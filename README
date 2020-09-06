@@ -1,0 +1,34 @@
+
+# PAGEANT (Personal Analysis of Genome and Annotation Toolkit ), is an open source platform that convert a personal genome into a health report.
+PAGEANT is unique, because it is:
+(1). Academic: we hold the highest standard of "academic" for quality and we remove all barriers for accessbility by making this free.
+(3). Confidential: users can install and run PAGENT on local computer, without uploading their genomic data to any outside servers.
+(2). Generalizable: Unlike "blackbox" or "closed-box" provided by commercial vendors such as 23&Me, PAGEANT allows adanced users to define their own way of calculation.
+(2). Transparent: all data and the underlying algorithm and calculation code is open source.
+
+
+
+Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking University School of Public Health
+
+
+
+# Steps:
+
+# #1. Download 1000 genomes genotype data to use as references
+start from 1000 genomes project main page https://www.internationalgenome.org. 
+Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
+Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
+The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples. 
+The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples. 
+Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
+
+```
+
+# create a 2genes.bed file with the following two rows, tab separated.
+chr1    159204012       159206500       ACKR1
+chr19   44905781        44909393        APOE
+
+# run SAMTOOLS to extract the two genomic regions and create a new 2gene.bam file
+samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
+
+```
