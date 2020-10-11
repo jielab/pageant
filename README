@@ -1,11 +1,10 @@
 
 # PAGEANT (Personal Analysis of Genome and Annotation Toolkit ), is an open source platform that convert a personal genome into a health report.
-PAGEANT is unique, because it is:
-(1). Academic: we hold the highest standard of "academic" for quality and we remove all barriers for accessbility by making this free.
-(3). Confidential: users can install and run PAGENT on local computer, without uploading their genomic data to any outside servers.
-(2). Generalizable: Unlike "blackbox" or "closed-box" provided by commercial vendors such as 23&Me, PAGEANT allows adanced users to define their own way of calculation.
-(2). Transparent: all data and the underlying algorithm and calculation code is open source.
-
+PAGEANT differs from other similar tools, summarized by “A-C-G-T”: 
+(1). Academic quality standard, where start-of-the-art algorithms and millions of genetic variants could be used to calculate PRS; 
+(2). Confidential data run locally, no need to send genomic data to cloud servers; 
+(3). Generalizable health assessment, easy to add/remove scope of health reports based on users' preference and comfort level. 
+(4). Transparent source code for all underlying programming scripts..
 
 
 Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking University School of Public Health
