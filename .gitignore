@@ -1,0 +1,10 @@
+/.idea/
+/log/
+/Ref_res/
+/img/
+/dist/
+/build/
+/__pycache__/
+/GUI.spec
+/Report.html
+Ref_res/filter.vcf

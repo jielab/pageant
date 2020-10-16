@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PAGEANT Report</title>
+    <!-- table theme file -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.materialize.min.css"
+          integrity="sha512-05uk5rtg4iPjJbpBv6tjFRuLxrcfk+QsXyLnxadK2yff5NjCmccgZRl8ioBYlXVMWke1IqJasOufLUTMcpd9Fg=="
+          crossorigin="anonymous"/>
+    <link rel="stylesheet" href="Setting.css">
+    <!-- load jQuery, tablesorter scripts and tablesorter widgets-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+            integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"
+            integrity="sha512-qzgd5cYSZcosqpzpn7zF2ZId8f/8CHmFKZ8j7mU4OUXTNRd5g+ZHBPsgKEwoqxCtdQvExE5LprwwPAgoicguNg=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.widgets.min.js"
+            integrity="sha512-dj/9K5GRIEZu+Igm9tC16XPOTz0RdPk9FGxfZxShWf65JJNU2TjbElGjuOo3EhwAJRPhJxwEJ5b+/Ouo+VqZdQ=="
+            crossorigin="anonymous"></script>
+
+
+    <script>
+        $(function () {
+            $(".tablesorter").tablesorter({
+                theme: 'materialize',
+                widthFixed: false,
+                columns_thead: true,
+                widgets: ["zebra"],
+
+            });
+        });
+    </script>
+
+</head>
+<body>
+<header>
+    <h1>PAGEANT Report</h1>
+    <div class="header-detail">
+        <ul>
+            <li><a>Name: {{ human.name }}</a></li>
+            <li><a>Sex: {{ human.sex }}</a></li>
+            <li><a>Report time: {{ time }}</a></li>
+        </ul>
+    </div>
+</header>
+<nav>
+    <ul>
+        {% if type %}
+        <li><a href="#Dected">Dected</a>
+            <ul>
+                {% for key in type.keys() %}
+                <li><a href="#{{ key | replace(' ', '_') }}">{{key | title}}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if undected %}
+        <li><a href="#Undected">Undected</a>
+            <ul>
+                {% for undect_key in res["Undected"].keys() %}
+                <li><a href="#undected_{{ undect_key | replace(' ', '_') }}">{{undect_key | title}}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endif %}
+        <li><a href="#Report_detail">Report detail</a></li>
+    </ul>
+</nav>
+<main>
+    <div id="main_top"></div>
+    {% if type %}
+    <div id="Dected">
+        <h2>Dected</h2>
+        {% for key, value in type.items() %}
+        <div class="section">
+            <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | title}}</h2>
+            <table class="tablesorter {{value}}">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    {% if value == "quan" %}
+                    <th>OR</th>
+                    <th>Percentage</th>
+                    {% else %}
+                    <th> Result</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for indicator in res[key] %}
+                <tr>
+                    <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">{{ indicator['Name'] | title }}</a></td>
+                    {% if value == "quan" %}
+                    <td>{{ indicator['Outcome'] | round(2) }}</td>
+                    <td>{{ indicator['Distribution']['Percentage'] | round(2) }}%</td>
+                    {% else %}
+                    <td>{{ indicator['Outcome'] | capitalize }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="detail">
+                <p class="miss_h3">Detail: </p>
+                {% for indicator in res[key] %}
+                <div id="{{ indicator['Name'] | replace(' ', '_') }}">
+                    <h3>{{ indicator['Name'] | title }}</h3>
+                    {% if value == "qual" %}
+                    <div class="detail_block">
+                        <h4><a style="float:left">Outcome:</a></h4>
+                        <p>{{ indicator['Outcome'] | capitalize }}</p>
+                        <h4>Scentific detail: </h4>
+                        <ul>
+                            {% for rs in indicator['Detail'] %}
+                            <li>{{ rs | replace("'", '') | replace("{", '') | replace("}", "") }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% elif value == "quan" %}
+                    <div class="quan_block_left">
+                        <h4><a>Risk score:</a></h4>
+                        <p class="Detail_text">{{ indicator['Outcome'] | round(2) }}</p>
+                        <h4>Distribution:</h4>
+                        <p class="Detail_text">
+                            <b>Percentage:</b>&emsp;{{ indicator['Distribution']['Percentage'] | round(2) }}%
+                            <b>&emsp;&emsp;Population average risk score:</b>
+                            &emsp;{{ indicator['Distribution']['Average'] | round(2) }}</p>
+                    </div>
+                    <div class="quan_block_right">
+                        <img src="{{ indicator['Distribution']['Plot'] }}" width="45%" height="100%" alt=""/></div>
+                    <div class="quan_block_bottom">
+                        <h4>Scentific detail: </h4>
+                        <ul>
+                            {% for rs in indicator['Detail'] %}
+                            <li>{{ rs | replace("'", '') | replace("{", '') | replace("}", "") }}}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    {% if undected %}
+    <div class="section">
+        <h2 id="Undected">Undected</h2>
+        <div style="padding-left: 1.5em">
+            {% for undect_key, value in res["Undected"].items() %}
+            <p id="undected_{{ undect_key | replace(' ', '_') }}" class="miss_h3">{{ undect_key | title}}</p>
+            <p class="Detail_text"> {{ value }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <h2 id="Report_detail">Report detail</h2>
+        <div style="padding-left: 1.5em">
+            <div>
+                <h3 style="width: 5em; display:inline-block">Input vcf:</h3>
+                <p style="display: inline-block">{{config['vcf_file']}}</p>
+            </div>
+            <div class="semi_left"><h3>Indicator data:</h3>
+                <p class="Detail_text">{{config['ind_file']}}</p></div>
+            <div class="semi_right"><h3>Reference population data:</h3>
+                <p class="Detail_text">{{config['ref']}}</p></div>
+            <div class="semi_left">
+                <h3>Qualitative excel:</h3>
+                <ul>
+                    {% for excel in config['qual_files'] %}
+                    <li>{{excel}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="semi_right">
+                <h3>Quantitative excel:</h3>
+                <ul>
+                    {% for excel in config['quan_files'] %}
+                    <li>{{excel}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="log">
+            <h3>Running log:</h3>
+            <div><p class="Detail_text">{{log}}</p></div>
+        </div>
+    </div>
+</main>
+<a class="top_button" href="#main_top"></a>
+</body>
+</html>
