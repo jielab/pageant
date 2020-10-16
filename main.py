@@ -42,6 +42,7 @@ fh.setFormatter(formatter)
 ch = logging.StreamHandler()
 logger.addHandler(fh)
 logger.addHandler(ch)
+logger.info('Log start.')
 
 
 def use_time(process_name=None):
