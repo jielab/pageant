@@ -13,13 +13,16 @@ Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking
 
 # Demo:
 
-# #1 下载参考人群的基因组数据
-用户可以在[ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/)下载公开的千人基因组数据，然后作为报告分析做需要的参考人群基因组数据放在/Referenc目录下
+# #1 下载程序
+使用`git clone https://github.com/jielab/pageant.git`下载本程序
 
-# #2 进行分析
+# #2 下载参考人群的基因组数据
+用户可以在 [ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) 下载公开的千人基因组数据，然后作为报告分析做需要的参考人群基因组数据放在/Referenc目录下
+
+# #3 进行分析
 打开PAGEANT.exe，使用默认参数即可进行分析
 
-# #3 查看报告
+# #4 查看报告
 分析成功后，点击OK即可查看报告
 
 
