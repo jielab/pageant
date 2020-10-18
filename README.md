@@ -11,23 +11,45 @@ Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking
 
 
 
-# Demo:
+# #1 Download and Install
 
-# #1 下载程序
-使用`git clone https://github.com/jielab/pageant.git`下载本程序
+**#1.1 download the source code and executable
 
-# #2 下载参考人群的基因组数据
-用户可以在 [ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/](ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/) 下载公开的千人基因组数据，然后作为报告分析做需要的参考人群基因组数据放在/Referenc目录下
+```
+Create a dedicated diretory and then type the following command to download the full package of PAGEANT 
+git clone https://github.com/jielab/pageant.git
 
-# #3 进行分析
-打开PAGEANT.exe，使用默认参数即可进行分析
+The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
-# #4 查看报告
-分析成功后，点击OK即可查看报告
+```
+
+**#1.2 download HapMap3 reference genome for calculating population risk reference
+
+```
+Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
+click the 3 links under "A. SNP Genotype Data" in the section of "How To Download This Release".
+
+Advanced users could use liftOver to convert the GRCh36 based .map file into GRCh37 based.
+But this is not needed for PAGEANT, since only SNP rsID is used for querying and calculation.
+
+```
+
+**#1.3 run from the GUI interface
+
+![Figure 1A](./Databases/figure1A.jpg)
+![Figure 1B](./Databases/figure1B.jpg)
 
 
-# Steps:
-# #1. Download 1000 genomes genotype data to use as references
+
+# #2 Examine the report
+
+
+
+# #3 Customize PAGEANT
+
+**#3.1. Replace reference genome by 1000 genomes data, for example
+
+```
 start from 1000 genomes project main page https://www.internationalgenome.org. 
 Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
 Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/. 
@@ -37,11 +59,16 @@ Users could download the aligned sequencing data for any set of samples from thi
 
 ```
 
-# create a 2genes.bed file with the following two rows, tab separated.
-chr1    159204012       159206500       ACKR1
-chr19   44905781        44909393        APOE
 
-# run SAMTOOLS to extract the two genomic regions and create a new 2gene.bam file
-samtools view -L 2genes.bed -O BAM -o 2genes.bam [raw-cram-file]
+**#3.2. Replace PRS reference file
 
-```
+
+**#3.3. Choose different PRS calculation methods
+
+
+**#3.4. Add or remove report items
+
+
+
+
+
