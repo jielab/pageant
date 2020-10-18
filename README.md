@@ -1,5 +1,6 @@
 
-# PAGEANT (Personal Analysis of Genome and Annotation Toolkit ), is an open source platform that convert a personal genome into a health report.
+# PAGEANT: Personal Analysis of Genome and Annotation Toolkit
+# DTC genome report, free, reliable, and DIY.
 PAGEANT differs from other similar tools, summarized by “A-C-G-T”: 
 (1). Academic quality standard, where start-of-the-art algorithms and millions of genetic variants could be used to calculate PRS; 
 (2). Confidential data run locally, no need to send genomic data to cloud servers; 
