@@ -37,13 +37,15 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 **#1.3 run from the GUI interface
 
-![Figure 1A](./Databases/figure1A.jpg)
-![Figure 1B](./Databases/figure1B.jpg)
+![Figure 1A](./Database/figure1A.jpg)
+![Figure 1B](./Database/figure1B.jpg)
 
 
 
 # #2 Examine the report
 
+![Figure 2A](./Database/figure2A.jpg)
+![Figure 2B](./Database/figure2B.jpg)
 
 
 # #3 Customize PAGEANT
