@@ -24,7 +24,7 @@ The PAGEANT.exe could be run directly by double clicking. It is compiled from GU
 
 ```
 
-**#1.2 download HapMap3 reference genome for calculating population risk reference
+**#1.2 download HapMap3 genotype, for calculating population risk reference
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -35,7 +35,29 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-**#1.3 run from the GUI interface
+**#1.2 Download G1k genotype, for calculating population risk reference
+```
+use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
+
+# rename the long file names to something short such as below:
+mv ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz chr1.vcf.gz
+
+# rename chromosome to add "chr" prefix, if needed
+seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
+bcftools annotate chr1.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+
+# convert from build 37 positions to build 38 positions, if needed
+gatk --java-options "-Xmx6g" LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz \
+	-C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
+
+# create a small VCF subset, keeping only those samples of interest.
+echo "NA20525" > sample.keep
+plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
+
+```
+
+
+**#1.4 run from the GUI interface
 
 ![Figure 1A](./Database/figure1A.jpg)
 ![Figure 1B](./Database/figure1B.jpg)
