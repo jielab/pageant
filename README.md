@@ -59,15 +59,15 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 **#1.4 run from the GUI interface
 
-![Figure 1A](./Database/figure1A.jpg)
-![Figure 1B](./Database/figure1B.jpg)
-
+![Figure 1A](./pictures/figure1A.jpg)
+![Figure 1B](./pictures/figure1B.jpg)
+![Figure 1B](./pictures/figure1C.jpg)
 
 
 # #2 Examine the report
 
-![Figure 2A](./Database/figure2A.jpg)
-![Figure 2B](./Database/figure2B.jpg)
+![Figure 2A](./pictures/figure2A.jpg)
+![Figure 2B](./pictures/figure2B.jpg)
 
 
 # #3 Customize PAGEANT
