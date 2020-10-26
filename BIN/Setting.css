@@ -38,7 +38,7 @@ main {
 }
 
 #main_top {
-	margin-bottom: -30px;
+    margin-bottom: -30px;
 }
 
 
@@ -65,7 +65,7 @@ nav ul, nav ul li ul {
 }
 
 nav ul li ul {
-	list-style-type: circle;
+    list-style-type: circle;
 }
 
 nav ul li, nav ul li ul li {
@@ -264,28 +264,34 @@ header div {
     max-height: 15em;
     overflow-y: auto;
 }
+
 .semi_left {
-	width: 50%;
-	float: left;
-	clear: left;
-}
-.semi_right {
-	width: 50%;
-	float: right;
-	clear: right;
+    width: 50%;
+    float: left;
+    clear: left;
 }
 
+.semi_right {
+    width: 50%;
+    float: right;
+    clear: right;
+}
+
+.report_div {
+    display: table;
+}
 
 .log {
-	max-width: 75vw;
-	padding-left: 1.5em;
-	text-align: left;
-	padding-top: 10px;
-	display: table;
+    max-width: 75vw;
+    padding-left: 1.5em;
+    text-align: left;
+    padding-top: 10px;
+    display: table;
 }
+
 .log div {
-	font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", monospace;
-	font-size: medium;
-	max-height: 25em;
-	overflow-y: scroll;
+    font-family: Consolas, "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", Monaco, "Courier New", monospace;
+    font-size: medium;
+    max-height: 25em;
+    overflow-y: scroll;
 }

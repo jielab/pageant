@@ -1,10 +1,14 @@
 /.idea/
 /log/
-/Ref_res/
+/ref_res/
 /img/
 /dist/
 /build/
 /__pycache__/
-/GUI.spec
 /Report.html
 Setting.css
+GUI.spec
+.gitignore
+.gitattributes
+/reference/*.idi
+Report.html

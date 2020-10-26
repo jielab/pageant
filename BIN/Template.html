@@ -51,7 +51,7 @@
         <li><a href="#Dected">Dected</a>
             <ul>
                 {% for key in type.keys() %}
-                <li><a href="#{{ key | replace(' ', '_') }}">{{key | title}}</a></li>
+                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
                 {% endfor %}
             </ul>
         </li>
@@ -60,7 +60,8 @@
         <li><a href="#Undected">Undected</a>
             <ul>
                 {% for undect_key in res["Undected"].keys() %}
-                <li><a href="#undected_{{ undect_key | replace(' ', '_') }}">{{undect_key | title}}</a></li>
+                <li><a href="#undected_{{ undect_key | replace(' ', '_') }}">
+                    {{undect_key | replace('_', ' ') | title}}</a></li>
                 {% endfor %}
             </ul>
         </li>
@@ -75,7 +76,7 @@
         <h2>Dected</h2>
         {% for key, value in type.items() %}
         <div class="section">
-            <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | title}}</h2>
+            <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | replace('_', ' ') | title}}</h2>
             <table class="tablesorter {{value}}">
                 <thead>
                 <tr>
@@ -91,7 +92,8 @@
                 <tbody>
                 {% for indicator in res[key] %}
                 <tr>
-                    <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">{{ indicator['Name'] | title }}</a></td>
+                    <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">
+                        {{ indicator['Name'] | replace('_', ' ') | title }}</a></td>
                     {% if value == "quan" %}
                     <td>{{ indicator['Outcome'] | round(2) }}</td>
                     <td>{{ indicator['Distribution']['Percentage'] | round(2) }}%</td>
@@ -106,7 +108,7 @@
                 <p class="miss_h3">Detail: </p>
                 {% for indicator in res[key] %}
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}">
-                    <h3>{{ indicator['Name'] | title }}</h3>
+                    <h3>{{ indicator['Name'] | replace('_', ' ') | title }}</h3>
                     {% if value == "qual" %}
                     <div class="detail_block">
                         <h4><a style="float:left">Outcome:</a></h4>
@@ -134,7 +136,8 @@
                         <h4>Scentific detail: </h4>
                         <ul>
                             {% for rs in indicator['Detail'] %}
-                            <li>{{ rs | replace("'", '') | replace("{", '') | replace("}", "") }}}</li>
+                            <li>{{ rs | replace("'", '') | replace("{", '') |
+                                replace("}", "") | replace("\n", "<br>") }}</li>
                             {% endfor %}
                         </ul>
                     </div>
@@ -151,7 +154,8 @@
         <h2 id="Undected">Undected</h2>
         <div style="padding-left: 1.5em">
             {% for undect_key, value in res["Undected"].items() %}
-            <p id="undected_{{ undect_key | replace(' ', '_') }}" class="miss_h3">{{ undect_key | title}}</p>
+            <p id="undected_{{ undect_key | replace(' ', '_') }}" class="miss_h3">
+                {{ undect_key | replace('_', ' ') | title}}</p>
             <p class="Detail_text"> {{ value }}</p>
             {% endfor %}
         </div>
@@ -160,10 +164,10 @@
 
     <div class="section">
         <h2 id="Report_detail">Report detail</h2>
-        <div style="padding-left: 1.5em">
+        <div class="report_div" style="padding-left: 1.5em">
             <div>
-                <h3 style="width: 5em; display:inline-block">Input vcf:</h3>
-                <p style="display: inline-block">{{config['vcf_file']}}</p>
+                <h3 style="width: 5em; display:inline-block">Input file:</h3>
+                <p style="display: inline-block">{{config['input_file']}}</p>
             </div>
             <div class="semi_left"><h3>Indicator data:</h3>
                 <p class="Detail_text">{{config['ind_file']}}</p></div>
