@@ -1,8 +1,7 @@
 
 # PAGEANT: Personal Analysis of Genome and Annotation Toolkit
-# DTC genome report, free, reliable, and DIY.
 
-# Jie Huang PhD, Department of Global Health, Peking University School of Public Health
+Jie Huang PhD, Department of Global Health, Peking University School of Public Health
 Contact: jiehuang001@pku.edu.cn, http://sph.pku.edu.cn/info/1409/4174.htm
 
 
