@@ -1,8 +1,7 @@
 
 # PAGEANT: Personal Analysis of Genome and Annotation Toolkit
 
-Jie Huang PhD, Department of Global Health, Peking University School of Public Health
-Contact: jiehuang001@pku.edu.cn, http://sph.pku.edu.cn/info/1409/4174.htm
+Jie Huang PhD, Peking University School of Public Health (http://sph.pku.edu.cn/info/1409/4174.htm), jiehuang001@pku.edu.cn 
 
 
 
