@@ -1,14 +1,9 @@
 
 # PAGEANT: Personal Analysis of Genome and Annotation Toolkit
 # DTC genome report, free, reliable, and DIY.
-PAGEANT differs from other similar tools, summarized by “A-C-G-T”: 
-(1). Academic quality standard, where start-of-the-art algorithms and millions of genetic variants could be used to calculate PRS; 
-(2). Confidential data run locally, no need to send genomic data to cloud servers; 
-(3). Generalizable health assessment, easy to add/remove scope of health reports based on users' preference and comfort level. 
-(4). Transparent source code for all underlying programming scripts..
 
-
-Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking University School of Public Health
+# Jie Huang PhD, Department of Global Health, Peking University School of Public Health
+Contact: jiehuang001@pku.edu.cn, http://sph.pku.edu.cn/info/1409/4174.htm
 
 
 
