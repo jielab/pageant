@@ -66,7 +66,7 @@
         <h2>Report</h2>
         {% for key, value in type.items() %}
         <div class="section">
-            <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | replace('_', ' ') | title}}</h2>
+            <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | replace('_', ' ')}}</h2>
             <table class="tablesorter {{value}}">
                 <thead>
                 <tr>
@@ -86,7 +86,7 @@
                 {% for indicator in res[key] %}
                 <tr>
                     <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">
-                        {{ indicator['Name'] | replace('_', ' ') | title }}</a></td>
+                        {{ indicator['Name'] | replace('_', ' ')}}</a></td>
                     {% if value == "quan" %}
 					{% if indicator['Status'] == True %}
 <!--                    <td>{{ indicator['Outcome'] | round(2) }}</td>-->
@@ -113,7 +113,7 @@
                 <p class="miss_h3">Detail: </p>
                 {% for indicator in res[key] %}
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}">
-                    <h3>{{ indicator['Name'] | replace('_', ' ') | title }}</h3>
+                    <h3>{{ indicator['Name'] | replace('_', ' ') }}</h3>
                     {% if indicator['Status'] == True %}
 					{% if value == "qual" %}
                     <div class="detail_block">
