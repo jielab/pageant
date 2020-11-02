@@ -26,11 +26,11 @@ description = "Usage: python perhaps.py -i INPUT_FILE [--ftype FILE_TYPE] -o OUT
 columns = {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3}),
            'columns_quan': OrderedDict({'code': 0, 'snp': 1, 'reference': 2, 'beta': 3}),
            'columns_qual': OrderedDict({'code': 0, 'snp': 1, 'reference': 2, 'interpretation': 3, 'reverse-inter': 4})}
-lan_lib = {'sex': {'male': ['male', '男', '男性', '1', 1], 'female': ['female', '女', '女性', '2', 2]},
+lan_lib = {'sex': {'male': ['male', 'Male', '男', '男性', '1', 1], 'female': ['female', 'Female', '女', '女性', '2', 2]},
            None: ['', '无', 'None', 'No', None], 'if': ['条件', 'if']}
 GWAS_setting = {'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'sep': '\t', 'p_threshold': 1e-5,
                 'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01}
-config = {'file_type': 'vcf', 'ref_structure': f'{os.path.join("reference", "hapmap3.vcf.gz")}'}
+config = {'file_type': 'vcf', 'ref_structure': f'{os.path.join("reference", "ref", "hapmap3.vcf.gz")}'}
 
 pattern = re.compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
 pat_header1 = re.compile(rb'^##')
@@ -131,7 +131,7 @@ class Human(object):
             if snp in self.gt_data:
                 self.ind_data[code].cal(snp, self.gt_data[snp], *cal_col)
             else:
-                self.ind_data[code].mis_snp(snp)
+                self.ind_data[code].mis_snp(snp, cal_col[1])
         else:
             logger.warning(f'Code ({code}) is missing in index excel!')
 
@@ -154,17 +154,19 @@ class Human(object):
         result = {}
         for ind in self.ind_data.values():
             if not ind.status:
-                if ind.outcome is None:
+                if not ind.detail:
                     logger.warning(f'Code ({ind.code}) has no corresponding algorithm!')
-                if 'Undected' not in result:
-                    result['Undected'] = {}
-                if ind.itype not in result['Undected']:
-                    result['Undected'][ind.itype] = []
-                result['Undected'][ind.itype].append(ind.name)
-            else:
-                if ind.itype not in result:
-                    result[ind.itype] = []
-                result[ind.itype].append(ind.report())
+                    ind.detail.append(f'Code ({ind.code}) has no corresponding algorithm!')
+                # if 'Undected' not in result:
+                #     result['Undected'] = {}
+                # if ind.itype not in result['Undected']:
+                #     result['Undected'][ind.itype] = []
+                # result['Undected'][ind.itype].append(ind.report())
+            # else:
+                ind.outcome = 'Undected'
+            if ind.itype not in result:
+                result[ind.itype] = []
+            result[ind.itype].append(ind.report())
         return result
 
 
@@ -200,25 +202,35 @@ class Ind(object):
         if self.ftype == 'qual':
             if not self.decide:
                 if inter not in lan_lib['if']:
-                    self.outcome = inter if gt == trans_gt(ref) else 'normal' if no_inter in lan_lib[None] else no_inter
-                    if {snp: trans_gt(gt)} not in self.detail:
-                        self.detail.append({snp: trans_gt(gt)})
-                    if no_inter not in lan_lib[None]:
-                        self.decide = None if not self.decide else True
+                    if self.decide is not None:
+                        self.outcome = inter if gt == trans_gt(ref) else no_inter
+                        self.outcome = 'normal' if self.outcome in lan_lib[None] else self.outcome
+                        if {snp: trans_gt(gt)} not in self.detail:
+                            self.detail.append({snp: trans_gt(gt)})
+                        if self.outcome != 'normal':
+                            self.decide = True
+                        self.status = True
                 else:
                     self.decide = False if gt == trans_gt(ref) else None
+                    if self.decide is False:
+                        if {snp: trans_gt(gt)} not in self.detail:
+                            self.detail.append({snp: trans_gt(gt)})
         elif self.ftype == 'quan':
-            self.outcome *= cal_beta(gt, ref, inter)
+            outcome = cal_beta(gt, ref, inter)
+            self.outcome *= outcome
             for item in self.detail:
                 if type(item) == dict:
                     if snp in item.keys():
                         logger.warning(f"There are duplicate snps ({snp}) when calculate the quantitative trait!")
-                        item['beta'] = cal_beta(gt, ref, inter)
-            if {snp: trans_gt(gt), 'beta': inter} not in self.detail:
-                self.detail.append({snp: trans_gt(gt), 'beta': inter, 'outcome': cal_beta(gt, ref, inter)})
-        self.status = True
+                        self.outcome /= item['outcome']
+                        item['beta'] = inter
+                        item['effect allele'] = ref
+                        item['outcome'] = outcome
+            if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome} not in self.detail:
+                self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome})
+            self.status = True
 
-    def mis_snp(self, snp: str):
+    def mis_snp(self, snp: str, inter: str or float or int):
         warning = f'Snp ({snp}) can not find in vcf file!'
         if self.ftype == 'quan':
             global ref_rs
@@ -226,9 +238,16 @@ class Ind(object):
                 beta = ref_rs[f"{self.code}_{snp}"].mean()
                 warning += f' Using reference population average: {beta}'
                 self.outcome *= beta
+        elif self.ftype == 'qual':
+            if inter in lan_lib['if']:
+                self.decide = None
+                if warning in self.detail:
+                    self.detail.remove(warning)
+                warning += f' Code {self.code} algorithm can not process further.'
         logger.warning(warning)
         if warning not in self.detail:
             self.detail.append(warning)
+        self.status = False
 
     def add_quan_dist(self, output):
         assert self.ftype == 'quan', 'Not quantitative trait!'
@@ -245,8 +264,8 @@ class Ind(object):
             if self.quan_dist['Status']:
                 del self.quan_dist['Status']
                 return {'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail,
-                        'Distribution': self.quan_dist, **self.other}
-        return {'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail, **self.other}
+                        'Distribution': self.quan_dist, **self.other, 'Status': self.status}
+        return {'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail, **self.other, 'Status': self.status}
 
 
 def assign_pos(value: float, plt_size: tuple):
@@ -319,8 +338,6 @@ def select_list(ob_list: list, index):
 def recode_and_sex_impute(file: str, temp_dir: str, file_type=config['file_type']):
     if file_type == 'vcf' or file_type == 'vcf.gz':
         read_txt = f"--vcf {file} "
-    elif file_type == 'vcf.gz':
-        read_txt = f"--vcf {file} "
     elif file_type == '23andme':
         read_txt = f"--23file {file} "
     else:
@@ -331,7 +348,7 @@ def recode_and_sex_impute(file: str, temp_dir: str, file_type=config['file_type'
                       "--recode vcf "
                       f"--out {os.path.join(temp_dir, 'temp')}",
                       plink='plink')
-        data = pd.read_csv('temp.sexcheck', ' ', skipinitialspace=True)
+        data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
     except Exception as e:
         logger.warning('Sex impute failed:\n' + f'{e.args}')
         run_plink_cmd(f"--vcf {file} "
@@ -341,7 +358,7 @@ def recode_and_sex_impute(file: str, temp_dir: str, file_type=config['file_type'
         return os.path.join(temp_dir, 'temp.vcf'), None
     else:
         # os.system('rm sex_impute.*')
-        return os.path.join(temp_dir, 'temp.vcf'), 'male' if data.SNPSEX[0] == 1 else 'female'
+        return os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
 
 
 def cal_sha(file: str):
@@ -648,6 +665,7 @@ def get_ref_cal(quan_file: list, vcf_files: list, data_path='ref_res'):
 
 
 def arg(args):
+    # todo: Update
     try:
         opts, temp = getopt.getopt(args, "hi:d:r:o:", ['help', 'input=', 'data-excel=', 'ref-dir=', 'output='])
     except getopt.GetoptError:
@@ -762,7 +780,7 @@ def get_prs_res(result_file: str):
 
 
 @use_time('Loading algorithm data and calculate the result')
-def load_cal(human: Human, qual_file: list, quan_file: list):
+def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
     for file in qual_file + quan_file:
         if is_excel(file):
             workbook = xlrd.open_workbook(file)
@@ -779,24 +797,23 @@ def load_cal(human: Human, qual_file: list, quan_file: list):
             columns_num = get_columns_num(file, [GWAS_setting[i] for i in ['SNP', 'EA', 'BETA']])
             run_plink_cmd(f"--vcf {human.vcf} --score {file} {' '.join([str(i) for i in columns_num])} header "
                           f"--q-score-range {os.path.join('ref_res', 'need_range_list')}"
-                          f" {os.path.join('ref_res', code + '.SNP.pvalue')} --out result_prs",
+                          f" {os.path.join('ref_res', code + '.SNP.pvalue')} "
+                          f"--out {os.path.join(temp_dir, 'result_prs')}",
                           plink='plink', delete_log=False)
-            res = get_prs_res(f'result_prs.{GWAS_setting["p_threshold"]}.profile')
-            with open('result_prs.log', 'r') as f:
+            res = get_prs_res(os.path.join(temp_dir, "result_prs." + str(GWAS_setting["p_threshold"]) + ".profile"))
+            with open(os.path.join(temp_dir, 'result_prs.log'), 'r') as f:
                 result_text = f.read()
             detail = result_text.split('\n\n')[2]
             human.get_prs_data(code, res, detail)
 
 
 def get_ftype(result: dict):
-    undect = False
-    type_list = OrderedDict()
+    # type_list = OrderedDict()
+    type_list = dict()
     for key in result:
-        if key == 'Undected':
-            undect = True
-        else:
-            type_list[key] = 'qual' if len(result[key][0]) == 3 else 'quan'
-    return type_list, undect
+        type_list[key] = max([len(i) for i in result[key]])
+    type_list = {key: 'quan' if value == max(type_list.values()) else 'qual' for key, value in type_list.items()}
+    return type_list
 
 
 @use_time('Whole process')
@@ -810,7 +827,7 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
         initial_ref_data(quan_files, vcf_files)
         load_vcf(human, get_snp_list(*qual_files, *quan_files))
         load_ind(human, ind_file)
-        load_cal(human, qual_files, quan_files)
+        load_cal(human, qual_files, quan_files, temp_dir)
         human.add_quan_dis(output)
         res_dict = human.export_res()
     except Exception as e:
@@ -827,22 +844,22 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
         with open(log_name) as fl:
             log_text = fl.read()
         log_text = log_text.replace('\n', '<br>')
-        t = template.render(human=human, res=res_dict, type=get_ftype(res_dict)[0],
-                            undected=get_ftype(res_dict)[1], time=strftime('%Y-%m-%d %H:%M'), config=locals(),
+        t = template.render(human=human, res=res_dict, type=get_ftype(res_dict),
+                            time=strftime('%Y-%m-%d %H:%M'), config=locals(),
                             log=log_text)
         copy('./bin/go_top.jpg', f'{output}/img')
         copy('./bin/Setting.css', output)
         with open(os.path.join(output, 'Report.html'), 'w', encoding="UTF-8") as fhtml:
             fhtml.write(t)
         rm_dir(temp_dir)
-        for i in os.listdir('.'):
-            if 'result_prs' in i:
-                os.remove(i)
+        # return res_dict
         return res_str + ' Report has saved in output directory.'
 
 
 if __name__ == '__main__':
-    vcf_file = r'.\test.vcf'
+    # vcf_file = r'.\test.vcf'
+    # ref = r'.\reference'
+    vcf_file = r'.\test\sample.vcf.gz'
     ref = r'.\reference'
     ind_file = r'.\database\001_Traits.xlsx'
     qual_file = [r'.\database\002_Qualitative.xlsx']
@@ -862,4 +879,4 @@ if __name__ == '__main__':
     # t = template.render(human=a, res=res, type=get_ftype(res)[0], undected=get_ftype(res)[1], time="2020-10-04 19:00")
     # with open('temp.html', 'w', encoding="UTF-8") as f:
     #     f.write(t)
-    main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output='.')
+    test = main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output='.')

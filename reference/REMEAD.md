@@ -1,1 +1,0 @@
-Please download the reference population genetic data here

@@ -12,3 +12,7 @@ GUI.spec
 .gitattributes
 /reference/*.idi
 Report.html
+/ref_res_old/
+/bin/Template_backup.html
+main.py
+GUI.py

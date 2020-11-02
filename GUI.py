@@ -604,7 +604,7 @@ class Ui_PAGEANT(object):
         self.default_button_2.setText(_translate("PAGEANT", "Default"))
         self.ref_file_select.setText(_translate("PAGEANT", "..."))
         # default parameters
-        self.input_vcf.setText('./test.vcf')
+        self.input_vcf.setText('./test/sample.vcf.gz')
         self.input_ind.setText('database/001_Traits.xlsx')
         self.input_qual.setText('database/002_Qualitative.xlsx')
         self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv, R0004.tsv')
@@ -627,7 +627,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.Analyze.clicked.connect(self.run)
         self.default_button.clicked.connect(self.default)
         self.parameters = {'name': 'Test',
-                           'input_file': './test.vcf',
+                           'input_file': './test/sample.vcf.gz',
                            'ind_file': 'database/001_Traits.xlsx',
                            'qual_files': ['database/002_Qualitative.xlsx'],
                            'quan_files': ['database/003_Quantitative.xlsx', 'database/R0002.tsv', 'database/R0004.tsv'],
