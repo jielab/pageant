@@ -942,7 +942,8 @@ def get_ftype(result: dict):
 
 
 @use_time('Whole process')
-def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str):
+def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str,
+         **other_paramate):
     res_str = ''
     log_name = log_start()
     temp_dir = mkdtemp(suffix='pageant')
@@ -979,8 +980,8 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
         with open(os.path.join(output, 'Report.html'), 'w', encoding="UTF-8") as fhtml:
             fhtml.write(t)
         rm_dir(temp_dir)
-        return res_dict
-        # return res_str + ' Report has saved in output directory.'
+        # return res_dict
+        return res_str + ' Report has saved in output directory.'
 
 
 if __name__ == '__main__':
