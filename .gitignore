@@ -5,14 +5,11 @@
 /dist/
 /build/
 /__pycache__/
-/Report.html
-Setting.css
 GUI.spec
+plot_test.py
 .gitignore
 .gitattributes
 /reference/*.idi
-Report.html
-/ref_res_old/
 /bin/Template_backup.html
-main.py
-GUI.py
+/res/
+PAGEANT.exe

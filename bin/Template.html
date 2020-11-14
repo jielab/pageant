@@ -8,7 +8,7 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.materialize.min.css"
           integrity="sha512-05uk5rtg4iPjJbpBv6tjFRuLxrcfk+QsXyLnxadK2yff5NjCmccgZRl8ioBYlXVMWke1IqJasOufLUTMcpd9Fg=="
           crossorigin="anonymous"/>
-    <link rel="stylesheet" href="Setting.css">
+    <link rel="stylesheet" href="./html_files/Setting.css">
     <!-- load jQuery, tablesorter scripts and tablesorter widgets-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
             integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg=="
@@ -63,7 +63,7 @@
     <div id="main_top"></div>
     {% if type %}
     <div id="Result">
-        <h2>Report</h2>
+        <h2>Result</h2>
         {% for key, value in type.items() %}
         <div class="section">
             <h2 id="{{ key | replace(' ', '_') }}" class="Dected_title">{{key | replace('_', ' ')}}</h2>
@@ -72,11 +72,7 @@
                 <tr>
                     <th>Name</th>
                     {% if value == "quan" %}
-<!--
-                    <th>OR</th>
-                    <th>Percentage</th>
--->
-					<th>Risk</th>
+                    <th>Risk</th>
                     {% else %}
                     <th> Result</th>
                     {% endif %}
@@ -88,20 +84,19 @@
                     <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">
                         {{ indicator['Name'] | replace('_', ' ')}}</a></td>
                     {% if value == "quan" %}
-					{% if indicator['Status'] == True %}
-<!--                    <td>{{ indicator['Outcome'] | round(2) }}</td>-->
-<!--                    <td>{{ indicator['Distribution']['Percentage'] | round(2) }}%</td>-->
-					{% if indicator['Distribution']['Percentage'] < 100 and indicator['Distribution']['Percentage'] > 75 %}
-					   <td style="background-color: crimson">High risk</td>
-					{% elif indicator['Distribution']['Percentage'] <= 75 and indicator['Distribution']['Percentage'] >= 25 %}
-						<td style="background-color: dodgerblue">Normal</td>
-					{% else %}
-						<td style="background-color: greenyellow">Low risk</td>
-					{% endif %}
-					{% else %}
-					<td>Undected</td>
-<!--					<td>Undected</td>-->
-					{% endif %}
+                    {% if indicator['Status'] == True %}
+                    {% if indicator['Distribution']['Percentage'] < 100 and indicator['Distribution']['Percentage'] > 75
+                    %}
+                    <td style="background-color: red">High risk</td>
+                    {% elif indicator['Distribution']['Percentage'] <= 75 and indicator['Distribution']['Percentage'] >=
+                    25 %}
+                    <td style="background-color: dodgerblue">Normal</td>
+                    {% else %}
+                    <td style="background-color: forestgreen">Low risk</td>
+                    {% endif %}
+                    {% else %}
+                    <td>Undected</td>
+                    {% endif %}
                     {% else %}
                     <td>{{ indicator['Outcome'] | capitalize }}</td>
                     {% endif %}
@@ -115,7 +110,67 @@
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}">
                     <h3>{{ indicator['Name'] | replace('_', ' ') }}</h3>
                     {% if indicator['Status'] == True %}
-					{% if value == "qual" %}
+                    <div class="abstract">
+                        <h4>Disease description:</h4>
+                        <div class="abstract_pic">
+                            <img src="{{ indicator['Picture'] }}" width="300px" height="100%"
+                                 alt="{{ indicator['Name'] | replace('_', ' ')}}picture"></div>
+                        <p class="abstract_text">
+                            {% if indicator['Disease_description'] %}
+                            {{ indicator['Disease_description'] }}
+                            {% else %}
+                            Disease description is unavailable.
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if value == "qual" %}
+                    <div class="dist_block_top">
+                        <div class="dist_block_left qual_width_left">
+                            <h4>Outcome:</h4>
+                            <p class="Detail_text">{{ indicator['Outcome'] | capitalize }}</p>
+                            <h4>Scentific detail: </h4>
+                            <ul>
+                                {% for rs in indicator['Detail'] %}
+                                <li>{{ rs | replace("'", '') | replace("{", '') | replace("}", "") }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="dist_block_right qual_width_right">
+                            <h4>Distribution plot:</h4>
+                            <img style="margin-left: 15%"
+                                 src="{{ indicator['Distribution']['Plot'] }}" width="70%" height="100%"
+                                 alt="{{ indicator['Name'] | replace(' ', '_') }} Distribution Plot"/>
+                        </div>
+                    </div>
+                    {% elif value == "quan" %}
+                    <div class="dist_block_top">
+                        <div class="dist_block_left quan_width_left">
+                            <h4>Risk score:</h4>
+                            <p class="Detail_text">{{ indicator['Outcome'] | round(2) }}</p>
+                            <h4>Distribution:</h4>
+                            <p class="Detail_text">
+                                <b>Percentage:</b>&emsp;{{ indicator['Distribution']['Percentage'] | round(2) }}%
+                                <b>&emsp;&emsp;Population average risk score:</b>
+                                &emsp;{{ indicator['Distribution']['Average'] | round(2) }}</p>
+                        </div>
+                        <div class="dist_block_right quan_width_right">
+                            <h4>Distribution plot:</h4>
+                            <img src="{{ indicator['Distribution']['Plot'] }}" width="90%" height="100%"
+                                 alt="{{ indicator['Name'] | replace(' ', '_') }} Distribution Plot"/>
+                        </div>
+                    </div>
+                    <div class="quan_block_bottom">
+                        <h4>Scentific detail: </h4>
+                        <ul>
+                            {% for rs in indicator['Detail'] %}
+                            <li>{{ rs | replace("'", '') | replace("{", '') |
+                                replace("}", "") | replace("\n", "<br>") }}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    {% else %}
                     <div class="detail_block">
                         <h4><a style="float:left">Outcome:</a></h4>
                         <p>{{ indicator['Outcome'] | capitalize }}</p>
@@ -126,40 +181,7 @@
                             {% endfor %}
                         </ul>
                     </div>
-                    {% elif value == "quan" %}
-                    <div class="quan_block_left">
-                        <h4><a>Risk score:</a></h4>
-                        <p class="Detail_text">{{ indicator['Outcome'] | round(2) }}</p>
-                        <h4>Distribution:</h4>
-                        <p class="Detail_text">
-                            <b>Percentage:</b>&emsp;{{ indicator['Distribution']['Percentage'] | round(2) }}%
-                            <b>&emsp;&emsp;Population average risk score:</b>
-                            &emsp;{{ indicator['Distribution']['Average'] | round(2) }}</p>
-                    </div>
-                    <div class="quan_block_right">
-                        <img src="{{ indicator['Distribution']['Plot'] }}" width="45%" height="100%" alt=""/></div>
-                    <div class="quan_block_bottom">
-                        <h4>Scentific detail: </h4>
-                        <ul>
-                            {% for rs in indicator['Detail'] %}
-                            <li>{{ rs | replace("'", '') | replace("{", '') |
-                                replace("}", "") | replace("\n", "<br>") }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
                     {% endif %}
-					{% else %}
-					<div class="detail_block">
-                        <h4><a style="float:left">Outcome:</a></h4>
-                        <p>{{ indicator['Outcome'] | capitalize }}</p>
-                        <h4>Scentific detail: </h4>
-                        <ul>
-                            {% for rs in indicator['Detail'] %}
-                            <li>{{ rs | replace("'", '') | replace("{", '') | replace("}", "") }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-					{% endif %}
                 </div>
                 {% endfor %}
             </div>

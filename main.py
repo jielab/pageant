@@ -1,56 +1,63 @@
 import os
 import getopt
-import sys
+from sys import exit as sys_exit
 import pandas as pd
-import xlrd
+import numpy as np
+from xlrd import open_workbook
 import logging
 from collections import OrderedDict
-import gzip
-import re
+from gzip import open as gzip_open
+from re import compile, sub
 from time import time, strftime
-import tempfile
+from tempfile import mkdtemp
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 from jinja2 import Environment, FileSystemLoader
 from shutil import copy
 import subprocess
 from math import exp
-import pickle
+from pickle import dump, load
 from multiprocessing import Pool
+from functools import partial
 
 
 description = "Usage: python perhaps.py -i INPUT_FILE [--ftype FILE_TYPE] -o OUTPUT_DIR [--trait TRAIT_FILE]\n" \
               "[--qual QUALITATIVE_FILE] [--quan QUANTITATIVE] [--ref-dir REFERENCE_DIR] [--file-dir REFERENCE_DIR]\n" \
               "[--sep GWAS_SEPARATOR] [-p GWAS_PTHRESHOLD] [--ref-dir REFERENCE_DIR] [--GWAS_config KEY=VALUE ...]"
 
-columns = {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3}),
+columns = {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3, 'Disease_description': 5}),
            'columns_quan': OrderedDict({'code': 0, 'snp': 1, 'reference': 2, 'beta': 3}),
            'columns_qual': OrderedDict({'code': 0, 'snp': 1, 'reference': 2, 'interpretation': 3, 'reverse-inter': 4})}
 lan_lib = {'sex': {'male': ['male', 'Male', '男', '男性', '1', 1], 'female': ['female', 'Female', '女', '女性', '2', 2]},
            None: ['', '无', 'None', 'No', None], 'if': ['条件', 'if']}
 GWAS_setting = {'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'sep': '\t', 'p_threshold': 1e-5,
                 'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01}
-config = {'file_type': 'vcf', 'ref_structure': f'{os.path.join("reference", "ref", "hapmap3.vcf.gz")}'}
+config = {'file_type': 'vcf', 'ref_structure': f'{os.path.join("reference", "ld_ref", "hapmap3.vcf.gz")}',
+          'logo_dir': f'{os.path.join("database", "logo")}'}
 
-pattern = re.compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
-pat_header1 = re.compile(rb'^##')
-pat_header2 = re.compile(rb'^#')
+pattern = compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
+pat_header1 = compile(rb'^##')
+pat_header2 = compile(rb'^#')
 ref_code = pd.DataFrame()
 ref_rs = pd.DataFrame()
-
+logo_code = [file.split('.')[0] for file in os.listdir(config['logo_dir'])]
 
 if not os.path.isdir('log'):
     os.mkdir('log')
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-log_name = f'log/{strftime("%Y%m%d%H%M%S")}.log'
-fh = logging.FileHandler(log_name)
-formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
-fh.setFormatter(formatter)
 ch = logging.StreamHandler()
-logger.addHandler(fh)
 logger.addHandler(ch)
-logger.info('Log start.')
+
+
+def log_start():
+    log_name = f'log/{strftime("%Y%m%d%H%M%S")}.log'
+    fh = logging.FileHandler(log_name)
+    formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+    logger.info('Logger start.')
+    return log_name
 
 
 def use_time(process_name=None):
@@ -59,18 +66,22 @@ def use_time(process_name=None):
     :param process_name: the name of this process
     :return: A informational log which records the time
     """
+
     def decorator(func):
         from functools import wraps
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             start = time()
+            logger.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
+                        f' start')
             fun_res = func(*args, **kwargs)
             logger.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
                         f' used time: {time() - start:.2f}s')
             return fun_res
 
         return wrapper
+
     return decorator
 
 
@@ -97,7 +108,21 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
         raise Exception("PlinkError:\n" + sterr.decode())
 
 
-def initial_ref_data(quan_list: list, vcf_list: list) -> None:
+def initial_res_dir(output: str):
+    if not os.path.isdir(output):
+        os.mkdir(output)
+    output = os.path.join(output, 'html_files')
+    if not os.path.isdir(output):
+        os.mkdir(output)
+    output = os.path.join(output, 'img')
+    if not os.path.isdir(output):
+        os.mkdir(output)
+    output = os.path.join(output, '..', 'dist_plot')
+    if not os.path.isdir(output):
+        os.mkdir(output)
+
+
+def initial_ref_data(qual_list: list, quan_list: list, vcf_list: list) -> None:
     """
     Get reference population data from existing data or generating newly
     :param quan_list: Quantitative files
@@ -108,7 +133,7 @@ def initial_ref_data(quan_list: list, vcf_list: list) -> None:
     if not os.path.isdir('ref_res'):
         os.mkdir('ref_res')
     assert vcf_list, 'There is no vcf file in population reference directory.'
-    ref_rs, ref_code = get_ref_cal(quan_list, vcf_list)
+    ref_rs, ref_code = get_ref_cal(qual_list, quan_list, vcf_list)
 
 
 class Human(object):
@@ -142,31 +167,25 @@ class Human(object):
             logger.warning(f'Code ({code}) is missing in index excel!')
 
     @use_time('Add population distribution')
-    def add_quan_dis(self, output):
+    def add_distribution(self, output: str):
         global ref_code
         assert not ref_code.empty, "Can not get reference data"
+        output = os.path.join(output, 'html_files', 'dist_plot')
         for ind in self.ind_data.values():
-            if ind.ftype == 'quan':
-                ind.add_quan_dist(output)
+            ind.add_quan_dist(output)
 
     @use_time('Export report result')
-    def export_res(self):
+    def export_res(self, output):
         result = {}
         for ind in self.ind_data.values():
             if not ind.status:
                 if not ind.detail:
                     logger.warning(f'Code ({ind.code}) has no corresponding algorithm!')
                     ind.detail.append(f'Code ({ind.code}) has no corresponding algorithm!')
-                # if 'Undected' not in result:
-                #     result['Undected'] = {}
-                # if ind.itype not in result['Undected']:
-                #     result['Undected'][ind.itype] = []
-                # result['Undected'][ind.itype].append(ind.report())
-            # else:
                 ind.outcome = 'Undected'
             if ind.itype not in result:
                 result[ind.itype] = []
-            result[ind.itype].append(ind.report())
+            result[ind.itype].append(ind.report(output))
         return result
 
 
@@ -182,19 +201,22 @@ class Ind(object):
         self.detail = []
         self.status = False
         self.decide = False
-        self.quan_dist = None
+        self.distribution = None
+        self.picture = True if self.code in logo_code else False
 
     def set_ftype(self, ftype: str):
         if not self.ftype:
             if ftype == 'quan':
                 self.outcome = 1
-                self.quan_dist = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
+                self.distribution = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
+            else:
+                self.distribution = {'Plot': None, 'Status': False}
             self.ftype = ftype
 
     def add_prs_res(self, res: float, detail: str):
         self.ftype = 'quan'
         self.outcome = res
-        self.quan_dist = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
+        self.distribution = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
         self.detail = [detail]
         self.status = True
 
@@ -203,7 +225,8 @@ class Ind(object):
             if not self.decide:
                 if inter not in lan_lib['if']:
                     if self.decide is not None:
-                        self.outcome = inter if gt == trans_gt(ref) else no_inter
+                        self.outcome = inter if gt == trans_gt(ref) else \
+                            inter if gt == trans_gt(gene_filp(ref)) else no_inter
                         self.outcome = 'normal' if self.outcome in lan_lib[None] else self.outcome
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
@@ -249,23 +272,32 @@ class Ind(object):
             self.detail.append(warning)
         self.status = False
 
-    def add_quan_dist(self, output):
-        assert self.ftype == 'quan', 'Not quantitative trait!'
-        global ref_code
+    def add_quan_dist(self, output: str):
         if self.code in ref_code.columns:
-            self.quan_dist['Average'] = ref_code[self.code].mean()
-            self.quan_dist['Percentage'] = sum(ref_code[self.code] < self.outcome) / ref_code.shape[0] * 100
-            self.quan_dist['Plot'] = quan_dist_plot(self.code, self.outcome, ref_code[self.code],
-                                                    self.quan_dist['Percentage'], output)
-            self.quan_dist['Status'] = True
+            if self.ftype == 'quan':
+                self.distribution['Average'] = ref_code[self.code].mean()
+                self.distribution['Percentage'] = sum(ref_code[self.code] < self.outcome) / ref_code.shape[0] * 100
+                self.distribution['Plot'] = quan_dist_plot(self.code, self.outcome, ref_code[self.code],
+                                                           self.distribution['Percentage'], output)
+                self.distribution['Status'] = True
+            else:
+                self.distribution['Plot'] = qual_dist_plot(self.code, self.outcome, self.name, output)
+                self.distribution['Status'] = True
 
-    def report(self):
-        if self.ftype == 'quan':
-            if self.quan_dist['Status']:
-                del self.quan_dist['Status']
-                return {'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail,
-                        'Distribution': self.quan_dist, **self.other, 'Status': self.status}
-        return {'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail, **self.other, 'Status': self.status}
+    def report(self, output):
+        if self.picture:
+            self.picture = os.path.join('html_files', 'img', os.listdir(config['logo_dir'])[logo_code.index(self.code)])
+            'no_pic.jpg'
+            copy(os.path.join(config['logo_dir'], os.path.basename(self.picture)), os.path.join(output, self.picture))
+        else:
+            self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
+        if self.distribution['Status']:
+            del self.distribution['Status']
+            return {'type': self.ftype, 'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail,
+                    'Distribution': self.distribution, **self.other, 'Status': self.status, 'Picture': self.picture}
+        return {'type': self.ftype, 'Name': self.name, 'Outcome': self.outcome, 'Detail': self.detail, **self.other,
+                'Status': self.status,
+                'Picture': self.picture}
 
 
 def assign_pos(value: float, plt_size: tuple):
@@ -287,12 +319,55 @@ def is_excel(file: str) -> bool:
     return True if file.split('.')[-1] == 'xlsx' or file.split('.')[-1] == 'xls' else False
 
 
-def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, report_dir):
-    if not os.path.isdir(report_dir):
-        os.mkdir(report_dir)
-    report_dir = os.path.join(report_dir, 'img')
-    if not os.path.isdir(report_dir):
-        os.mkdir(report_dir)
+def qual_dist_plot(code: str, res: str, name: str, report_dir: str):
+    population = ref_code[code].value_counts()
+    labels = population.index
+    labels = [label.split(":")[0] for label in labels]
+
+    plt.figure(figsize=(8, 6), dpi=400)
+    ax1, ax2 = plt.subplot(1, 3, (1, 2)), plt.subplot(1, 3, 3)
+    patches, texts = ax1.pie(population, radius=1.2, pctdistance=1.13)
+    ax1.axis('equal')
+    ax2.axis('off')
+    ax2.legend(patches, labels, loc='center')
+    plt.suptitle(f'Distribution of {name} in reference population', size=12, weight="bold", y=0.95)
+
+    props = population.apply(lambda a: f'{a / sum(population) * 100:.2f}%')
+    bbox_props = dict(boxstyle="square,pad=0.3", fc="w", ec="k", lw=0.72)
+    kw = dict(arrowprops=dict(arrowstyle="->"),
+              bbox=bbox_props, zorder=0, va="center")
+
+    for i, p in enumerate(patches):
+        ang = (p.theta2 - p.theta1) / 2. + p.theta1
+        if 'ang_r' not in locals().keys():
+            y_dif = 0
+        elif (ang - 180) * (ang_r - 180) >= 0:
+            if ang - ang_r < 10:
+                y_dif += 0.3 / (ang - ang_r)
+            else:
+                y_dif -= 1 / (ang - ang_r)
+                y_dif = y_dif if y_dif >= 0 else 0
+        else:
+            y_dif = 0
+        ang_r = ang
+        x = np.cos(np.deg2rad(ang))
+        y = np.sin(np.deg2rad(ang))
+        y_text = y + y_dif
+        y_text = (y_text - 0.8) * 0.33 + 0.8 if y_text > 0.8 else y_text
+        horizontalalignment = "right" if ang <= 180 else "left"
+        connectionstyle = f"angle, angleA={0 + np.rad2deg(np.arctan(1.5 * y_dif))}, " \
+                          f"angleB={ang + np.rad2deg(np.arcsin(1.5 * y_dif))}" if abs(y) > 0.5 else 'arc3'
+        kw["arrowprops"].update({"connectionstyle": connectionstyle})
+        ax1.annotate(props[i], xy=(1.18 * x, 1.18 * y), xytext=(1.5 * np.sign(x), round(1.5 * y_text, 2)),
+                     horizontalalignment=horizontalalignment, **kw)
+
+    plt.tight_layout()
+    plt.savefig(os.path.join(report_dir, f'{code}.png'))
+    plt.close()
+    return os.path.join('html_files', 'dist_plot', f'{code}.png')
+
+
+def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, report_dir: str):
     from numpy import log10
     plt.hist(log10(ref_data), bins=100, weights=[1. / len(ref_data)] * len(ref_data))
     plt.axvline(log10(value), c='r', lw=2, ls='--')
@@ -304,11 +379,28 @@ def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, rep
     plt.ylabel("Percentage")
     plt.savefig(os.path.join(report_dir, f'{code}.png'))
     plt.close()
-    return os.path.join(report_dir, f'{code}.png')
+    return os.path.join('html_files', 'dist_plot', f'{code}.png')
 
 
 def cal_beta(gt: set, ref: str, beta: int or float):
     return 1 if ref not in gt else beta ** 2 if len(gt) == 1 else beta
+
+
+def cal_trait(trait: str or None, gt: set, ref: str, inter: str, no_inter: str or None):
+    if trait is None:
+        if inter in lan_lib['if']:
+            return 'Normal' if gt == trans_gt(ref) else 'Normal' if gt == trans_gt(gene_filp(ref)) else None
+        else:
+            return None
+    else:
+        if trait == 'Normal':
+            if inter in lan_lib['if']:
+                return 'Normal' if gt == trans_gt(ref) else 'Normal' if gt == trans_gt(gene_filp(ref)) else None
+            else:
+                outcome = inter if gt == trans_gt(ref) else inter if gt == trans_gt(gene_filp(ref)) else no_inter
+                return 'Normal' if outcome in lan_lib[None] else outcome
+        else:
+            return trait
 
 
 def trans_sex(sex: str or bool):
@@ -329,9 +421,20 @@ def trans_gt(gt: set or str):
         return set(gt)
 
 
+def gene_filp(raw: str):
+    base_dict = {'A': 'T', 'C': 'G', 'T': 'A', 'G': 'C'}
+    return ''.join([base_dict[char] if char in base_dict.keys() else char for char in raw])
+
+
 def select_list(ob_list: list, index):
     # assert len(ob_list) < max(index), 'list index out of range'
     return [ob_list[i] if i < len(ob_list) else None for i in index]
+
+
+def sub_col(ob_list: list, index: OrderedDict, code=True):
+    if not code:
+        index.pop('code')
+    return {key: ob_list[index[key]] if index[key] < len(ob_list) else None for key in index}
 
 
 @use_time()
@@ -368,26 +471,23 @@ def cal_sha(file: str):
 
 
 @use_time("Calculate files' sha value")
-def cal_multi_sha(file_list: str or list):
+def cal_multi_sha(file_list: str or list, vcf_only=True):
     from hashlib import sha256
     value = sha256(b'')
     if type(file_list) == str:
         file_list = os.listdir('dir')
     for file in file_list:
-        if file.split('.')[-1] == 'gz' or file.split('.')[-1] == 'vcf':
+        if file.split('.')[-1] == 'gz' or file.split('.')[-1] == 'vcf' or not vcf_only:
             with open(file, 'rb') as f:
                 value.update(f.read())
     return value.hexdigest()
 
 
-def open_vcf(vcf_file: str):
-    if vcf_file.split('.')[-1] == 'gz':
-        return gzip.open
-    elif vcf_file.split('.')[-1] == 'vcf':
-        return open
+def open_gz(file: str):
+    if file.split('.')[-1] == 'gz':
+        return gzip_open
     else:
-        logger.warning('Unsupported file.')
-        return
+        return open
 
 
 @use_time('Get reference index')
@@ -401,7 +501,7 @@ def get_ref_index(vcf_file: str):
         # if verify_data(id_index, vcf_file, 'single'):
         return id_index
     with open(id_index, 'w') as fw:
-        nopen = open_vcf(vcf_file)
+        nopen = open_gz(vcf_file)
         fw.write(f'#{cal_sha(vcf_file)}\n')
         with nopen(vcf_file, 'rb') as fr:
             global pattern
@@ -423,9 +523,9 @@ def extract_snp(vcf_file: str, temp_dir: str):
     :param temp_dir: Directory where the file is stored
     :return: Extracted vcf file
     """
-    nopen = open_vcf(vcf_file)
+    nopen = open_gz(vcf_file)
     need_lines = []
-    need_snp_list = snp_list_rw('r')
+    need_snp_list = snp_list_rw(temp_dir, 'r')
     if nopen:
         logger.info(f"Step 1: Get {vcf_file} index")
         idi_file = get_ref_index(vcf_file)
@@ -467,7 +567,7 @@ def merge_files(file_dir: str, out: str, valid=None):
 
 def get_gt_iid(vcf_list: list) -> pd.DataFrame:
     for vcf_file in vcf_list:
-        nopen = open_vcf(vcf_file)
+        nopen = open_gz(vcf_file)
         if nopen:
             with nopen(vcf_file, 'rb') as f:
                 for line in f:
@@ -497,12 +597,12 @@ def get_ref_gt(vcf_list: list, excel_files: list,
     return gt_df
 
 
-def snp_list_rw(method='w', need_snp_list=None):
-    with open('need_snp_list', method + 'b' if method != 'raw' else 'w') as f:
+def snp_list_rw(tempdir: str, method='w', need_snp_list=None):
+    with open(os.path.join(tempdir, 'need_snp_list'), method + 'b' if method != 'raw' else 'w') as f:
         if method == 'w':
-            pickle.dump(need_snp_list, f)
+            dump(need_snp_list, f)
         elif method == 'r':
-            return pickle.load(f)
+            return load(f)
         elif method == 'raw':
             for snp in need_snp_list:
                 f.write(snp + '\n')
@@ -516,24 +616,29 @@ def rm_dir(rmdir: str):
     os.rmdir(rmdir)
 
 
+def copy_files(files: list, from_dir: str, to_dir: str):
+    for file in files:
+        copy(os.path.join(from_dir, file), to_dir)
+
+
 @use_time('Get reference subset vcf')
 def get_ref_vcf(vcf_files: list, need_snp_list: set or list, out_name='filter.vcf'):
-    from functools import partial
-    temp_dir = tempfile.mkdtemp(suffix='vcf')
-    snp_list_rw(need_snp_list=need_snp_list)  # temp
+    temp_dir = mkdtemp(suffix='vcf')
+    snp_list_rw(tempdir=temp_dir, need_snp_list=need_snp_list)  # temp
     func = partial(extract_snp, temp_dir=temp_dir)
-    pool = Pool(processes=os.cpu_count() - 2)  # cpu_count need warp
+    pro_num = len(vcf_files) if len(vcf_files) < os.cpu_count() else os.cpu_count()
+    pool = Pool(processes=pro_num)  # todo: cpu_count need warp
     pool.map(func, vcf_files)
     pool.close()
     pool.join()
+    os.remove(os.path.join(temp_dir, 'need_snp_list'))
     merge_files(temp_dir, os.path.join('ref_res', out_name), valid=cal_multi_sha(vcf_files))
     rm_dir(temp_dir)
-    os.remove('need_snp_list')
 
 
 @use_time()
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    sha_cal = cal_sha if mode == 'single' else cal_multi_sha
+    sha_cal = cal_sha if mode == 'single' else partial(cal_multi_sha, vcf_only=False)
     with open(data_file) as f:
         if f.read(4) == 'DONE':
             if f.read(61) == sha_cal(source_files)[3:]:
@@ -547,11 +652,13 @@ def select_columns(file: str, sep: str, need_col: list, out_file: str, method='n
         need_col = get_columns_num(file, need_col)
     elif method != 'number':
         raise AttributeError("Unsupported method")
-    with open(file, 'rb') as fr:
+    nopen = open_gz(file)
+    with nopen(file, 'rb') as fr:
         with open(out_file, 'wb') as fw:
             for line in fr:
                 if skipspace:
-                    line = re.sub(f' *{sep} *'.encode(), sep.encode(), line)
+                    line = line.lstrip(b' ')
+                    line = sub(f' *{sep} *'.encode(), sep.encode(), line)
                 if not first or header:
                     if line.strip():
                         fw.write(sep.encode().join(select_list(line.strip().split(sep.encode()), need_col)) + b'\n')
@@ -571,12 +678,21 @@ def same_status(files: list):
     return True
 
 
+def trans_gz(gz_file: str, out_dir: str):
+    if gz_file.split('.')[-1] == 'gz':
+        with gzip_open(gz_file) as fr:
+            with open(os.path.join(out_dir, 'prs_data'), 'w') as fw:
+                for line in fr:
+                    fw.write(line.decode())
+        return os.path.join(out_dir, 'prs_data')
+    else:
+        return gz_file
+
+
 @use_time('Get population prs result')
 def get_ref_prs(prs_data: str, vcf_files: list, ref_structure=config['ref_structure']):
-    temp_dir = tempfile.mkdtemp(suffix='prs')
+    temp_dir = mkdtemp(suffix='prs')
     code = os.path.basename(prs_data).split('.')[0]
-    # get_ref_vcf(vcf_files, need_snp_list=get_snp_list(prs_data, excel_files=False, prs_files=True),
-    #             out_name=code + 'vcf')
     # Clump
     clump_p2 = GWAS_setting["clump-p2"] if GWAS_setting["clump-p1"] < GWAS_setting["clump-p2"] \
         else GWAS_setting["clump-p1"]
@@ -593,6 +709,7 @@ def get_ref_prs(prs_data: str, vcf_files: list, ref_structure=config['ref_struct
         f.write(f'{GWAS_setting["p_threshold"]} 0 {GWAS_setting["p_threshold"]}\n')
     # PRS calculate
     columns_num = get_columns_num(prs_data, [GWAS_setting[i] for i in ['SNP', 'EA', 'BETA']])
+    prs_data = trans_gz(prs_data, temp_dir)
     for fid, file in enumerate(vcf_files):
         run_plink_cmd(f'--vcf {file} --score {prs_data} '
                       f'{" ".join([str(i) for i in columns_num])} header '
@@ -606,49 +723,56 @@ def get_ref_prs(prs_data: str, vcf_files: list, ref_structure=config['ref_struct
         else:
             res_data = res_data + pd.read_csv(os.path.join(temp_dir,
                                                            f"result_prs.{GWAS_setting['p_threshold']}.profile"),
-                                              ' ', skipinitialspace=True, index_col=1)
+                                              ' ', skipinitialspace=True, index_col=1)['SCORE']
     rm_dir(temp_dir)
     return res_data
 
 
 @use_time('Get reference quantitative result data')
-def get_ref_cal(quan_file: list, vcf_files: list, data_path='ref_res'):
+def get_ref_cal(qual_file: list, quan_file: list, vcf_files: list, data_path='ref_res'):
     ref_code_file = os.path.join(data_path, 'population_code_res.csv')
     ref_rs_file = os.path.join(data_path, 'population_rs_res.csv')
     ref_config = os.path.join(data_path, 'setting')
     with open(ref_config, 'wb') as f:
-        pickle.dump(GWAS_setting, f)
+        dump(GWAS_setting, f)
     if os.path.isfile(ref_code_file) and os.path.isfile(ref_rs_file):
-        if verify_data(ref_code_file, vcf_files + quan_file + [ref_config], 'multi'):
+        if verify_data(ref_code_file, vcf_files + qual_file + quan_file + [ref_config], 'multi'):
             if same_status([ref_code_file, ref_rs_file]):
                 return pd.read_csv(ref_rs_file, skiprows=1, index_col=0), \
                        pd.read_csv(ref_code_file, skiprows=1, index_col=0)
     outcomes_rs = pd.DataFrame()
     outcomes_code = pd.DataFrame()
-    gt_data = get_ref_gt(vcf_files, quan_file)
-    with open(ref_code_file, 'w', newline='') as fc:
-        with open(ref_rs_file, 'w', newline='') as fr:
-            sha = cal_multi_sha(vcf_files + quan_file + [ref_config])
+    gt_data = get_ref_gt(vcf_files, qual_file + quan_file)
+    with open(ref_code_file, 'w', newline='', encoding='UTF-8') as fc:
+        with open(ref_rs_file, 'w', newline='', encoding='UTF-8') as fr:
+            sha = cal_multi_sha(vcf_files + qual_file + quan_file + [ref_config], vcf_only=False)
             fc.write(f'#{sha}\n')
             fr.write(f'#{sha}\n')
-            for file in quan_file:
+            for file in qual_file + quan_file:
                 if is_excel(file):
-                    workbook = xlrd.open_workbook(file)
+                    workbook = open_workbook(file)
                     for sheet in workbook.sheets():
                         for row in range(1, sheet.nrows):
                             code = sheet.row_values(row)[0] if sheet.row_types(row)[0] == 1 \
                                 else f'{sheet.row_values(row)[0]:.0f}'
                             rs = sheet.row_values(row)[1]
                             if rs in gt_data.index:
-                                outcome = gt_data.loc[rs].apply(
-                                    lambda gt: cal_beta(trans_gt(gt), *sheet.row_values(row)[2:4]))
-                                code_rs = f'{code}_{rs}'
-                                if code_rs not in outcomes_rs.columns:
-                                    outcomes_rs[code_rs] = outcome
-                                    if code in outcomes_code.columns:
-                                        outcomes_code[code] = outcomes_code[code] * outcome
-                                    else:
-                                        outcomes_code[code] = outcome
+                                if file in quan_file:
+                                    outcome = gt_data.loc[rs].apply(
+                                        lambda gt: cal_beta(trans_gt(gt), *sheet.row_values(row)[2:4]))
+                                    code_rs = f'{code}_{rs}'
+                                    if code_rs not in outcomes_rs.columns:
+                                        outcomes_rs[code_rs] = outcome
+                                        if code in outcomes_code.columns:
+                                            outcomes_code[code] = outcomes_code[code] * outcome
+                                        else:
+                                            outcomes_code[code] = outcome
+                                else:
+                                    if code not in outcomes_code.columns:
+                                        outcomes_code[code] = pd.Series('Normal', index=gt_data.columns)
+                                    temp = list(map(lambda trait, gt: cal_trait(trait, gt, *sheet.row_values(row)[2:5]),
+                                        outcomes_code[code], gt_data.loc[rs]))
+                                    outcomes_code[code] = temp
             outcomes_rs.to_csv(fr)
             fr.seek(0)
             fr.write('DONE')
@@ -670,13 +794,13 @@ def arg(args):
         opts, temp = getopt.getopt(args, "hi:d:r:o:", ['help', 'input=', 'data-excel=', 'ref-dir=', 'output='])
     except getopt.GetoptError:
         print(description)
-        sys.exit(2)
+        sys_exit(2)
     else:
         ref_dir = r'.\1KG'
         for opt, arg in opts:
             if opt in ('-h', '--help'):
                 print(description)
-                sys.exit()
+                sys_exit()
             elif opt in ('-i', '--input'):
                 finput = arg
             elif opt in ('-d', '--data-excel'):
@@ -724,17 +848,17 @@ def load_vcf(human: Human, data_snps: set):
 
 @use_time('Load indicator data')
 def load_ind(human: Human, excel_ind_file: str):
-    workbook = xlrd.open_workbook(excel_ind_file)
+    workbook = open_workbook(excel_ind_file)
     for sheet in workbook.sheets():
         itype = sheet.name
         for row in range(1, sheet.nrows):
             if sheet.row_types(row)[0] != 1:
                 logger.warning(f'Not standard code format, indicator '
                                f'({sheet.row_values(row)[columns["columns_ind"]["name"]]}) may work improperly. ')
-                human.set_ind(f'{sheet.row_values(row)[0]:.0f}',
-                              *select_list(sheet.row_values(row), columns['columns_ind'].values())[1:], itype)
+                human.set_ind(f'{sheet.row_values(row)[columns["columns_ind"]["code"]]:.0f}',
+                              **sub_col(sheet.row_values(row), columns['columns_ind'], code=False), itype=itype)
             else:
-                human.set_ind(*select_list(sheet.row_values(row), columns['columns_ind'].values()), itype)
+                human.set_ind(**sub_col(sheet.row_values(row), columns['columns_ind']), itype=itype)
 
 
 def get_snp_list(*algorithm_files: str, excel_files=True, prs_files=False):
@@ -744,21 +868,23 @@ def get_snp_list(*algorithm_files: str, excel_files=True, prs_files=False):
         try:
             if is_excel(file):
                 if excel_files:
-                    workbook = xlrd.open_workbook(file)
+                    workbook = open_workbook(file)
                     for sheet in workbook.sheets():
                         for row in range(1, sheet.nrows):
                             snp_list.add(sheet.row_values(row)[1])
             elif prs_files:
                 header = True
-                with open(file, 'r') as f:
+                nopen = open_gz(file)
+                with nopen(file, 'rb') as f:
                     for line in f:
                         if header:
                             if not snp_column:
-                                snp_column = line.split(GWAS_setting['sep']).index(GWAS_setting['SNP'])
+                                snp_column = line.split(GWAS_setting['sep'].encode()).index(
+                                    GWAS_setting['SNP'].encode())
                             header = False
                             continue
                         else:
-                            snp_list.add(line.split(GWAS_setting['sep'])[snp_column])
+                            snp_list.add(line.split(GWAS_setting['sep'].encode())[snp_column].decode())
         except Exception:
             logger.warning(f'{file} has some proble when getting snp list from it.')
             raise
@@ -766,10 +892,11 @@ def get_snp_list(*algorithm_files: str, excel_files=True, prs_files=False):
 
 
 def get_columns_num(file: str, need_columns: list, sep=GWAS_setting['sep']):
-    with open(file, 'r') as f:
+    nopen = open_gz(file)
+    with nopen(file, 'rb') as f:
         header = f.readline()
-    header = header.strip().split(sep)
-    return [header.index(i) + 1 for i in need_columns]
+    header = header.strip().split(sep.encode())
+    return [header.index(i.encode()) + 1 for i in need_columns]
 
 
 def get_prs_res(result_file: str):
@@ -781,9 +908,10 @@ def get_prs_res(result_file: str):
 
 @use_time('Loading algorithm data and calculate the result')
 def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
+    # todo(Sheng): Many codes are similar to get_ref_res, maybe it can be simplified
     for file in qual_file + quan_file:
         if is_excel(file):
-            workbook = xlrd.open_workbook(file)
+            workbook = open_workbook(file)
             ftype = 'quan' if file in quan_file else 'qual'
             for sheet in workbook.sheets():
                 for row in range(1, sheet.nrows):
@@ -795,6 +923,7 @@ def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
         else:
             code = os.path.basename(file).split('.')[0]
             columns_num = get_columns_num(file, [GWAS_setting[i] for i in ['SNP', 'EA', 'BETA']])
+            file = trans_gz(file, temp_dir)
             run_plink_cmd(f"--vcf {human.vcf} --score {file} {' '.join([str(i) for i in columns_num])} header "
                           f"--q-score-range {os.path.join('ref_res', 'need_range_list')}"
                           f" {os.path.join('ref_res', code + '.SNP.pvalue')} "
@@ -809,27 +938,25 @@ def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
 
 def get_ftype(result: dict):
     # type_list = OrderedDict()
-    type_list = dict()
-    for key in result:
-        type_list[key] = max([len(i) for i in result[key]])
-    type_list = {key: 'quan' if value == max(type_list.values()) else 'qual' for key, value in type_list.items()}
-    return type_list
+    return {key: result[key][0]['type'] for key in result}
 
 
 @use_time('Whole process')
 def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str):
     res_str = ''
-    temp_dir = tempfile.mkdtemp(suffix='pageant')
+    log_name = log_start()
+    temp_dir = mkdtemp(suffix='pageant')
     human = Human(name, input_file, temp_dir)
+    initial_res_dir(output)
     try:
         vcf_files = [f"{os.path.join(ref, file)}" for file in os.listdir(ref) if
                      'vcf' in file and 'idi' not in file and 'tbi' not in file]
-        initial_ref_data(quan_files, vcf_files)
+        initial_ref_data(qual_files, quan_files, vcf_files)
         load_vcf(human, get_snp_list(*qual_files, *quan_files))
         load_ind(human, ind_file)
         load_cal(human, qual_files, quan_files, temp_dir)
-        human.add_quan_dis(output)
-        res_dict = human.export_res()
+        human.add_distribution(output)
+        res_dict = human.export_res(output=output)
     except Exception as e:
         res_str += f'Error: {str(e)}, analysis falied.'
         res_dict = {}
@@ -847,13 +974,13 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
         t = template.render(human=human, res=res_dict, type=get_ftype(res_dict),
                             time=strftime('%Y-%m-%d %H:%M'), config=locals(),
                             log=log_text)
-        copy('./bin/go_top.jpg', f'{output}/img')
-        copy('./bin/Setting.css', output)
+        copy_files(['go_top.jpg', 'no_pic.jpg'], 'bin', os.path.join(output, 'html_files', 'img'))
+        copy('./bin/Setting.css', os.path.join(output, 'html_files'))
         with open(os.path.join(output, 'Report.html'), 'w', encoding="UTF-8") as fhtml:
             fhtml.write(t)
         rm_dir(temp_dir)
-        # return res_dict
-        return res_str + ' Report has saved in output directory.'
+        return res_dict
+        # return res_str + ' Report has saved in output directory.'
 
 
 if __name__ == '__main__':
@@ -863,7 +990,7 @@ if __name__ == '__main__':
     ref = r'.\reference'
     ind_file = r'.\database\001_Traits.xlsx'
     qual_file = [r'.\database\002_Qualitative.xlsx']
-    quan_file = [r'.\database\003_Quantitative.xlsx', r'.\database\R0002.tsv', r'.\database\R0004.tsv']
+    quan_file = [r'.\database\003_Quantitative.xlsx', r'.\database\R0002.tsv.gz', r'.\database\R0004.tsv.gz']
     vcf_files = [f"{os.path.join(ref, file)}" for file in os.listdir(ref) if
                  'vcf' in file and 'idi' not in file and 'tbi' not in file]
     # vcf_file = r'E:\Data\Database\1KGP\sample\sample_1.vcf'
@@ -879,4 +1006,4 @@ if __name__ == '__main__':
     # t = template.render(human=a, res=res, type=get_ftype(res)[0], undected=get_ftype(res)[1], time="2020-10-04 19:00")
     # with open('temp.html', 'w', encoding="UTF-8") as f:
     #     f.write(t)
-    test = main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output='.')
+    test = main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output=r'.\res')

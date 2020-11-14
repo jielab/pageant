@@ -12,6 +12,10 @@ import main
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 from webbrowser import open_new
+from multiprocessing import freeze_support
+
+
+QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
 
 class Ui_PAGEANT(object):
@@ -23,8 +27,6 @@ class Ui_PAGEANT(object):
         sizePolicy.setVerticalStretch(48)
         sizePolicy.setHeightForWidth(PAGEANT.sizePolicy().hasHeightForWidth())
         PAGEANT.setSizePolicy(sizePolicy)
-        PAGEANT.setMinimumSize(QtCore.QSize(600, 480))
-        PAGEANT.setMaximumSize(QtCore.QSize(600, 480))
         font = QtGui.QFont()
         font.setFamily("Arial Symbol")
         PAGEANT.setFont(font)
@@ -607,10 +609,10 @@ class Ui_PAGEANT(object):
         self.input_vcf.setText('./test/sample.vcf.gz')
         self.input_ind.setText('database/001_Traits.xlsx')
         self.input_qual.setText('database/002_Qualitative.xlsx')
-        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv, R0004.tsv')
+        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv.gz, R0004.tsv.gz')
         self.input_ref_dir.setText('./reference')
         self.input_ref_file.setText('./reference/hapmap3.vcf.gz')
-        self.Output_dir.setText(os.getcwd())
+        self.Output_dir.setText(os.path.join(os.getcwd(), 'res'))
         self.name.setText('Test')
 
 
@@ -630,13 +632,14 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                            'input_file': './test/sample.vcf.gz',
                            'ind_file': 'database/001_Traits.xlsx',
                            'qual_files': ['database/002_Qualitative.xlsx'],
-                           'quan_files': ['database/003_Quantitative.xlsx', 'database/R0002.tsv', 'database/R0004.tsv'],
+                           'quan_files': ['database/003_Quantitative.xlsx', 'database/R0002.tsv.gz',
+                                          'database/R0004.tsv.gz'],
                            'ref': './reference',
-                           'output': '.'}
+                           'output': './res'}
 
     def openfile_single_vcf(self):
         get_directory_path = QFileDialog.getOpenFileName(self, "Select the input file", os.getcwd(),
-                                                         filter='VCF (*.vcf); 23andme (*.txt)')
+                                                         filter='VCF (*.vcf, *.vcf.gz);; 23andme (*.txt)')
         self.input_vcf.setText(get_directory_path[0])
         self.parameters['input_file'], self.parameters['file_type'] = get_directory_path
 
@@ -647,14 +650,14 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def openfile_multi(self):
         get_files_path = QFileDialog.getOpenFileNames(self, "Select the qualitative data files", os.getcwd(),
-                                                      filter='File (*.xlsx *.xls *.txt); All (*.*)',
+                                                      filter='File (*.xlsx *.xls *.txt);; All (*.*)',
                                                       initialFilter='File')
         self.input_qual.setText('; '.join(i.split('/')[-1] for i in get_files_path[0]))
         self.parameters['qual_files'] = get_files_path[0]
 
     def openfile_multi2(self):
         get_files_path = QFileDialog.getOpenFileNames(self, "Select the quantitative data files", os.getcwd(),
-                                                      filter='File (*.xlsx *.xls *.txt); All (*.*)',
+                                                      filter='File (*.xlsx *.xls *.txt);; All (*.*)',
                                                       initialFilter='File'
                                                       )
         self.input_quan.setText('; '.join(i.split('/')[-1] for i in get_files_path[0]))
@@ -673,7 +676,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
     def default(self):
         self.input_ind.setText('database/001_Traits.xlsx')
         self.input_qual.setText('database/002_Quantitative.xlsx')
-        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv, R0004.tsv')
+        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv.gz, R0004.tsv.gz')
         self.input_ref_dir.setText('./reference')
         self.parameters['ind_file'] = self.input_ind.text()
         self.parameters['qual_files'] = [self.input_qual.text()]
@@ -691,12 +694,13 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                         QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Close,
                                               QtWidgets.QMessageBox.Ok)
             if reply == QtWidgets.QMessageBox.Ok:
-                open_new(os.path.join('.', 'report.html'))
+                open_new(os.path.join(self.parameters['output'], 'report.html'))
             else:
                 return
 
 
 if __name__ == "__main__":
+    freeze_support()
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = MyMainForm()
     MainWindow.show()
