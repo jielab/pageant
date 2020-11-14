@@ -2,7 +2,7 @@ import os
 import getopt
 from sys import exit as sys_exit
 import pandas as pd
-import numpy as np
+from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10
 from xlrd import open_workbook
 import logging
 from collections import OrderedDict
@@ -172,7 +172,7 @@ class Human(object):
         assert not ref_code.empty, "Can not get reference data"
         output = os.path.join(output, 'html_files', 'dist_plot')
         for ind in self.ind_data.values():
-            ind.add_quan_dist(output)
+            ind.add_dist(output)
 
     @use_time('Export report result')
     def export_res(self, output):
@@ -272,7 +272,7 @@ class Ind(object):
             self.detail.append(warning)
         self.status = False
 
-    def add_quan_dist(self, output: str):
+    def add_dist(self, output: str):
         if self.code in ref_code.columns:
             if self.ftype == 'quan':
                 self.distribution['Average'] = ref_code[self.code].mean()
@@ -350,15 +350,15 @@ def qual_dist_plot(code: str, res: str, name: str, report_dir: str):
         else:
             y_dif = 0
         ang_r = ang
-        x = np.cos(np.deg2rad(ang))
-        y = np.sin(np.deg2rad(ang))
+        x = cos(deg2rad(ang))
+        y = sin(deg2rad(ang))
         y_text = y + y_dif
         y_text = (y_text - 0.8) * 0.33 + 0.8 if y_text > 0.8 else y_text
         horizontalalignment = "right" if ang <= 180 else "left"
-        connectionstyle = f"angle, angleA={0 + np.rad2deg(np.arctan(1.5 * y_dif))}, " \
-                          f"angleB={ang + np.rad2deg(np.arcsin(1.5 * y_dif))}" if abs(y) > 0.5 else 'arc3'
+        connectionstyle = f"angle, angleA={0 + rad2deg(arcsin(1.5 * y_dif))}, " \
+                          f"angleB={ang + rad2deg(arcsin(1.5 * y_dif))}" if abs(y) > 0.5 else 'arc3'
         kw["arrowprops"].update({"connectionstyle": connectionstyle})
-        ax1.annotate(props[i], xy=(1.18 * x, 1.18 * y), xytext=(1.5 * np.sign(x), round(1.5 * y_text, 2)),
+        ax1.annotate(props[i], xy=(1.18 * x, 1.18 * y), xytext=(1.5 * sign(x), round(1.5 * y_text, 2)),
                      horizontalalignment=horizontalalignment, **kw)
 
     plt.tight_layout()
@@ -368,7 +368,6 @@ def qual_dist_plot(code: str, res: str, name: str, report_dir: str):
 
 
 def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, report_dir: str):
-    from numpy import log10
     plt.hist(log10(ref_data), bins=100, weights=[1. / len(ref_data)] * len(ref_data))
     plt.axvline(log10(value), c='r', lw=2, ls='--')
     plt.text(assign_pos(log10(value), plt.axis()), plt.axis()[3] * 0.816,
