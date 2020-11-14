@@ -944,6 +944,8 @@ def get_ftype(result: dict):
 @use_time('Whole process')
 def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str,
          **other_paramate):
+    for key, value in other_paramate:
+        config[key] = value
     res_str = ''
     log_name = log_start()
     temp_dir = mkdtemp(suffix='pageant')

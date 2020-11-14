@@ -639,7 +639,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def openfile_single_vcf(self):
         get_directory_path = QFileDialog.getOpenFileName(self, "Select the input file", os.getcwd(),
-                                                         filter='VCF (*.vcf, *.vcf.gz);; 23andme (*.txt)')
+                                                         filter='VCF (*.vcf *.vcf.gz);; 23andme (*.txt)')
         self.input_vcf.setText(get_directory_path[0])
         self.parameters['input_file'], self.parameters['file_type'] = get_directory_path
 
