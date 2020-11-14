@@ -141,7 +141,7 @@ class Human(object):
         self.name = name
         self.gt_data = {}
         self.ind_data = {}
-        self.vcf, self.sex = recode_and_sex_impute(file, temp_dir)
+        self.vcf, self.sex = recode_and_sex_impute(file, temp_dir, config['file_type'])
 
     def set_gt(self, snp_id: str, gt: set):
         self.gt_data[snp_id] = gt
@@ -438,8 +438,8 @@ def sub_col(ob_list: list, index: OrderedDict, code=True):
 
 
 @use_time()
-def recode_and_sex_impute(file: str, temp_dir: str, file_type=config['file_type']):
-    if file_type == 'vcf' or file_type == 'vcf.gz':
+def recode_and_sex_impute(file: str, temp_dir: str, file_type: str):
+    if file_type == 'vcf':
         read_txt = f"--vcf {file} "
     elif file_type == '23andme':
         read_txt = f"--23file {file} "
@@ -454,14 +454,21 @@ def recode_and_sex_impute(file: str, temp_dir: str, file_type=config['file_type'
         data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
     except Exception as e:
         logger.warning('Sex impute failed:\n' + f'{e.args}')
-        run_plink_cmd(f"--vcf {file} "
+        run_plink_cmd(read_txt +
                       "--recode vcf "
                       f"--out {os.path.join(temp_dir, 'temp')}",
                       plink='plink')
         return os.path.join(temp_dir, 'temp.vcf'), None
     else:
+        run_plink_cmd(f"--vcf {os.path.join(temp_dir, 'temp.vcf')} "
+                      "--recode vcf "
+                      "--rm-dup force-first "
+                      f"--out {os.path.join(temp_dir, 'temp')}")
         # os.system('rm sex_impute.*')
-        return os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
+        if file_type == 'vcf':
+            return os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
+        elif file_type == '23andme':
+            return os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.PEDSEX[0] == 1 else 'Female'
 
 
 def cal_sha(file: str):
@@ -943,9 +950,11 @@ def get_ftype(result: dict):
 
 @use_time('Whole process')
 def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str,
-         **other_paramate):
-    for key, value in other_paramate:
-        config[key] = value
+         **other_parameters):
+    if other_parameters:
+        global config
+        for key in other_parameters:
+            config[key] = other_parameters[key]
     res_str = ''
     log_name = log_start()
     temp_dir = mkdtemp(suffix='pageant')

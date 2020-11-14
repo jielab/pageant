@@ -85,7 +85,7 @@
                         {{ indicator['Name'] | replace('_', ' ')}}</a></td>
                     {% if value == "quan" %}
                     {% if indicator['Status'] == True %}
-                    {% if indicator['Distribution']['Percentage'] < 100 and indicator['Distribution']['Percentage'] > 75
+                    {% if indicator['Distribution']['Percentage'] > 75
                     %}
                     <td style="background-color: red">High risk</td>
                     {% elif indicator['Distribution']['Percentage'] <= 75 and indicator['Distribution']['Percentage'] >=
@@ -124,7 +124,7 @@
                         </p>
                     </div>
                     {% if value == "qual" %}
-                    <div class="dist_block_top">
+                    <div class="dist_block_top" style="border-bottom-style: none">
                         <div class="dist_block_left qual_width_left">
                             <h4>Outcome:</h4>
                             <p class="Detail_text">{{ indicator['Outcome'] | capitalize }}</p>
