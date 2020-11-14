@@ -415,7 +415,7 @@ def trans_gt(gt: set or str):
         return '/'.join(list(gt)[0] * 2 if len(gt) == 1 else list(gt))  # Todo: not all biallelic
     elif type(gt) == str:
         for i in gt:
-            if not i.isalpha():
+            if not i.isalpha() and i != '*':
                 gt_n = gt.split(i)
                 return set(gt_n)
         return set(gt)
