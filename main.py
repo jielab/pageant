@@ -122,6 +122,7 @@ def initial_res_dir(output: str):
         os.mkdir(output)
 
 
+@use_time()
 def initial_ref_data(qual_list: list, quan_list: list, vcf_list: list) -> None:
     """
     Get reference population data from existing data or generating newly
@@ -225,8 +226,8 @@ class Ind(object):
             if not self.decide:
                 if inter not in lan_lib['if']:
                     if self.decide is not None:
-                        self.outcome = inter if gt == trans_gt(ref) else \
-                            inter if gt == trans_gt(gene_filp(ref)) else no_inter
+                        self.outcome = inter if equal_gt(gt, trans_gt(ref)) else \
+                            inter if equal_gt(gt, trans_gt(gene_filp(ref))) else no_inter
                         self.outcome = 'normal' if self.outcome in lan_lib[None] else self.outcome
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
@@ -234,7 +235,8 @@ class Ind(object):
                             self.decide = True
                         self.status = True
                 else:
-                    self.decide = False if gt == trans_gt(ref) else None
+                    self.decide = False if equal_gt(gt, trans_gt(ref)) else \
+                            False if equal_gt(gt, trans_gt(gene_filp(ref))) else None
                     if self.decide is False:
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
@@ -388,15 +390,18 @@ def cal_beta(gt: set, ref: str, beta: int or float):
 def cal_trait(trait: str or None, gt: set, ref: str, inter: str, no_inter: str or None):
     if trait is None:
         if inter in lan_lib['if']:
-            return 'Normal' if gt == trans_gt(ref) else 'Normal' if gt == trans_gt(gene_filp(ref)) else None
+            return 'Normal' if equal_gt(gt, trans_gt(ref)) else 'Normal' \
+                if equal_gt(gt, trans_gt(gene_filp(ref))) else None
         else:
             return None
     else:
         if trait == 'Normal':
             if inter in lan_lib['if']:
-                return 'Normal' if gt == trans_gt(ref) else 'Normal' if gt == trans_gt(gene_filp(ref)) else None
+                return 'Normal' if equal_gt(gt, trans_gt(ref)) else 'Normal' \
+                    if equal_gt(gt, trans_gt(gene_filp(ref))) else None
             else:
-                outcome = inter if gt == trans_gt(ref) else inter if gt == trans_gt(gene_filp(ref)) else no_inter
+                outcome = inter if equal_gt(gt, trans_gt(ref)) else inter \
+                    if equal_gt(gt, trans_gt(gene_filp(ref))) else no_inter
                 return 'Normal' if outcome in lan_lib[None] else outcome
         else:
             return trait
@@ -418,6 +423,19 @@ def trans_gt(gt: set or str):
                 gt_n = gt.split(i)
                 return set(gt_n)
         return set(gt)
+
+
+def equal_gt(gt1: set, gt2: set):
+    base = ('A', 'G', 'C', 'T')
+    if gt1 == gt2:
+        return True
+    elif 'D' in gt1.union(gt2) or 'I' in gt1.union(gt2):
+        if 'D' in gt2 or 'I' in gt2:
+            gt1, gt2 = gt2, gt1
+        gt2 = {i if set(i).difference(base) != set() else 'D' if len(i) == 1 else 'I' for i in gt2}
+        return gt1 == gt2
+    else:
+        return False
 
 
 def gene_filp(raw: str):
@@ -596,7 +614,7 @@ def get_ref_gt(vcf_list: list, excel_files: list,
         for line in f:
             temp = line.strip().split('\t')
             try:
-                gt_df.loc[temp[2]] = [get_gt(gt, temp[3], temp[4]) for gt in temp[9:]]
+                gt_df.loc[temp[2]] = [get_gt(gt, temp[3], temp[4], warning=False) for gt in temp[9:]]
             except IndexError:
                 print(temp)
                 raise
@@ -821,13 +839,17 @@ def arg(args):
             raise Exception('Not complete arguments!')
 
 
-def get_gt(vcf_gt: str, ref: str, alt: str):
+def get_gt(vcf_gt: str, ref: str, alt: str, snp=None, warning=True):
     # if sum(not i.isnumeric() for i in vcf_gt) != 1:
     #     logger.warning('Not biallelic alleles appear')
     for i in vcf_gt:
         if i == '.':
+            logger.warning(f'Find "." in "{snp}", with which it may be difficult to compare the genotypes.')
             return {'*'}
-        if not i.isnumeric():
+        if i == '*':
+            if warning:
+                logger.warning(f'Find "*" in "{snp}", with which it may be difficult to compare the genotypes.')
+        elif not i.isnumeric():
             gt_n = vcf_gt.split(i)
             return set(alt.split(',')[int(i) - 1] if int(i) else ref for i in gt_n)
     return set(alt.split(',')[int(vcf_gt) - 1] if int(vcf_gt) else ref)
@@ -849,7 +871,7 @@ def load_vcf(human: Human, data_snps: set):
                 snp_id = snp[2]
                 assert snp[8] == 'GT', 'Not standard VCF'
                 if snp_id in data_snps:
-                    human.set_gt(snp_id, get_gt(snp[9], snp[3], snp[4]))
+                    human.set_gt(snp_id, get_gt(snp[9], snp[3], snp[4], snp_id))
 
 
 @use_time('Load indicator data')
@@ -990,14 +1012,17 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
         with open(os.path.join(output, 'Report.html'), 'w', encoding="UTF-8") as fhtml:
             fhtml.write(t)
         rm_dir(temp_dir)
-        # return res_dict
+        # return human
         return res_str + ' Report has saved in output directory.'
 
 
 if __name__ == '__main__':
     # vcf_file = r'.\test.vcf'
     # ref = r'.\reference'
-    vcf_file = r'.\test\sample.vcf.gz'
+    vcf_file = r'..\..\111-1642-2174.download.snp.txt'
+    file_type = '23andme'
+    # vcf_file = r'.\test\test.vcf.gz'
+    # file_type = 'vcf'
     ref = r'.\reference'
     ind_file = r'.\database\001_Traits.xlsx'
     qual_file = [r'.\database\002_Qualitative.xlsx']
@@ -1017,4 +1042,4 @@ if __name__ == '__main__':
     # t = template.render(human=a, res=res, type=get_ftype(res)[0], undected=get_ftype(res)[1], time="2020-10-04 19:00")
     # with open('temp.html', 'w', encoding="UTF-8") as f:
     #     f.write(t)
-    test = main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output=r'.\res')
+    test = main('Test', vcf_file, ind_file, qual_file, quan_file, ref, output=r'.\res', file_type=file_type)
