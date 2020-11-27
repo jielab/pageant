@@ -42,22 +42,29 @@ ref_code = pd.DataFrame()
 ref_rs = pd.DataFrame()
 logo_code = [file.split('.')[0] for file in os.listdir(config['logo_dir'])]
 
-if not os.path.isdir('log'):
-    os.mkdir('log')
+progress_bar = 0
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-ch = logging.StreamHandler()
-logger.addHandler(ch)
+if __name__ == '__main__':
+    ch = logging.StreamHandler()
+    logger.addHandler(ch)
 
 
 def log_start():
+    if not os.path.isdir('log'):
+        os.mkdir('log')
     log_name = f'log/{strftime("%Y%m%d%H%M%S")}.log'
     fh = logging.FileHandler(log_name)
     formatter = logging.Formatter("%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s")
     fh.setFormatter(formatter)
     logger.addHandler(fh)
-    logger.info('Logger start.')
+    logging.info('Logging start.')
     return log_name
+
+
+def gui_log_setup(hander: logging.Handler):
+    logger.addHandler(hander)
 
 
 def use_time(process_name=None):
@@ -73,11 +80,11 @@ def use_time(process_name=None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             start = time()
-            logger.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
-                        f' start')
+            logging.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
+                         f' start')
             fun_res = func(*args, **kwargs)
-            logger.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
-                        f' used time: {time() - start:.2f}s')
+            logging.info(f'{process_name if process_name else func.__name__.replace("_", " ").capitalize()}'
+                         f' used time: {time() - start:.2f}s')
             return fun_res
 
         return wrapper
@@ -85,7 +92,24 @@ def use_time(process_name=None):
     return decorator
 
 
-@use_time()
+def progress_value(process_value: int):
+
+    def decorator(func):
+        from functools import wraps
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            fun_res = func(*args, **kwargs)
+            global progress_bar
+            progress_bar += process_value
+            logging.info(f"Progress of the analysis: {progress_bar}%")
+            return fun_res
+
+        return wrapper
+
+    return decorator
+
+
 def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
     """
     Creat a subprocess which not display in GUI.
@@ -122,7 +146,8 @@ def initial_res_dir(output: str):
         os.mkdir(output)
 
 
-@use_time()
+@progress_value(30)
+@use_time('Initial reference data')
 def initial_ref_data(qual_list: list, quan_list: list, vcf_list: list) -> None:
     """
     Get reference population data from existing data or generating newly
@@ -159,14 +184,15 @@ class Human(object):
             else:
                 self.ind_data[code].mis_snp(snp, cal_col[1])
         else:
-            logger.warning(f'Code ({code}) is missing in index excel!')
+            logging.warning(f'Code ({code}) is missing in index excel!')
 
     def get_prs_data(self, code: str, res: float, detail: str):
         if code in self.ind_data:
             self.ind_data[code].add_prs_res(res, detail)
         else:
-            logger.warning(f'Code ({code}) is missing in index excel!')
+            logging.warning(f'Code ({code}) is missing in index excel!')
 
+    @progress_value(10)
     @use_time('Add population distribution')
     def add_distribution(self, output: str):
         global ref_code
@@ -175,13 +201,14 @@ class Human(object):
         for ind in self.ind_data.values():
             ind.add_dist(output)
 
+    @progress_value(10)
     @use_time('Export report result')
     def export_res(self, output):
         result = {}
         for ind in self.ind_data.values():
             if not ind.status:
                 if not ind.detail:
-                    logger.warning(f'Code ({ind.code}) has no corresponding algorithm!')
+                    logging.warning(f'Code ({ind.code}) has no corresponding algorithm!')
                     ind.detail.append(f'Code ({ind.code}) has no corresponding algorithm!')
                 ind.outcome = 'Undected'
             if ind.itype not in result:
@@ -246,7 +273,7 @@ class Ind(object):
             for item in self.detail:
                 if type(item) == dict:
                     if snp in item.keys():
-                        logger.warning(f"There are duplicate snps ({snp}) when calculate the quantitative trait!")
+                        logging.warning(f"There are duplicate snps ({snp}) when calculate the quantitative trait!")
                         self.outcome /= item['outcome']
                         item['beta'] = inter
                         item['effect allele'] = ref
@@ -269,10 +296,10 @@ class Ind(object):
                 if warning in self.detail:
                     self.detail.remove(warning)
                 warning += f' Code {self.code} algorithm can not process further.'
-        logger.warning(warning)
+                self.status = False
+        logging.warning(warning)
         if warning not in self.detail:
             self.detail.append(warning)
-        self.status = False
 
     def add_dist(self, output: str):
         if self.code in ref_code.columns:
@@ -454,6 +481,7 @@ def sub_col(ob_list: list, index: OrderedDict, code=True):
     return {key: ob_list[index[key]] if index[key] < len(ob_list) else None for key in index}
 
 
+@progress_value(10)
 @use_time()
 def recode_and_sex_impute(file: str, temp_dir: str, file_type: str):
     if file_type == 'vcf':
@@ -470,7 +498,7 @@ def recode_and_sex_impute(file: str, temp_dir: str, file_type: str):
                       plink='plink')
         data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
     except Exception as e:
-        logger.warning('Sex impute failed:\n' + f'{e.args}')
+        logging.warning('Sex impute failed:\n' + f'{e.args}')
         run_plink_cmd(read_txt +
                       "--recode vcf "
                       f"--out {os.path.join(temp_dir, 'temp')}",
@@ -494,7 +522,7 @@ def cal_sha(file: str):
         return sha256(f.read()).hexdigest()
 
 
-@use_time("Calculate files' sha value")
+@use_time("Calculate files' sha now_value")
 def cal_multi_sha(file_list: str or list, vcf_only=True):
     from hashlib import sha256
     value = sha256(b'')
@@ -551,16 +579,16 @@ def extract_snp(vcf_file: str, temp_dir: str):
     need_lines = []
     need_snp_list = snp_list_rw(temp_dir, 'r')
     if nopen:
-        logger.info(f"Step 1: Get {vcf_file} index")
+        logging.info(f"Step 1: Get {vcf_file} index")
         idi_file = get_ref_index(vcf_file)
-        logger.info(f"Step 2: Get {vcf_file} need snps' rows' number")
+        logging.info(f"Step 2: Get {vcf_file} need snps' rows' number")
         with open(idi_file) as f:
             for line in f:
                 temp = line.strip().split('\t')
                 if temp[0] in need_snp_list:
                     need_lines.append(int(temp[1]))
                     need_snp_list.remove(temp[0])
-        logger.info(f"Step 3: Extract {vcf_file} need snps")
+        logging.info(f"Step 3: Extract {vcf_file} need snps")
         with open(os.path.join(temp_dir, os.path.basename(vcf_file)), 'wb') as fw:
             with nopen(vcf_file, 'rb') as f:
                 i_line = 1
@@ -571,7 +599,7 @@ def extract_snp(vcf_file: str, temp_dir: str):
                         fw.write(line)
                         need_lines.pop(0)
                     i_line += 1
-        logger.info(f"{vcf_file} finish extract.")
+        logging.info(f"{vcf_file} finish extract.")
 
 
 @use_time('Merge vcf files')
@@ -841,20 +869,21 @@ def arg(args):
 
 def get_gt(vcf_gt: str, ref: str, alt: str, snp=None, warning=True):
     # if sum(not i.isnumeric() for i in vcf_gt) != 1:
-    #     logger.warning('Not biallelic alleles appear')
+    #     logging.warning('Not biallelic alleles appear')
     for i in vcf_gt:
         if i == '.':
-            logger.warning(f'Find "." in "{snp}", with which it may be difficult to compare the genotypes.')
+            logging.warning(f'Find "." in "{snp}", with which it may be difficult to compare the genotypes.')
             return {'*'}
         if i == '*':
             if warning:
-                logger.warning(f'Find "*" in "{snp}", with which it may be difficult to compare the genotypes.')
+                logging.warning(f'Find "*" in "{snp}", with which it may be difficult to compare the genotypes.')
         elif not i.isnumeric():
             gt_n = vcf_gt.split(i)
             return set(alt.split(',')[int(i) - 1] if int(i) else ref for i in gt_n)
     return set(alt.split(',')[int(vcf_gt) - 1] if int(vcf_gt) else ref)
 
 
+@progress_value(10)
 @use_time('Load sample vcf')
 def load_vcf(human: Human, data_snps: set):
     with open(human.vcf, 'r') as f:
@@ -881,7 +910,7 @@ def load_ind(human: Human, excel_ind_file: str):
         itype = sheet.name
         for row in range(1, sheet.nrows):
             if sheet.row_types(row)[0] != 1:
-                logger.warning(f'Not standard code format, indicator '
+                logging.warning(f'Not standard code format, indicator '
                                f'({sheet.row_values(row)[columns["columns_ind"]["name"]]}) may work improperly. ')
                 human.set_ind(f'{sheet.row_values(row)[columns["columns_ind"]["code"]]:.0f}',
                               **sub_col(sheet.row_values(row), columns['columns_ind'], code=False), itype=itype)
@@ -914,7 +943,7 @@ def get_snp_list(*algorithm_files: str, excel_files=True, prs_files=False):
                         else:
                             snp_list.add(line.split(GWAS_setting['sep'].encode())[snp_column].decode())
         except Exception:
-            logger.warning(f'{file} has some proble when getting snp list from it.')
+            logging.warning(f'{file} has some proble when getting snp list from it.')
             raise
     return snp_list
 
@@ -934,6 +963,7 @@ def get_prs_res(result_file: str):
     return exp(float(temp[-1].strip().split(' ')[-1]))
 
 
+@progress_value(30)
 @use_time('Loading algorithm data and calculate the result')
 def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
     # todo(Sheng): Many codes are similar to get_ref_res, maybe it can be simplified
@@ -972,6 +1002,8 @@ def get_ftype(result: dict):
 @use_time('Whole process')
 def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files: list, ref: str, output: str,
          **other_parameters):
+    global progress_bar
+    progress_bar = 0
     if other_parameters:
         global config
         for key in other_parameters:
@@ -993,11 +1025,11 @@ def main(name: str, input_file: str, ind_file: str, qual_files: list, quan_files
     except Exception as e:
         res_str += f'Error: {str(e)}, analysis falied.'
         res_dict = {}
-        logger.error(f'Error: {str(e)}, analysis falied.', exc_info=True)
+        logging.error(f'Error: {str(e)}, analysis falied.', exc_info=True)
         return res_str
     else:
         res_str += f'Analysis runs successfully!'
-        logger.info(res_str)
+        logging.info(res_str)
     finally:
         env = Environment(loader=FileSystemLoader(os.getcwd()))
         template = env.get_template('./bin/template.html')
