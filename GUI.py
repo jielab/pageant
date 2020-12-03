@@ -51,6 +51,8 @@ class Ui_PAGEANT(object):
     def setupUi(self, PAGEANT):
         PAGEANT.setObjectName("PAGEANT")
         PAGEANT.resize(600, 480)
+        PAGEANT.setFixedSize(600, 480)
+        PAGEANT.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint | QtCore.Qt.WindowCloseButtonHint)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(60)
         sizePolicy.setVerticalStretch(48)
@@ -564,7 +566,7 @@ class Ui_PAGEANT(object):
 
     def retranslateUi(self, PAGEANT):
         _translate = QtCore.QCoreApplication.translate
-        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT"))
+        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT (2020-12-01)"))  # version
         self.Analyze.setText(_translate("PAGEANT", "Analyze"))
         self.single_file.setText(_translate("PAGEANT", "..."))
         self.label_vcf.setText(_translate("PAGEANT", "Input file"))
