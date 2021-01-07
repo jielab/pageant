@@ -135,12 +135,14 @@
                                 {% endfor %}
                             </ul>
                         </div>
+                        {% if 'Distribution' in indicator %}
                         <div class="dist_block_right qual_width_right">
                             <h4>Distribution plot:</h4>
                             <img style="margin-left: 15%"
                                  src="{{ indicator['Distribution']['Plot'] }}" width="70%" height="100%"
                                  alt="{{ indicator['Name'] | replace(' ', '_') }} Distribution Plot"/>
                         </div>
+                        {% endif %}
                     </div>
                     {% elif value == "quan" %}
                     <div class="dist_block_top">
@@ -197,25 +199,13 @@
                 <h3 style="width: 5em; display:inline-block">Input file:</h3>
                 <p style="display: inline-block">{{config['input_file']}}</p>
             </div>
-            <div class="semi_left"><h3>Indicator data:</h3>
-                <p class="Detail_text">{{config['ind_file']}}</p></div>
-            <div class="semi_right"><h3>Reference population data:</h3>
-                <p class="Detail_text">{{config['ref']}}</p></div>
-            <div class="semi_left">
-                <h3>Qualitative excel:</h3>
-                <ul>
-                    {% for excel in config['qual_files'] %}
-                    <li>{{excel}}</li>
-                    {% endfor %}
-                </ul>
+            <div>
+                <h3 style="display:inline-block">Database directory: </h3>
+                <p style="display: inline-block">{{config['data_dir']}}</p>
             </div>
-            <div class="semi_right">
-                <h3>Quantitative excel:</h3>
-                <ul>
-                    {% for excel in config['quan_files'] %}
-                    <li>{{excel}}</li>
-                    {% endfor %}
-                </ul>
+            <div>
+                <h3 style="display:inline-block">Reference population data: </h3>
+                <p style="display: inline-block">{{config['ref']}}</p>
             </div>
         </div>
         <div class="log">

@@ -12,6 +12,26 @@ from time import sleep
 
 QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
+default_config = {'name': 'Test',
+                  'input_file': './test/sample.vcf.gz',
+                  'data_dir': 'database',
+                  'ref_structure': f'{os.path.abspath(os.path.join("reference", "ld_ref", "hapmap3.vcf.gz"))}',
+                  'text_sep': '\t',
+                  'encoding': 'UTF-8',
+                  'ref': './reference',
+                  'output': './res',
+                  'SNP': 'SNP',
+                  'EA': 'EA',
+                  'P': 'P',
+                  'BETA': 'BETA',
+                  'sep': '\t',
+                  'p_threshold': 1e-5,
+                  'clump-p1': 1,
+                  'clump-r2': 0.1,
+                  'clump-kb': 250,
+                  'clump-p2': 0.01
+                  }
+
 
 class GUIHandler(logging.Handler):
     def __init__(self, connector: QtWidgets.QProgressDialog, progress_value, *args, **kwargs):
@@ -100,7 +120,7 @@ class Ui_PAGEANT(object):
         self.Basic_tab.setFont(font)
         self.Basic_tab.setObjectName("Basic_tab")
         self.input_vcf = QtWidgets.QLineEdit(self.Basic_tab)
-        self.input_vcf.setGeometry(QtCore.QRect(90, 160, 352, 25))
+        self.input_vcf.setGeometry(QtCore.QRect(90, 170, 352, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
@@ -136,7 +156,7 @@ class Ui_PAGEANT(object):
         self.Analyze.setFont(font)
         self.Analyze.setObjectName("Analyze")
         self.single_file = QtWidgets.QToolButton(self.Basic_tab)
-        self.single_file.setGeometry(QtCore.QRect(440, 159, 41, 27))
+        self.single_file.setGeometry(QtCore.QRect(440, 169, 41, 27))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
@@ -145,7 +165,7 @@ class Ui_PAGEANT(object):
         self.single_file.setFont(font)
         self.single_file.setObjectName("single_file")
         self.label_vcf = QtWidgets.QLabel(self.Basic_tab)
-        self.label_vcf.setGeometry(QtCore.QRect(40, 120, 160, 20))
+        self.label_vcf.setGeometry(QtCore.QRect(40, 130, 160, 20))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(9)
@@ -154,7 +174,7 @@ class Ui_PAGEANT(object):
         self.label_vcf.setFont(font)
         self.label_vcf.setObjectName("label_vcf")
         self.label_o = QtWidgets.QLabel(self.Basic_tab)
-        self.label_o.setGeometry(QtCore.QRect(40, 250, 200, 20))
+        self.label_o.setGeometry(QtCore.QRect(40, 230, 200, 20))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(9)
@@ -191,15 +211,25 @@ class Ui_PAGEANT(object):
         self.TabWidget.addTab(self.Basic_tab, "")
         self.Data_tab = QtWidgets.QWidget()
         self.Data_tab.setObjectName("Data_tab")
-        self.input_qual = QtWidgets.QLineEdit(self.Data_tab)
-        self.input_qual.setGeometry(QtCore.QRect(90, 160, 352, 25))
+        self.input_text_sep = QtWidgets.QLineEdit(self.Data_tab)
+        self.input_text_sep.setGeometry(QtCore.QRect(130, 160, 131, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
         font.setBold(True)
         font.setWeight(75)
-        self.input_qual.setFont(font)
-        self.input_qual.setObjectName("input_qual")
+        self.input_text_sep.setFont(font)
+        self.input_text_sep.setObjectName("input_text_sep")
+        self.input_sep = QtWidgets.QLineEdit(self.Data_tab)
+        self.input_sep.setGeometry(QtCore.QRect(350, 160, 131, 25))
+        font = QtGui.QFont()
+        font.setFamily("Microsoft JhengHei")
+        font.setPointSize(8)
+        font.setBold(True)
+        font.setWeight(75)
+        self.input_sep.setFont(font)
+        self.input_sep.setText("")
+        self.input_sep.setObjectName("input_sep")
         self.label_6 = QtWidgets.QLabel(self.Data_tab)
         self.label_6.setGeometry(QtCore.QRect(40, 20, 200, 25))
         font = QtGui.QFont()
@@ -209,15 +239,6 @@ class Ui_PAGEANT(object):
         font.setWeight(75)
         self.label_6.setFont(font)
         self.label_6.setObjectName("label_6")
-        self.multi_files = QtWidgets.QToolButton(self.Data_tab)
-        self.multi_files.setGeometry(QtCore.QRect(440, 159, 41, 27))
-        font = QtGui.QFont()
-        font.setFamily("Microsoft JhengHei")
-        font.setPointSize(8)
-        font.setBold(True)
-        font.setWeight(75)
-        self.multi_files.setFont(font)
-        self.multi_files.setObjectName("multi_files")
         self.label_ref_dir = QtWidgets.QLabel(self.Data_tab)
         self.label_ref_dir.setGeometry(QtCore.QRect(40, 275, 300, 25))
         font = QtGui.QFont()
@@ -227,33 +248,51 @@ class Ui_PAGEANT(object):
         font.setWeight(75)
         self.label_ref_dir.setFont(font)
         self.label_ref_dir.setObjectName("label_ref_dir")
-        self.label_qual = QtWidgets.QLabel(self.Data_tab)
-        self.label_qual.setGeometry(QtCore.QRect(70, 125, 200, 25))
+        self.label_sep = QtWidgets.QLabel(self.Data_tab)
+        self.label_sep.setGeometry(QtCore.QRect(70, 125, 181, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
-        self.label_qual.setFont(font)
-        self.label_qual.setObjectName("label_qual")
-        self.label_quan = QtWidgets.QLabel(self.Data_tab)
-        self.label_quan.setGeometry(QtCore.QRect(70, 195, 200, 25))
+        self.label_sep.setFont(font)
+        self.label_sep.setObjectName("label_sep")
+        self.label_text_sep = QtWidgets.QLabel(self.Data_tab)
+        self.label_text_sep.setGeometry(QtCore.QRect(80, 160, 50, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
-        self.label_quan.setFont(font)
-        self.label_quan.setObjectName("label_quan")
-        self.multi_files2 = QtWidgets.QToolButton(self.Data_tab)
-        self.multi_files2.setGeometry(QtCore.QRect(440, 229, 41, 27))
+        self.label_text_sep.setFont(font)
+        self.label_text_sep.setObjectName("label_text_sep")
+        self.label_gwas_sep = QtWidgets.QLabel(self.Data_tab)
+        self.label_gwas_sep.setGeometry(QtCore.QRect(290, 160, 50, 25))
+        font = QtGui.QFont()
+        font.setFamily("Microsoft JhengHei")
+        font.setPointSize(9)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_gwas_sep.setFont(font)
+        self.label_gwas_sep.setObjectName("label_gwas_sep")
+        self.label_encoding = QtWidgets.QLabel(self.Data_tab)
+        self.label_encoding.setGeometry(QtCore.QRect(70, 195, 191, 25))
+        font = QtGui.QFont()
+        font.setFamily("Microsoft JhengHei")
+        font.setPointSize(9)
+        font.setBold(True)
+        font.setWeight(75)
+        self.label_encoding.setFont(font)
+        self.label_encoding.setObjectName("label_encoding")
+        self.input_encoding = QtWidgets.QLineEdit(self.Data_tab)
+        self.input_encoding.setGeometry(QtCore.QRect(90, 230, 391, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
         font.setBold(True)
         font.setWeight(75)
-        self.multi_files2.setFont(font)
-        self.multi_files2.setObjectName("multi_files2")
+        self.input_encoding.setFont(font)
+        self.input_encoding.setObjectName("input_encoding")
         self.dir_select2 = QtWidgets.QToolButton(self.Data_tab)
         self.dir_select2.setGeometry(QtCore.QRect(440, 309, 41, 27))
         font = QtGui.QFont()
@@ -263,15 +302,6 @@ class Ui_PAGEANT(object):
         font.setWeight(75)
         self.dir_select2.setFont(font)
         self.dir_select2.setObjectName("dir_select2")
-        self.input_quan = QtWidgets.QLineEdit(self.Data_tab)
-        self.input_quan.setGeometry(QtCore.QRect(90, 230, 352, 25))
-        font = QtGui.QFont()
-        font.setFamily("Microsoft JhengHei")
-        font.setPointSize(8)
-        font.setBold(True)
-        font.setWeight(75)
-        self.input_quan.setFont(font)
-        self.input_quan.setObjectName("input_quan")
         self.input_ref_dir = QtWidgets.QLineEdit(self.Data_tab)
         self.input_ref_dir.setGeometry(QtCore.QRect(90, 310, 352, 25))
         font = QtGui.QFont()
@@ -290,48 +320,48 @@ class Ui_PAGEANT(object):
         font.setWeight(75)
         self.default_button.setFont(font)
         self.default_button.setObjectName("default_button")
-        self.input_ind = QtWidgets.QLineEdit(self.Data_tab)
-        self.input_ind.setGeometry(QtCore.QRect(90, 90, 352, 25))
+        self.input_database = QtWidgets.QLineEdit(self.Data_tab)
+        self.input_database.setGeometry(QtCore.QRect(90, 90, 352, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
         font.setBold(True)
         font.setWeight(75)
-        self.input_ind.setFont(font)
-        self.input_ind.setText("")
-        self.input_ind.setObjectName("input_ind")
-        self.single_file2 = QtWidgets.QToolButton(self.Data_tab)
-        self.single_file2.setGeometry(QtCore.QRect(440, 89, 41, 27))
+        self.input_database.setFont(font)
+        self.input_database.setText("")
+        self.input_database.setObjectName("input_database")
+        self.dir_select3 = QtWidgets.QToolButton(self.Data_tab)
+        self.dir_select3.setGeometry(QtCore.QRect(440, 89, 41, 27))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(8)
         font.setBold(True)
         font.setWeight(75)
-        self.single_file2.setFont(font)
-        self.single_file2.setObjectName("single_file2")
-        self.label_ind = QtWidgets.QLabel(self.Data_tab)
-        self.label_ind.setGeometry(QtCore.QRect(70, 55, 200, 25))
+        self.dir_select3.setFont(font)
+        self.dir_select3.setObjectName("dir_select3")
+        self.label_database = QtWidgets.QLabel(self.Data_tab)
+        self.label_database.setGeometry(QtCore.QRect(70, 55, 200, 25))
         font = QtGui.QFont()
         font.setFamily("Microsoft JhengHei")
         font.setPointSize(9)
         font.setBold(True)
         font.setWeight(75)
-        self.label_ind.setFont(font)
-        self.label_ind.setObjectName("label_ind")
-        self.input_qual.raise_()
+        self.label_database.setFont(font)
+        self.label_database.setObjectName("label_database")
         self.label_6.raise_()
         self.label_ref_dir.raise_()
-        self.label_qual.raise_()
-        self.label_quan.raise_()
-        self.input_quan.raise_()
+        self.label_sep.raise_()
+        self.label_encoding.raise_()
+        self.input_encoding.raise_()
         self.input_ref_dir.raise_()
         self.default_button.raise_()
-        self.input_ind.raise_()
-        self.label_ind.raise_()
-        self.multi_files2.raise_()
-        self.single_file2.raise_()
+        self.input_database.raise_()
+        self.label_database.raise_()
+        self.dir_select3.raise_()
         self.dir_select2.raise_()
-        self.multi_files.raise_()
+        self.label_text_sep.raise_()
+        self.input_sep.raise_()
+        self.label_gwas_sep.raise_()
         # add
         self.TabWidget.addTab(self.Data_tab, "")
         self.PRS_tab = QtWidgets.QWidget()
@@ -566,7 +596,7 @@ class Ui_PAGEANT(object):
 
     def retranslateUi(self, PAGEANT):
         _translate = QtCore.QCoreApplication.translate
-        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT (2020-12-01)"))  # version
+        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT (2021-01-07)"))  # version
         self.Analyze.setText(_translate("PAGEANT", "Analyze"))
         self.single_file.setText(_translate("PAGEANT", "..."))
         self.label_vcf.setText(_translate("PAGEANT", "Input file"))
@@ -574,16 +604,18 @@ class Ui_PAGEANT(object):
         self.label_o.setText(_translate("PAGEANT", "Ouput Directory"))
         self.dir_select.setText(_translate("PAGEANT", "..."))
         self.TabWidget.setTabText(self.TabWidget.indexOf(self.Basic_tab), _translate("PAGEANT", "Basic"))
+        # page2
         self.label_6.setText(_translate("PAGEANT", "Analysis Data"))
-        self.multi_files.setText(_translate("PAGEANT", "..."))
         self.label_ref_dir.setText(_translate("PAGEANT", "Reference Population Directory"))
-        self.label_qual.setText(_translate("PAGEANT", "Qualitative Data"))
-        self.label_quan.setText(_translate("PAGEANT", "Quantitative Data"))
-        self.multi_files2.setText(_translate("PAGEANT", "..."))
+        self.label_sep.setText(_translate("PAGEANT", "Quantitative Data"))
         self.dir_select2.setText(_translate("PAGEANT", "..."))
         self.default_button.setText(_translate("PAGEANT", "Default"))
-        self.single_file2.setText(_translate("PAGEANT", "..."))
-        self.label_ind.setText(_translate("PAGEANT", "Traits Data"))
+        self.dir_select3.setText(_translate("PAGEANT", "..."))
+        self.label_database.setText(_translate("PAGEANT", "Database directory"))
+        self.label_text_sep.setText(_translate("PAGEANT", "Text"))
+        self.label_gwas_sep.setText(_translate("PAGEANT", "GWAS"))
+        self.label_encoding.setText(_translate("PAGEANT", "File encoding"))
+        self.label_sep.setText(_translate("PAGEANT", "Separator"))
         self.TabWidget.setTabText(self.TabWidget.indexOf(self.Data_tab), _translate("PAGEANT", "Data"))
         # add
         self.label_clump.setToolTip(_translate("PAGEANT", "Clump setting"))
@@ -638,9 +670,10 @@ class Ui_PAGEANT(object):
         self.ref_file_select.setText(_translate("PAGEANT", "..."))
         # default parameters
         self.input_vcf.setText('./test/sample.vcf.gz')
-        self.input_ind.setText('database/001_Traits.xlsx')
-        self.input_qual.setText('database/002_Qualitative.xlsx')
-        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv.gz, R0004.tsv.gz')
+        self.input_database.setText('./database')
+        self.input_text_sep.setText(r'\t')
+        self.input_sep.setText(r'\t')
+        self.input_encoding.setText('UTF-8')
         self.input_ref_dir.setText('./reference')
         self.input_ref_file.setText('./reference/hapmap3.vcf.gz')
         self.Output_dir.setText(os.path.join(os.getcwd(), 'res'))
@@ -652,9 +685,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         super(MyMainForm, self).__init__(parent)
         self.setupUi(self)
         self.single_file.clicked.connect(self.openfile_single_vcf)
-        self.single_file2.clicked.connect(self.openfile_single_data)
-        self.multi_files.clicked.connect(self.openfile_multi)
-        self.multi_files2.clicked.connect(self.openfile_multi2)
+        self.dir_select3.clicked.connect(self.opendir3)
         self.dir_select.clicked.connect(self.opendir)
         self.dir_select2.clicked.connect(self.opendir2)
         self.Analyze.clicked.connect(self.run)
@@ -685,14 +716,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.progress_now = ProgressNow(self.inter)
 
         # progress config dict
-        self.parameters = {'name': 'Test',
-                           'input_file': './test/sample.vcf.gz',
-                           'ind_file': 'database/001_Traits.xlsx',
-                           'qual_files': ['database/002_Qualitative.xlsx'],
-                           'quan_files': ['database/003_Quantitative.xlsx', 'database/R0002.tsv.gz',
-                                          'database/R0004.tsv.gz'],
-                           'ref': './reference',
-                           'output': './res'}
+        self.parameters = default_config
 
     def openfile_single_vcf(self):
         get_directory_path = QFileDialog.getOpenFileName(self, "Select the input file", os.getcwd(),
@@ -701,25 +725,10 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.parameters['input_file'], file_type = get_directory_path
         self.parameters['file_type'] = file_type.split(' ')[0]
 
-    def openfile_single_data(self):
-        get_file_path = QFileDialog.getOpenFileName(self, "Select the indicators data file", os.getcwd())
-        self.input_ind.setText(get_file_path[0])
-        self.parameters['ind_file'] = get_file_path[0]
-
-    def openfile_multi(self):
-        get_files_path = QFileDialog.getOpenFileNames(self, "Select the qualitative data files", os.getcwd(),
-                                                      filter='File (*.xlsx *.xls *.txt);; All (*.*)',
-                                                      initialFilter='File')
-        self.input_qual.setText('; '.join(i.split('/')[-1] for i in get_files_path[0]))
-        self.parameters['qual_files'] = get_files_path[0]
-
-    def openfile_multi2(self):
-        get_files_path = QFileDialog.getOpenFileNames(self, "Select the quantitative data files", os.getcwd(),
-                                                      filter='File (*.xlsx *.xls *.txt);; All (*.*)',
-                                                      initialFilter='File'
-                                                      )
-        self.input_quan.setText('; '.join(i.split('/')[-1] for i in get_files_path[0]))
-        self.parameters['quan_files'] = get_files_path[0]
+    def opendir3(self):
+        get_dir_path = QFileDialog.getExistingDirectory(self, "Select the database directory", os.getcwd())
+        self.input_database.setText(get_dir_path)
+        self.parameters['database'] = get_dir_path
 
     def opendir(self):
         get_dir_path = QFileDialog.getExistingDirectory(self, "Select the output directory", os.getcwd())
@@ -732,14 +741,23 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.parameters['ref'] = get_dir_path
 
     def default(self):
-        self.input_ind.setText('database/001_Traits.xlsx')
-        self.input_qual.setText('database/002_Quantitative.xlsx')
-        self.input_quan.setText('database: 003_Quantitative.xlsx, R0002.tsv.gz, R0004.tsv.gz')
+        self.input_vcf.setText('./test/sample.vcf.gz')
+        self.input_database.setText('./database')
+        self.input_text_sep.setText(r'\t')
+        self.input_sep.setText(r'\t')
+        self.input_encoding.setText('UTF-8')
         self.input_ref_dir.setText('./reference')
-        self.parameters['ind_file'] = self.input_ind.text()
-        self.parameters['qual_files'] = [self.input_qual.text()]
-        self.parameters['quan_files'] = ['database/003_Quantitative.xlsx', 'database/R0002.tsv', 'database/R0004.tsv']
-        self.parameters['ref'] = self.input_ref_dir.text()
+        self.input_ref_file.setText('./reference/hapmap3.vcf.gz')
+        self.Output_dir.setText('res')
+        self.input_p1.setText("1")
+        self.input_p2.setText("1")
+        self.input_r2.setText("0.1")
+        self.input_kb.setText("250")
+        self.input_P.setText("P")
+        self.input_BETA.setText("BETA")
+        self.input_SNP.setText("SNP")
+        self.input_EA.setText("EA")
+        self.input_p_threshold.setText("1e-5")
 
     def timerEvent(self, a0: 'QtCore.QTimerEvent') -> None:
         if self.progress_now.value() < self.progress_value.value:
@@ -772,6 +790,22 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def run(self):
         self.parameters['name'] = self.name.text()
+        self.parameters.update(dict(zip(['name', 'data_dir', 'input_file', 'encoding', 'ref', 'ref_structure', 'output',
+                                         'SNP', 'EA', 'P', 'BETA', 'p_threshold', 'clump-p1', 'clump-r2',
+                                         'clump-kb', 'clump-p2'],
+                                        [self.name.text(), self.input_database.text(),
+                                         self.input_vcf.text(), self.input_encoding.text(),
+                                         self.input_ref_dir.text(), self.input_ref_file.text(), self.Output_dir.text(),
+                                         self.input_SNP.text(), self.input_EA.text(), self.input_P.text(),
+                                         self.input_BETA.text(), float(self.input_p_threshold.text()),
+                                         float(self.input_p1.text()), float(self.input_r2.text()),
+                                         int(self.input_kb.text()), float(self.input_p2.text())
+                                         ])))
+        self.parameters.update({'sep': self.input_sep.text() if self.input_sep.text() != r'\t' else '\t',
+                                'text_sep': self.input_text_sep.text() if self.input_text_sep.text() != r'\t' else '\t'
+        })
+
+
         self.progress_value.value = 0
         self.progress = QtWidgets.QProgressDialog('Analysis start.', 'Cancel', 0, 100)
         self.progress.setWindowModality(QtCore.Qt.NonModal)

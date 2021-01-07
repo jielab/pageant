@@ -1,0 +1,3 @@
+Disease_risk: quan
+Genetics_characteristics: qual
+Drug_safety: qual
