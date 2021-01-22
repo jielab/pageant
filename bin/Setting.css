@@ -113,11 +113,12 @@ body header p {
 }
 
 .Detail_text {
-    text-indent: 2em;
+	text-indent: 2em;
 }
 
 .detail_block li {
-    line-height: 150%;
+	line-height: 150%;
+	display: inline;
 }
 
 .Dected_title {
@@ -182,12 +183,11 @@ header div {
 }
 
 .dist_block_left {
-    text-indent: 1em;
-    padding-bottom: 1em;
-    float: left;
-    padding-left: 20px;
-    vertical-align: middle;
-    height: auto;
+	padding-bottom: 1em;
+	float: left;
+	padding-left: 20px;
+	vertical-align: middle;
+	height: auto;
 }
 
 
@@ -237,7 +237,6 @@ header div {
 
 .quan_block_bottom, .detail_block {
 	clear: both;
-	text-indent: 2em;
 	padding-bottom: 2vh;
 	margin-bottom: 4vh;
 }

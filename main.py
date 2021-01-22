@@ -21,7 +21,6 @@ from multiprocessing import Pool
 from functools import partial
 from tqdm import tqdm
 
-
 description = "Usage: python perhaps.py -i INPUT_FILE [--ftype FILE_TYPE] -o OUTPUT_DIR [--trait TRAIT_FILE]\n" \
               "[--qual QUALITATIVE_FILE] [--quan QUANTITATIVE] [--ref-dir REFERENCE_DIR] [--file-dir REFERENCE_DIR]\n" \
               "[--sep GWAS_SEPARATOR] [-p GWAS_PTHRESHOLD] [--ref-dir REFERENCE_DIR] [--GWAS_config KEY=VALUE ...]"
@@ -33,10 +32,11 @@ columns = {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3, 'Disease_
 lan_lib = {'sex': {'male': ['male', 'Male', '男', '男性', '1', 1], 'female': ['female', 'Female', '女', '女性', '2', 2]},
            None: ['', '无', 'None', 'No', None], 'if': ['条件', 'if', 'IF'], 'and': ['并列', 'and', 'AND', '&', 'And']}
 config = {'file_type': 'vcf', 'ref_structure':
-          f'{os.path.abspath(os.path.join("reference", "ld_ref", "hapmap3.vcf.gz"))}',
+    f'{os.path.abspath(os.path.join("reference", "ld_ref", "hapmap3.vcf.gz"))}',
           'logo_dir': f'{os.path.join("database", "logo")}', 'text_sep': '\t', 'encoding': 'UTF-8',
           'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'sep': '\t', 'p_threshold': 1e-5,
-          'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01
+          'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01,
+          'show_code': 1, 'description_suf': ".desc.txt", 'need_suf': '.snps.ref', 'gwas_suf': ".tsv"
           }
 type_list = {}
 
@@ -100,7 +100,6 @@ def use_time(process_name=None):
 
 
 def progress_value(process_value: int):
-
     def decorator(func):
         from functools import wraps
 
@@ -224,7 +223,7 @@ class Human(object):
 class Ind(object):
     def __init__(self, code: str, name: str, sex: str, itype: str, ind_dir, **other):
         self.code = code
-        self.name = name
+        self.name = name if config['show_code'] == 0 else f'{name} ({code})'
         self.sex = sex
         self.itype = itype
         self.ftype = None
@@ -267,14 +266,14 @@ class Ind(object):
                     # once in if condition, it can not exit this status
                     # now it only supports one if condition once time
                     self.decide = False if equal_gt(gt, trans_gt(ref)) else \
-                            False if equal_gt(gt, trans_gt(gene_filp(ref))) else None
+                        False if equal_gt(gt, trans_gt(gene_filp(ref))) else None
                     if self.decide is False:
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
                 else:
                     if self.decide is not None:
                         if inter in lan_lib['and']:
-                            outcome = True if equal_gt(gt, trans_gt(ref)) else\
+                            outcome = True if equal_gt(gt, trans_gt(ref)) else \
                                 True if equal_gt(gt, trans_gt(gene_filp(ref))) else False
                             self.and_status = self.and_status & outcome
                         else:
@@ -339,6 +338,7 @@ class Ind(object):
     def report(self, output):
         if self.picture:
             copy(self.picture, os.path.join(output, 'html_files', 'img', os.path.basename(self.picture)))
+            self.picture = os.path.join('html_files', 'img', os.path.basename(self.picture))
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
         if self.status:
@@ -422,7 +422,7 @@ def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, rep
     plt.hist(log10(ref_data), bins=100, weights=[1. / len(ref_data)] * len(ref_data))
     plt.axvline(log10(value), c='r', lw=2, ls='--')
     plt.text(assign_pos(log10(value), plt.axis()), plt.axis()[3] * 0.816,
-             f'Percentage: {per:.0f}% \nLevel: {risk_level(per)}',
+             f'Percentage: {per:.2f}% \nLevel: {risk_level(per)}',
              bbox={'facecolor': 'white', 'alpha': 0.8})
     plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda a, b: f'{a * 100:.0f}%'))
     plt.xlabel("Logarithm of Risk score")
@@ -741,7 +741,10 @@ def get_ref_vcf(vcf_files: list, need_snp_list: set or list, out_name='filter.vc
 
 @use_time()
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    sha_cal = cal_sha if mode == 'single' else partial(cal_multi_sha, vcf_only=False, re=r'\.|_', include=False)
+    sha_cal = cal_sha if mode == 'single' else \
+        partial(cal_multi_sha, vcf_only=False,
+                re=config['need_suf'].replace('.', '\\.') + "|" + config['gwas_suf'].replace('.', '\\.'),
+                include=True)
     with open(data_file) as f:
         if f.read(4) == 'DONE':
             if f.read(61) == sha_cal(source_files)[3:]:
@@ -848,7 +851,9 @@ def get_ref_cal(data_dir: str, vcf_files: list, data_path='ref_res'):
     gt_data = get_ref_gt(vcf_files, data_dir)
     with open(ref_code_file, 'w', newline='', encoding='UTF-8') as fc:
         with open(ref_rs_file, 'w', newline='', encoding='UTF-8') as fr:
-            sha = cal_multi_sha(vcf_files + [data_dir] + [ref_config], vcf_only=False, re=r'\.|_', include=False)
+            sha = cal_multi_sha(vcf_files + [data_dir] + [ref_config], vcf_only=False,
+                                re=config['need_suf'].replace('.', '\\.') + "|" + config['gwas_suf'].replace('.', '\\.'),
+                                include=True)
             fc.write(f'#{sha}\n')
             fr.write(f'#{sha}\n')
             try:
@@ -866,7 +871,7 @@ def get_ref_cal(data_dir: str, vcf_files: list, data_path='ref_res'):
                                 else:
                                     res = res.rename(ind_dir)
                                     outcomes_code = outcomes_code.merge(res.apply(lambda x: exp(x)), left_index=True,
-                                                                    right_index=True)
+                                                                        right_index=True)
                             else:
                                 with open(file, 'r', encoding=config['encoding']) as f:
                                     for line in f:
@@ -913,7 +918,7 @@ def get_type_list(data_dir: str):
 
 
 def arg(args):
-    # todo: Update
+    # todo: Update cammand line version
     try:
         opts, temp = getopt.getopt(args, "hi:d:r:o:", ['help', 'input=', 'data-excel=', 'ref-dir=', 'output='])
     except getopt.GetoptError:
@@ -975,21 +980,6 @@ def load_vcf(human: Human, data_snps: set):
                     human.set_gt(snp_id, get_gt(snp[9], snp[3], snp[4], snp_id))
 
 
-@use_time('Load indicator data')
-def load_ind_old(human: Human, excel_ind_file: str):
-    workbook = open_workbook(excel_ind_file)
-    for sheet in workbook.sheets():
-        itype = sheet.name
-        for row in range(1, sheet.nrows):
-            if sheet.row_types(row)[0] != 1:
-                logging.warning(f'Not standard code format, indicator '
-                               f'({sheet.row_values(row)[columns["columns_ind"]["name"]]}) may work improperly. ')
-                human.set_ind(f'{sheet.row_values(row)[columns["columns_ind"]["code"]]:.0f}',
-                              **sub_col(sheet.row_values(row), columns['columns_ind'], code=False), itype=itype)
-            else:
-                human.set_ind(**sub_col(sheet.row_values(row), columns['columns_ind']), itype=itype)
-
-
 def load_txt(description_text: str):
     with open(description_text, encoding=config['encoding']) as f:
         for line in f:
@@ -1005,6 +995,7 @@ def load_txt(description_text: str):
                     yield key, value
 
 
+@progress_value(30)
 @use_time('Load indicator data')
 def load_data(human: Human, data_dir: str, temp_dir: str):
     os.chdir(data_dir)
@@ -1016,7 +1007,7 @@ def load_data(human: Human, data_dir: str, temp_dir: str):
                 sex = None
                 try:
                     info = {columns['names_ind'][key] if key in columns['names_ind'] else key: value
-                            for key, value in load_txt(ind_dir + '_description')}
+                            for key, value in load_txt(ind_dir + config['description_suf'])}
                     if sex not in info:
                         info['sex'] = ''
                     human.set_ind(code=ind_dir, **info, ind_dir=os.getcwd(), itype=type_dir)
@@ -1040,6 +1031,7 @@ def load_data(human: Human, data_dir: str, temp_dir: str):
                         with open(os.path.join(temp_dir, 'result_prs.log'), 'r') as f:
                             result_text = f.read()
                         detail = result_text.split('\n\n')[2]
+                        # todo: What detail should be telled to the users?
                         human.get_prs_data(ind_dir, res, detail)
                     else:
                         with open(file_name, encoding=config['encoding']) as f:
@@ -1056,43 +1048,13 @@ def load_data(human: Human, data_dir: str, temp_dir: str):
         os.chdir(raw_dir)
 
 
-def get_snp_list_old(*algorithm_files: str, excel_files=True, prs_files=False, ):
-    snp_list = set([])
-    snp_column = None
-    for file in algorithm_files:
-        try:
-            if is_excel(file):
-                if excel_files:
-                    workbook = open_workbook(file)
-                    for sheet in workbook.sheets():
-                        for row in range(1, sheet.nrows):
-                            snp_list.add(sheet.row_values(row)[1])
-            elif prs_files:
-                header = True
-                nopen = open_gz(file)
-                with nopen(file, 'rb') as f:
-                    for line in f:
-                        if header:
-                            if not snp_column:
-                                snp_column = line.split(config['sep'].encode()).index(
-                                    config['SNP'].encode())
-                            header = False
-                            continue
-                        else:
-                            snp_list.add(line.split(config['sep'].encode())[snp_column].decode())
-        except Exception:
-            logging.warning(f'{file} has some problem when getting snp list from it.')
-            raise
-    return snp_list
-
-
 def get_cal_file(code: str):
-    if os.path.isfile(code):
-        return True, False, code
-    elif os.path.isfile(code + '.tsv'):
-        return True, True, code + '.tsv'
-    elif os.path.isfile(code + '.tsv.gz'):
-        return True, True, code + '.tsv.gz'
+    if os.path.isfile(code + config['need_suf']):
+        return True, False, code + config['need_suf']
+    elif os.path.isfile(code + config['gwas_suf']):
+        return True, True, code + config['gwas_suf']
+    elif os.path.isfile(code + config['gwas_suf'] + '.gz'):
+        return True, True, code + config['gwas_suf'] + '.gz'
     else:
         return False, None, None
 
@@ -1148,37 +1110,6 @@ def get_prs_res(result_file: str):
         temp = f.readlines()
     os.remove(result_file)
     return exp(float(temp[-1].strip().split(' ')[-1]))
-
-
-@progress_value(30)
-@use_time('Loading algorithm data and calculate the result')
-def load_cal(human: Human, qual_file: list, quan_file: list, temp_dir: str):
-    # todo(Sheng): Many codes are similar to get_ref_res, maybe it can be simplified
-    for file in qual_file + quan_file:
-        if is_excel(file):
-            workbook = open_workbook(file)
-            ftype = 'quan' if file in quan_file else 'qual'
-            for sheet in workbook.sheets():
-                for row in range(1, sheet.nrows):
-                    if sheet.row_types(row)[0] != 1:
-                        human.cal_ind(ftype, f'{sheet.row_values(row)[0]:.0f}',
-                                      *select_list(sheet.row_values(row), columns['columns_' + ftype].values())[1:])
-                    else:
-                        human.cal_ind(ftype, *select_list(sheet.row_values(row), columns['columns_' + ftype].values()))
-        else:
-            code = os.path.basename(file).split('.')[0]
-            columns_num = get_columns_num(file, [config[i] for i in ['SNP', 'EA', 'BETA']])
-            file = trans_gz(file, temp_dir)
-            run_plink_cmd(f"--vcf {human.vcf} --score {file} {' '.join([str(i) for i in columns_num])} header "
-                          f"--q-score-range {os.path.join('ref_res', 'need_range_list')}"
-                          f" {os.path.join('ref_res', code + '.SNP.pvalue')} "
-                          f"--out {os.path.join(temp_dir, 'result_prs')}",
-                          plink='plink', delete_log=False)
-            res = get_prs_res(os.path.join(temp_dir, "result_prs." + str(config["p_threshold"]) + ".profile"))
-            with open(os.path.join(temp_dir, 'result_prs.log'), 'r') as f:
-                result_text = f.read()
-            detail = result_text.split('\n\n')[2]
-            human.get_prs_data(code, res, detail)
 
 
 @use_time('Whole process')

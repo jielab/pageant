@@ -596,7 +596,7 @@ class Ui_PAGEANT(object):
 
     def retranslateUi(self, PAGEANT):
         _translate = QtCore.QCoreApplication.translate
-        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT (2021-01-07)"))  # version
+        PAGEANT.setWindowTitle(_translate("PAGEANT", "PAGEANT (2021-01-19)"))  # version
         self.Analyze.setText(_translate("PAGEANT", "Analyze"))
         self.single_file.setText(_translate("PAGEANT", "..."))
         self.label_vcf.setText(_translate("PAGEANT", "Input file"))
@@ -768,7 +768,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
             self.progress.setValue(self.progress_now.value())
 
     def cancel_failed(self):
-        QtWidgets.QMessageBox.critical(self, 'Error', 'Can not cancel the analysis', QtWidgets.QMessageBox.Close)
+        QtWidgets.QMessageBox.critical(self, 'Error', 'Cancel function disable!', QtWidgets.QMessageBox.Close)
 
     def report(self):
         self.Analyze.setEnabled(True)
@@ -804,14 +804,13 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.parameters.update({'sep': self.input_sep.text() if self.input_sep.text() != r'\t' else '\t',
                                 'text_sep': self.input_text_sep.text() if self.input_text_sep.text() != r'\t' else '\t'
         })
-
-
         self.progress_value.value = 0
         self.progress = QtWidgets.QProgressDialog('Analysis start.', 'Cancel', 0, 100)
         self.progress.setWindowModality(QtCore.Qt.NonModal)
         self.progress.setAutoClose(True)
         self.progress.setAutoReset(False)
         self.progress.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
+        # todo: How to cancel the progress?
         self.progress.canceled.connect(self.cancel_failed)
         self.progress.setFixedSize(500, 150)
         self.progress.show()
