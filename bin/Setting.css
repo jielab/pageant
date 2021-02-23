@@ -93,7 +93,7 @@ nav ul li ul li a {
 
 .section {
     margin-bottom: 4em;
-
+    clear: both;
 }
 
 h1 {
@@ -113,12 +113,12 @@ body header p {
 }
 
 .Detail_text {
-	text-indent: 2em;
+    text-indent: 2em;
 }
 
 .detail_block li {
-	line-height: 150%;
-	display: inline;
+    line-height: 150%;
+    display: inline;
 }
 
 .Dected_title {
@@ -183,11 +183,11 @@ header div {
 }
 
 .dist_block_left {
-	padding-bottom: 1em;
-	float: left;
-	padding-left: 20px;
-	vertical-align: middle;
-	height: auto;
+    padding-bottom: 1em;
+    float: left;
+    padding-left: 20px;
+    vertical-align: middle;
+    height: auto;
 }
 
 
@@ -195,29 +195,29 @@ header div {
     float: right;
 }
 
-.quan_width_left{
-	width: 51%;
+.quan_width_left {
+    width: 51%;
 }
 
-.quan_width_right{
-	width: 45%;
+.quan_width_right {
+    width: 45%;
 }
 
-.qual_width_left{
-	width: 30%;
+.qual_width_left {
+    width: 30%;
 }
 
-.qual_width_right{
-	width: 60%;
+.qual_width_right {
+    width: 60%;
 }
 
 .abstract {
-	border-bottom-style: groove;
-	display: table;
-	border-bottom-width: medium;
-	padding-bottom: 10px;
-	text-indent: 2em;
-	width: 72vw;
+    border-bottom-style: groove;
+    display: table;
+    border-bottom-width: medium;
+    padding-bottom: 10px;
+    text-indent: 2em;
+    width: 72vw;
 }
 
 .abstract_pic {
@@ -229,16 +229,16 @@ header div {
 
 
 .abstract_text {
-	margin: 2vw;
-	padding: 1vw;
-	text-indent: 2em;
-	text-align: justify;
+    margin: 2vw;
+    padding: 1vw;
+    text-indent: 2em;
+    text-align: justify;
 }
 
 .quan_block_bottom, .detail_block {
-	clear: both;
-	padding-bottom: 2vh;
-	margin-bottom: 4vh;
+    clear: both;
+    padding-bottom: 2vh;
+    margin-bottom: 4vh;
 }
 
 .miss_h3 {
@@ -338,12 +338,12 @@ header div {
 }
 
 .log {
-	max-width: 75vw;
-	padding-left: 1.5em;
-	text-align: left;
-	padding-top: 10px;
-	display: table;
-	min-width: 70vw;
+    max-width: 75vw;
+    padding-left: 1.5em;
+    text-align: left;
+    padding-top: 10px;
+    display: table;
+    min-width: 70vw;
 }
 
 .log div {
@@ -355,4 +355,12 @@ header div {
 
 .Disease_description {
     padding-left: 2em;
+}
+
+.tablesorter-sticky-wrapper {
+    margin-left: 20px;
+}
+
+.pagedisplay {
+    font-size: 20px;
 }

@@ -1,3 +1,3 @@
 Name: Simvastatin
 Chinese name: 辛伐他汀
-Disease description: If there were mutation in gene SLCO1B1, the dose needs to be adjusted.
+Description: If there were mutation in gene SLCO1B1, the dose needs to be adjusted.

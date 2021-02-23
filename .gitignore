@@ -6,11 +6,12 @@
 /build/
 /__pycache__/
 GUI.spec
-plot_test.py
 .gitignore
 .gitattributes
 /reference/*.idi
 /bin/Template_backup.html
 /res/
 PAGEANT.exe
-/venv
+/venv/
+/temp/
+/src/__pycache__/

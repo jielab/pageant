@@ -1,0 +1,4 @@
+Name: HIV resistance
+Chinese name: HIV抗性
+Description: 
+Reference: PMID: 31873311

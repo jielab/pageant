@@ -1,0 +1,3 @@
+Name: Earwax Type
+Chinese name: 耳垢类型
+Disease description: 

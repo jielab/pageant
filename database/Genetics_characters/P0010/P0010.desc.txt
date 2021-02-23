@@ -1,3 +1,0 @@
-Name: FTO type
-Chinese name: FTO基因型
-Disease description: "The locus rs9939609 on the FTO gene, T/T is the normal genotype. If one of the T turns into A, the risk of obesity is increased.If both T's mutate into A, the risk of obesity increases further."

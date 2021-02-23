@@ -1,3 +1,0 @@
-Name: Colorectal cancer
-Chinese name: 结肠直肠癌
-Disease description: 

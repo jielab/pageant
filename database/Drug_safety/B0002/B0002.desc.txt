@@ -1,3 +1,3 @@
 Name: Omeprazole
 Chinese name: 奧美拉唑
-Disease description: If you were CYP2C19 ultrafast metabolic type, the dose needs to be reduced.
+Description: If you were CYP2C19 ultrafast metabolic type, the dose needs to be reduced.

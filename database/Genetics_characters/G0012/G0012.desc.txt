@@ -1,0 +1,3 @@
+Name: Sensitivity to fishy smell
+Chinese name: 鱼腥味敏感度
+Description: 

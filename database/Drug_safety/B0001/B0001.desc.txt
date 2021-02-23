@@ -1,3 +1,3 @@
 Name: Warfarin
 Chinese name: 华法林
-Disease description: If there were mutation in rs9923231 or rs1057910, the dose needs to be reduced.
+Description: If there were mutation in rs9923231 or rs1057910, the dose needs to be reduced.

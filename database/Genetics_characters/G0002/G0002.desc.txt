@@ -1,0 +1,4 @@
+Name: Alcohol flush
+Chinese name: 酒精性脸红
+Description: 
+Reference: PMID: 30955975

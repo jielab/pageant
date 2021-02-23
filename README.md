@@ -17,7 +17,7 @@ Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking
 ## 1.1 Download the executable file
 
 
-* Download the executable files from [PAGEANT](https://disk.pku.edu.cn:443/link/A4C96A7C7FF368E8C395F2A13DB15D67), and then unzip it into an any empty directory. 
+* Download the executable files from [PKU Disk](https://disk.pku.edu.cn:443/link/23D5306029AA16DC8A9186155AA4F5FB) or [Google Drive](https://drive.google.com/file/d/1d8s8oSPEl0z6zVYvpBbyko-EvLlk3LJ9/view?usp=sharing), and then unzip it into an any empty directory. 
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 

@@ -1,3 +1,0 @@
-Name: Lactose metabolism
-Chinese name: 乳糖代谢能力
-Disease description: "rs4988235 was used to assess lactose tolerance.If both chromosomes are C, lactose intolerance occurs;On the other hand, as long as one of them is T, lactose tolerance occurs."

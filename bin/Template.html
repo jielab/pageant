@@ -8,6 +8,13 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.materialize.min.css"
           integrity="sha512-05uk5rtg4iPjJbpBv6tjFRuLxrcfk+QsXyLnxadK2yff5NjCmccgZRl8ioBYlXVMWke1IqJasOufLUTMcpd9Fg=="
           crossorigin="anonymous"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css"
+          integrity="sha512-aOG0c6nPNzGk+5zjwyJaoRUgCdOrfSDhmMID2u4+OIslr0GjpLKo7Xm0Ao3xmpM4T8AmIouRkqwj1nrdVsLKEQ=="
+          crossorigin="anonymous"/>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/jquery.tablesorter.pager.min.css"
+          integrity="sha512-TWYBryfpFn3IugX13ZCIYHNK3/2sZk3dyXMKp3chZL+0wRuwFr1hDqZR9Qd5SONzn+Lja10hercP2Xjuzz5O3g=="
+          crossorigin="anonymous"/>
     <link rel="stylesheet" href="./html_files/Setting.css">
     <!-- load jQuery, tablesorter scripts and tablesorter widgets-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -19,16 +26,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.widgets.min.js"
             integrity="sha512-dj/9K5GRIEZu+Igm9tC16XPOTz0RdPk9FGxfZxShWf65JJNU2TjbElGjuOo3EhwAJRPhJxwEJ5b+/Ouo+VqZdQ=="
             crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/extras/jquery.tablesorter.pager.min.js"
+            integrity="sha512-y845ijdup9lDunrcSRQAlFdQICHVhkB5UNguWRX8A3L+guxO7Oow0poojw0PLckhcKij++h85bnyro80fjR9+A=="
+            crossorigin="anonymous"></script>
 
 
     <script>
         $(function () {
+            for (var i = 0; i < 4; i++) {
+                var $table = $('.pager_table' + i),
+                    pagerOptions = {
+                        container: $(".pager" + i),
+                        output: '{startRow} - {endRow} / {filteredRows} ({totalRows})',
+                        fixedHeight: true,
+                        removeRows: false,
+                    };
+                $table
+                    .tablesorter({
+                        widthFixed: true,
+                        widgets: ['zebra', 'filter'],
+                        theme: 'materialize',
+                        widgetOptions: {
+                            filter_ignoreCase: false
+                        }
+                    })
+                    .tablesorterPager(pagerOptions);
+            }
+
             $(".tablesorter").tablesorter({
+                showProcessing: true,
                 theme: 'materialize',
                 widthFixed: false,
                 columns_thead: true,
-                widgets: ["zebra"],
-
+                widgets: ["zebra", "stickyHeaders", "filter"],
+                widgetOptions: {
+                    stickyHeaders_attachTo: '#main',
+                    stickyHeaders_addResizeEvent: true,
+                    filter_ignoreCase: false
+                }
             });
         });
     </script>
@@ -47,7 +82,7 @@
 </header>
 <nav>
     <ul>
-        {% if type %}
+        {% if success %}
         <li><a href="#Result">Result</a>
             <ul>
                 {% for key in type.keys() %}
@@ -55,13 +90,40 @@
                 {% endfor %}
             </ul>
         </li>
+        {% if module['sample_qc'] or module['ref_qc'] %}
+        <li><a href="#qc">Quality control</a>
+            <ul>
+                {% if module['sample_qc'] %}
+                <li><a href="#sample_qc">Sample QC</a></li>
+                {% endif %}
+                {% if module['ref_qc'] %}
+                <li><a href="#ref_qc">Reference QC</a></li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if module['query_database'] %}
+        <li><a href="#query_database">Query database</a>
+            <ul>
+                {% if module['clinvar'] %}
+                <li><a href="#clinvar">Clinvar</a></li>
+                {% endif %}
+                {% if module['pharmgkb'] %}
+                <li><a href="#pharmgkb">PharmGKB</a></li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if module['query_database'] %}
+        <li><a href="#qr_code">QR code</a></li>
+        {% endif %}
         {% endif %}
         <li><a href="#Report_detail">Report detail</a></li>
     </ul>
 </nav>
-<main>
+<main id="main">
     <div id="main_top"></div>
-    {% if type %}
+    {% if success %}
     <div id="Result">
         <h2>Result</h2>
         {% for key, value in type.items() %}
@@ -79,18 +141,16 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for indicator in res[key] %}
+                {% for indicator in basic_res[key] %}
                 <tr>
                     <td><a href="#{{ indicator['Name'] | replace(' ', '_') }}">
                         {{ indicator['Name'] | replace('_', ' ')}}</a></td>
                     {% if value == "quan" %}
                     {% if indicator['Status'] == True %}
-                    {% if indicator['Distribution']['Percentage'] > 75
-                    %}
-                    <td style="background-color: red">High risk</td>
-                    {% elif indicator['Distribution']['Percentage'] <= 75 and indicator['Distribution']['Percentage'] >=
-                    25 %}
-                    <td style="background-color: dodgerblue">Normal</td>
+                    {% if indicator['Distribution']['Low_p'] > 75 %}
+                    <td style="background-color: orangered">High risk</td>
+                    {% elif indicator['Distribution']['Low_p'] <= 75 and indicator['Distribution']['Low_p'] >= 25 %}
+                    <td style="background-color: deepskyblue">Normal</td>
                     {% else %}
                     <td style="background-color: forestgreen">Low risk</td>
                     {% endif %}
@@ -106,20 +166,20 @@
             </table>
             <div class="detail">
                 <p class="miss_h3">Detail: </p>
-                {% for indicator in res[key] %}
+                {% for indicator in basic_res[key] %}
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}">
                     <h3>{{ indicator['Name'] | replace('_', ' ') }}</h3>
                     {% if indicator['Status'] == True %}
                     <div class="abstract">
-                        <h4>Disease description:</h4>
+                        <h4>Description:</h4>
                         <div class="abstract_pic">
                             <img src="{{ indicator['Picture'] }}" width="300px" height="100%"
                                  alt="{{ indicator['Name'] | replace('_', ' ')}}picture"></div>
                         <p class="abstract_text">
-                            {% if indicator['Disease_description'] %}
-                            {{ indicator['Disease_description'] }}
+                            {% if indicator['Description'] %}
+                            {{ indicator['Description'] }}
                             {% else %}
-                            Disease description is unavailable.
+                            Description is unavailable.
                             {% endif %}
                         </p>
                     </div>
@@ -149,17 +209,38 @@
                         <div class="dist_block_left quan_width_left">
                             <h4>Risk score:</h4>
                             <p class="Detail_text">{{ indicator['Outcome'] | round(2) }}</p>
+                            {% if 'Distribution' in indicator %}
                             <h4>Distribution:</h4>
                             <p class="Detail_text">
-                                <b>Percentage:</b>&emsp;{{ indicator['Distribution']['Percentage'] | round(2) }}%
-                                <b>&emsp;&emsp;Population average risk score:</b>
-                                &emsp;{{ indicator['Distribution']['Average'] | round(2) }}</p>
+                                There are <b>{{ indicator['Distribution']['All'] }}</b> samples' PRS data
+                                among reference population.</p>
+                            <p class="Detail_text">
+                                <b>N below this sample:</b> {{ indicator['Distribution']['Low'] }}
+                                ({{ indicator['Distribution']['Low_p'] | round(1) }}%)</p>
+                            <p class="Detail_text"><b>N above this sample:</b>
+                                {{ indicator['Distribution']['Up'] }}
+                                ({{ indicator['Distribution']['Up_p'] | round(1) }}%)</p>
+                            <p class="Detail_text">
+                                <b>Population average risk score:</b>
+                                {{ indicator['Distribution']['Average'] | round(2) }}</p>
+                            {% if indicator['Other']['Average lifetime risk'] %}
+                            <p class="Detail_text">
+                                <b>Average lifetime risk:</b> {{ indicator['Other']['Average lifetime risk'] }}</p>
+                            <p class="Detail_text">
+                                Consider only PRS, <b>your lifetime risk</b> would be {{
+                                risk_cal(indicator['Other']['Average lifetime risk'], indicator['Outcome']) }}
+                            </p>
+                            {% endif %}
+
+                            {% endif %}
                         </div>
+                        {% if 'Distribution' in indicator %}
                         <div class="dist_block_right quan_width_right">
                             <h4>Distribution plot:</h4>
                             <img src="{{ indicator['Distribution']['Plot'] }}" width="90%" height="100%"
                                  alt="{{ indicator['Name'] | replace(' ', '_') }} Distribution Plot"/>
                         </div>
+                        {% endif %}
                     </div>
                     <div class="quan_block_bottom">
                         <h4>Scentific detail: </h4>
@@ -189,8 +270,192 @@
             </div>
         </div>
         {% endfor %}
-        {% endif %}
     </div>
+
+    {% if module['ref_qc'] or module['sample_qc'] %}
+    <div class="section">
+        <div id="qc">
+            <h2>Quality control</h2>
+            {% if module['sample_qc'] %}
+            <h2 class="Dected_title" id="sample_qc">Sample QC</h2>
+            <ul style="font-size: 20px">
+                <li>The genetically determined sex is: {{ human.sex }}</li>
+                <li>{{ human.missing[0] }} of {{ human.missing[1] }} variants are missing, missing rate is:
+                    {{ human.missing[2] }}
+                </li>
+            </ul>
+            <h3>Variants count in each chromosome:</h3>
+            <img src="./html_files/img/chromosome_count.png" alt="Variants count in each chromosome" width="100%">
+            {% if module['vep'] %}
+            <h3>Type of variations in sample:</h3>
+            <img src="./html_files/img/vep_res.png" alt="Type of variants in sample" width="50%">
+            {% endif %}
+            {% endif %}
+            {% if module['ref_qc'] %}
+            <h2 class="Dected_title" id="ref_qc">Reference QC</h2>
+            <h3>Minor allele frequency:</h3>
+            <img src="./html_files/img/QC_MAF.png" alt="Minor allele frequency of each variant" width="86%">
+            <h3>Missing genotype rates:</h3>
+            <img src="./html_files/img/QC_ind_miss.png" alt="Missing genotype rates per variant" width="43%"
+                 style="float: left">
+            <img src="./html_files/img/QC_var_miss.png" alt="Missing genotype rates per sample" width="43%">
+            <h3>Sex discrepancy:</h3>
+            <img src="./html_files/img/QC_sex.png" alt="F value (X chromosome homozygosity estimate) of each sample"
+                 width="86%">
+            <h3>Cryptic relatedness:</h3>
+            <img src="./html_files/img/QC_relatedness.png" alt="Pihat value of each sample-sample pair" width="86%">
+            <h3>Hardy-Weinberg equilibrium:</h3>
+            <img src="./html_files/img/QC_hardy.png" alt="Hardy-Weinberg equilibrium p-value in each variant"
+                 width="86%">
+            <h3>Heterozygosity rate:</h3>
+            <img src="./html_files/img/QC_het.png" alt="Heterozygosity rate in each sample" width="86%">
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+
+    {% if module['query_database'] %}
+    <div class="section">
+        <div id="query_database">
+            <h2>Query database</h2>
+            {% if module['clinvar'] %}
+            <h2 class="Dected_title" id="clinvar">Clinvar</h2>
+            <div class="pager3" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+            <table class="pager_table3">
+                <thead>
+                <tr>
+                    <th>Variant</th>
+                    <th>Allele</th>
+                    <th>Allele type</th>
+                    <th>Genotype</th>
+                    <th>Clinvar ID</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, row in extra_res[0][0].iterrows() %}
+                <tr>
+                    <td>{{ row['Variant'] }}</td>
+                    <td>{{ row['Allele'] }}</td>
+                    <td>{{ row['Allele type'] | replace("<", "&lt") | replace(">", "&gt") }}</td>
+                    {% if row['Color'] == 'Red' %}
+                    <td style="background-color: red">{{ row['Genotype'] }}</td>
+                    {% elif row['Color'] == 'Green' %}
+                    <td style="background-color: forestgreen">{{ row['Genotype'] }}</td>
+                    {% else %}
+                    <td style="background-color: yellow">{{ row['Genotype'] }}</td>
+                    {% endif %}
+                    <td>{{ row['Clinvar ID'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pager3" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+            {% endif %}
+            {% if module['pharmgkb'] %}
+            <h2 class="Dected_title" id="pharmgkb">PharmGKB</h2>
+            {% with pharm_type = ['affect phenotypes', 'affect drug dose, response, metabolism, etc', 'have in vitro
+            functional analysis-type associations'] %}
+            {% for i in range(3) %}
+            <h3>Variants which {{ pharm_type[i] }}:</h3>
+            <div class="pager{{ i }}" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+            <table class="pager_table{{ i }}">
+                <thead>
+                <tr>
+                    <th>Variant</th>
+                    <th>Alleles</th>
+                    <th>Associations</th>
+                    <th>Genotype</th>
+                    <th>PMID</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, row in extra_res[0][1][i].iterrows() %}
+                <tr>
+                    <td>{{ row['Variant'] }}</td>
+                    <td>{{ row['Alleles'] }}</td>
+                    <td>{{ row['Sentence'] | replace("<", "&lt") | replace(">", "&gt") }}</td>
+                    {% if row['Color'] == 'Red' %}
+                    <td style="background-color: red">{{ row['Genotype'] }}</td>
+                    {% elif row['Color'] == 'Green' %}
+                    <td style="background-color: forestgreen">{{ row['Genotype'] }}</td>
+                    {% else %}
+                    <td style="background-color: yellow">{{ row['Genotype'] }}</td>
+                    {% endif %}
+                    <td>{{ row['PMID'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pager{{ i }}" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+            {% endfor %}
+            {% endwith %}
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if module['qr_code'] %}
+    <div class="section">
+        <div id="qr_code">
+            <h2>QR code</h2>
+            <img src="./html_files/img/qr_code.png" alt="QR code" width="43%" style="float: left">
+            <div style="width: 43%; max-height: 23em; display: inline-block; clear: right; overflow-y: auto">
+                <h3>SNPs list:</h3>
+                <div><p>{{ ', '.join(extra_res[1]) }}</p></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
 
     <div class="section">
         <h2 id="Report_detail">Report detail</h2>
