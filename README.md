@@ -7,7 +7,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 1. Core functionalities
 
-<img src="./pictures/figure1.png" width = "1000" height = "" alt="figure1" align=center />
+<img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
 
 
 
