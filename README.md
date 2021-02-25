@@ -6,7 +6,7 @@ Contact: Jie Huang MD MPH PhD, Department of Global Health, Peking University Sc
 
 # 1. Core functionalities
 
-<img src="./pictures/figure1.jpg" width = "500" height = "" alt="figure1" align=center />
+<img src="./pictures/figure1.png" width = "500" height = "" alt="figure1" align=center />
 
 
 # 2. Easy-to-use GUI interface
