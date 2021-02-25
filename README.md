@@ -1,7 +1,8 @@
 
 # PAGEANT: Personal Access to Genome and Analysis of Natural Traits
 
-Contact: Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health
+Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health)
+
 
 
 # 1. Core functionalities
@@ -9,9 +10,11 @@ Contact: Jie Huang MD MPH PhD, Department of Global Health, Peking University Sc
 <img src="./pictures/figure1.png" width = "1000" height = "" alt="figure1" align=center />
 
 
+
 # 2. Easy-to-use GUI interface
 
 ![Figure 2](./pictures/figure2.png)
+
 
 
 # 3. Install and run
