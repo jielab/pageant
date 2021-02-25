@@ -1,21 +1,20 @@
 
-# PAGEANT: Personal Analysis of Genome and Annotation Toolkit
-# DTC genome report, free, reliable, and DIY.
-PAGEANT differs from other similar tools, summarized by “A-C-G-T”: 
-1. Academic quality standard, where start-of-the-art algorithms and millions of genetic variants could be used to calculate PRS; 
-2. Confidential data run locally, no need to send genomic data to cloud servers;
-3. Generalizable health assessment, easy to add/remove scope of health reports based on users' preference and comfort level. 
-4. Transparent source code for all underlying programming scripts..
+# PAGEANT: Personal Access to Genome and Analysis of Natural Traits
+
+Contact: Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health
 
 
-Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking University School of Public Health
+# 1. Core functionalities
+
+<img src="./pictures/figure1.jpg" width = "500" height = "" alt="figure1" align=center />
 
 
+# 2. Easy-to-use GUI interface
 
-# 1. Download and Test run
+![Figure 2](./pictures/figure2.png)
 
-## 1.1 Download the executable file
 
+# 3. Install and run
 
 * Download the executable files from [PKU Disk](https://disk.pku.edu.cn:443/link/23D5306029AA16DC8A9186155AA4F5FB) or [Google Drive](https://drive.google.com/file/d/1d8s8oSPEl0z6zVYvpBbyko-EvLlk3LJ9/view?usp=sharing), and then unzip it into an any empty directory. 
 
@@ -23,25 +22,9 @@ Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking
 
 
 
+# 4. Customize PAGEANT
 
-
-## 1.2 Run from the GUI interface
-
-<img src="./pictures/figure1A.jpg" width = "500" height = "" alt="figure1A" align=center />
-<img src="./pictures/figure1B.jpg" width = "500" height = "" alt="figure1A" align=center />
-<img src="./pictures/figure1C.jpg" width = "500" height = "" alt="figure1A" align=center />
-
-
-# 2. Examine the report
-
-![Figure 2A](./pictures/figure2A.jpg)
-![Figure 2A](./pictures/figure2C.jpg)
-![Figure 2B](./pictures/figure2B.jpg)
-
-
-# 3. Customize PAGEANT
-
-## 3.1 Replace reference genome by 1000 genomes data, for example
+## 4.1 Replace reference genome by 1000 genomes data, for example
 
 ```
 start from 1000 genomes project main page https://www.internationalgenome.org. 
@@ -54,9 +37,9 @@ Users could download the aligned sequencing data for any set of samples from thi
 ```
 
 
-## 3.2 Replace PRS reference file
+## 4.2 Replace PRS reference file
 
-### 3.2.1 Download HapMap3 genotype, for calculating population risk reference
+### 4.2.1 Download HapMap3 genotype, for calculating population risk reference
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -67,7 +50,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-### 3.2.2 Download G1k genotype, for calculating population risk reference
+### 4.2.2 Download G1k genotype, for calculating population risk reference
 ```
 use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
@@ -88,12 +71,7 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ```
 
-## 3.3 Choose different PRS calculation methods
 
+## 4.3 Add or remove report items
 
-## 3.4 Add or remove report items
-
-
-
-
-
+![Figure 3](./pictures/figure3.png)
