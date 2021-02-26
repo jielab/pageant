@@ -13,7 +13,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 2. Easy-to-use GUI interface
 
-![Figure 2](./pictures/figure2.png)
+![Figure 2](./pictures/figure2NEW.png)
 
 <br />
 
