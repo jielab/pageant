@@ -3,29 +3,28 @@
 
 Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health)
 
-
-
+<br />
+<br />
 # 1. Core functionalities
 
 <img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
+
 <br />
 <br />
-
-
 # 2. Easy-to-use GUI interface
 
 ![Figure 2](./pictures/figure2.png)
 
-
-
+<br />
+<br />
 # 3. Install and run
 
 * Download the executable files from [PKU Disk](https://disk.pku.edu.cn:443/link/23D5306029AA16DC8A9186155AA4F5FB) or [Google Drive](https://drive.google.com/file/d/1d8s8oSPEl0z6zVYvpBbyko-EvLlk3LJ9/view?usp=sharing), and then unzip it into an any empty directory. 
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
-
-
+<br />
+<br />
 # 4. Customize PAGEANT
 
 ## 4.1 Replace reference genome by 1000 genomes data, for example
