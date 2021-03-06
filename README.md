@@ -19,7 +19,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 3. Install and run
 
-* Download the executable files from [PKU Disk](https://disk.pku.edu.cn:443/link/23D5306029AA16DC8A9186155AA4F5FB) or [Google Drive](https://drive.google.com/file/d/1d8s8oSPEl0z6zVYvpBbyko-EvLlk3LJ9/view?usp=sharing), and then unzip it into an any empty directory. 
+* Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
