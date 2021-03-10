@@ -10,36 +10,34 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 <img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
 
 <br />
-
-# 2. Easy-to-use GUI interface
-
-![Figure 2](./pictures/figure2NEW.png)
-
 <br />
 
-# 3. Install and run
+# 2. Install and click to run
 
 * Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
+![Figure 2](./pictures/figure2NEW.png)
+
+<br />
 <br />
 
-# 4. QA/QC of genotype data
+# 3. Example report Q1: QA/QC of genotype data
 
 ![Figure 4](./pictures/figure4.png)
 
 <br />
 
-# 5. Example report (the other 4Qs)
+# 4. Example report Q2 - Q4
 
 ![Figure 6](./pictures/figure6.png)
 
 <br />
 
-# 6. Customize PAGEANT
+# 5. Customize PAGEANT
 
-## 6.1 Replace reference genome by 1000 genomes data, for example
+## 5.1 Replace reference genome by 1000 genomes data, for example
 
 ```
 start from 1000 genomes project main page https://www.internationalgenome.org. 
@@ -52,9 +50,9 @@ Users could download the aligned sequencing data for any set of samples from thi
 ```
 
 
-## 6.2 Replace PRS reference file
+## 5.2 Replace PRS reference file
 
-### 6.2.1 Download HapMap3 genotype, for calculating population risk reference
+### 5.2.1 Download HapMap3 genotype, for calculating population risk reference
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -65,7 +63,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-### 6.2.2 Download G1k genotype, for calculating population risk reference
+### 5.2.2 Download G1k genotype, for calculating population risk reference
 ```
 use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
@@ -87,6 +85,6 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 ```
 
 
-## 6.3 Add or remove report items
+## 5.3 Add or remove report items
 
 ![Figure 3](./pictures/figure3.png)
