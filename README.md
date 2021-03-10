@@ -25,7 +25,19 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 <br />
 
-# 4. Customize PAGEANT
+# 4. QA/QC of genotype data
+
+![Figure 4](./pictures/figure4.png)
+
+<br />
+
+# 5. Example report (the other 4Qs)
+
+![Figure 5](./pictures/figure5.png)
+
+<br />
+
+# 6. Customize PAGEANT
 
 ## 4.1 Replace reference genome by 1000 genomes data, for example
 
