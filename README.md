@@ -5,7 +5,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 <br />
 
-# 1. Core functionalities
+# 1. Core functionalities (5Qs)
 
 <img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
 
@@ -33,7 +33,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 5. Example report (the other 4Qs)
 
-![Figure 5](./pictures/figure5.png)
+![Figure 6](./pictures/figure6.png)
 
 <br />
 
