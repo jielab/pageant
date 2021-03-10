@@ -39,7 +39,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 6. Customize PAGEANT
 
-## 4.1 Replace reference genome by 1000 genomes data, for example
+## 6.1 Replace reference genome by 1000 genomes data, for example
 
 ```
 start from 1000 genomes project main page https://www.internationalgenome.org. 
@@ -52,9 +52,9 @@ Users could download the aligned sequencing data for any set of samples from thi
 ```
 
 
-## 4.2 Replace PRS reference file
+## 6.2 Replace PRS reference file
 
-### 4.2.1 Download HapMap3 genotype, for calculating population risk reference
+### 6.2.1 Download HapMap3 genotype, for calculating population risk reference
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -65,7 +65,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-### 4.2.2 Download G1k genotype, for calculating population risk reference
+### 6.2.2 Download G1k genotype, for calculating population risk reference
 ```
 use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
@@ -87,6 +87,6 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 ```
 
 
-## 4.3 Add or remove report items
+## 6.3 Add or remove report items
 
 ![Figure 3](./pictures/figure3.png)
