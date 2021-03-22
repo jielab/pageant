@@ -37,22 +37,7 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 
 # 5. Customize PAGEANT
 
-## 5.1 Replace reference genome by 1000 genomes data, for example
-
-```
-start from 1000 genomes project main page https://www.internationalgenome.org. 
-Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
-Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/.
-The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples.
-The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples.
-Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
-
-```
-
-
-## 5.2 Replace PRS reference file
-
-### 5.2.1 Download HapMap3 genotype, for calculating population risk reference
+### 5.1 Download HapMap3 genotype, used as population reference by default
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -63,8 +48,13 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-### 5.2.2 Download G1k genotype, for calculating population risk reference
+## 5.2 download 1000 genomes project (1000G) genotype data, if needed
+
 ```
+
+open https://www.internationalgenome.org, click "Data" menu on the top.
+under "Available data" section, click "Phase 3" VCF files.
+
 use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
 # rename the long file names to something short such as below:
@@ -84,7 +74,8 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ```
 
+## 5.3 Add or remove traits from the genetic report
 
-## 5.3 Add or remove report items
+Please follow the following design.
 
 ![Figure 3](./pictures/figure3b.png)
