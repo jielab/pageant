@@ -87,4 +87,4 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ## 5.3 Add or remove report items
 
-![Figure 3](./pictures/figure3new.png)
+![Figure 3](./pictures/figure3b.png)
