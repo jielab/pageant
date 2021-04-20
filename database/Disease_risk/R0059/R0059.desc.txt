@@ -1,4 +1,0 @@
-Name: Lung cancer
-Chinese name: 肺癌
-Description: 
-Average lifetime risk: 6.3% (NIH)

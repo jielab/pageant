@@ -117,11 +117,11 @@ body header p {
 }
 
 .detail_block li {
-    line-height: 150%;
-    display: inline;
+    /*line-height: 100%;*/
+    display: list-item;
 }
 
-.Dected_title {
+.Detected_title {
     font-size: 28px;
 }
 
@@ -174,8 +174,8 @@ header div {
 }
 
 .dist_block_top {
-    border-bottom-style: groove;
-    border-bottom-width: medium;
+    /*border-bottom-style: groove;*/
+    /*border-bottom-width: medium;*/
     display: table;
     width: 100%;
     padding-bottom: 20px;
@@ -212,9 +212,9 @@ header div {
 }
 
 .abstract {
-    border-bottom-style: groove;
     display: table;
-    border-bottom-width: medium;
+    /*border-bottom-style: groove;*/
+    /*border-bottom-width: medium;*/
     padding-bottom: 10px;
     text-indent: 2em;
     width: 72vw;
@@ -239,6 +239,7 @@ header div {
     clear: both;
     padding-bottom: 2vh;
     margin-bottom: 4vh;
+    padding-left: 20px;
 }
 
 .miss_h3 {
@@ -310,6 +311,11 @@ header div {
     color: #000000;
 }
 
+.show_href {
+    font-weight: normal !important;
+    text-decoration: underline !important;
+}
+
 .detail_block ul {
     max-height: 5em;
     overflow-y: auto;
@@ -363,4 +369,11 @@ header div {
 
 .pagedisplay {
     font-size: 20px;
+}
+
+.section_text {
+    font-size: 20px;
+    text-indent: 2em;
+    line-height: 1.5;
+    margin-left: 18px;
 }

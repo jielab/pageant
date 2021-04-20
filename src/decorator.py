@@ -1,4 +1,7 @@
 from time import time
+from chardet.universaldetector import UniversalDetector
+from detect_delimiter import detect
+from functools import wraps
 import logging
 
 
@@ -14,8 +17,6 @@ def use_time(process_name=None):
     """
 
     def decorator(func):
-        from functools import wraps
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             start = time()
@@ -31,16 +32,14 @@ def use_time(process_name=None):
     return decorator
 
 
-def progress_value(process_value: int):
+def progress_value(process_value: float):
     def decorator(func):
-        from functools import wraps
-
         @wraps(func)
         def wrapper(*args, **kwargs):
             fun_res = func(*args, **kwargs)
             global progress_bar
             progress_bar += process_value
-            logging.info(f"Progress of the analysis: {progress_bar}%")
+            logging.info(f"Progress of the analysis: {progress_bar:.1f}%")
             return fun_res
 
         return wrapper
@@ -51,3 +50,34 @@ def progress_value(process_value: int):
 def restart_progress_bar():
     global progress_bar
     progress_bar = 0
+
+
+def auto_encoding(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            fun_res = func(*args, **kwargs)
+        except UnicodeDecodeError as e:
+            detector = UniversalDetector()
+            detector.feed(e.object)
+            detector.close()
+            fun_res = func(*args, **kwargs, encoding=detector.result['encoding'])
+        except Exception as e:
+            raise e
+        return fun_res
+
+    return wrapper
+
+
+def auto_sep(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            fun_res = func(*args, **kwargs)
+        except AssertionError as e:
+            fun_res = func(*args, **kwargs, sep=detect(e.args[0]))
+        except Exception as e:
+            raise e
+        return fun_res
+
+    return wrapper

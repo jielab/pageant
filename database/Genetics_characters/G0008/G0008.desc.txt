@@ -1,4 +1,0 @@
-Name: Muscle fiber type
-Chinese name: 肌纤维类型
-Description: Muscle fiber types can be broken down into two main types: slow twitch (Type I) muscle fibers and fast twitch (Type II) muscle fibers. The slow-twitch muscle fibers are more efficient at using oxygen to generate more adenosine triphosphate (ATP) fuel for continuous, extended muscle contractions over a long time. They fire more slowly than fast-twitch fibers and can go for a long time before they fatigue. Because of this, slow-twitch fibers are great at helping athletes run marathons and bicycle for hours. However, fast-twitch fibers use anaerobic metabolism to create fuel, they are better at generating short bursts of strength or speed than slow muscles but getting fatigue more quickly.
-Reference: PMID: 17828264

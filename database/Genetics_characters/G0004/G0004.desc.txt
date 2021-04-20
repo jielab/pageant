@@ -1,5 +1,0 @@
-Name: Folic Acid metabolism
-Chinese name: 叶酸代谢
-Description: "It was found that the activity of MTHFR was related to the variation of C677T (code rs1801133) and A1298C (code rs1801131), while the activity of MTRR was related to the variation of A66G (code RS1801394).If one of these three loci is heterozygous, folate metabolism is reduced.If one is a mutant homozygous, folic acid metabolism decreases more dramatically, so heterozygous and mutant homozygous carriers need additional folic acid or even folic acid's active substance.The author's values of these three gene loci are rs1801133 as C/T, RS1801131 as T/T, and RS1801394 as A/A, so appropriate folic acid supplementation is required."
-Reference: PMID: 8789576
-

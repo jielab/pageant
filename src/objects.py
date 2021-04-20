@@ -1,12 +1,25 @@
 import matplotlib.pyplot as plt
-from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10
+from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
+from typing import List, Dict, Set, Tuple, Generator, Iterable
+from typing.io import IO, TextIO, BinaryIO
 import pandas as pd
-from matplotlib.ticker import FuncFormatter
+from scipy.stats import gaussian_kde
 import subprocess
+import cpufeature
 from re import search
 from shutil import copy
 from src.decorator import *
 from src.config import *
+
+
+class PLINKERROR(Exception):
+    def __init__(self, *args):
+        super(PLINKERROR, self).__init__(*args)
+
+
+class RUNPLINKERROR(Exception):
+    def __init__(self, *args):
+        super(RUNPLINKERROR, self).__init__(*args)
 
 
 class Human(object):
@@ -14,13 +27,13 @@ class Human(object):
         self.name = name
         self.gt_data = {}
         self.ind_data = {}
-        self.vcf, self.sex, self.missing = None, None, None
+        self.vcf, self.sex, self.missing, self.snps = None, None, None, None
 
     def set_gt(self, snp_id: str, gt: set):
         self.gt_data[snp_id] = gt
 
     def set_ind(self, code: str, name: str, sex: str, itype: str, ind_dir: str, **other):
-        if trans_sex(sex) is None or trans_sex(sex) == self.sex:
+        if trans_sex(sex) is None or trans_sex(sex) == trans_sex(self.sex):
             self.ind_data[code] = Ind(code, name, sex, itype, ind_dir, **other)
 
     def cal_ind(self, ftype: str, code: str, snp: str, *cal_col, ref_rs: pd.DataFrame):
@@ -31,6 +44,20 @@ class Human(object):
             else:
                 self.ind_data[code].mis_snp(snp, cal_col[1], ref_rs)
 
+    @auto_encoding
+    @auto_sep
+    def cal_ind_from_txt(self, file: str, type_dir: str, ind_dir: str, ref_rs: pd.DataFrame,
+                         type_list: dict, columns: dict, *,
+                         encoding: str = 'UTF-8', sep: str = '\t') -> None:
+        with open(file, encoding=encoding) as f:
+            for line in f:
+                line = line.strip('\n\r')
+                if line:
+                    line = line.split(sep)
+                    assert len(line) > 1, sep.join(line)
+                    self.cal_ind(type_list[type_dir], ind_dir,
+                                 *select_list(line, columns['columns_' + type_list[type_dir]].values()), ref_rs=ref_rs)
+
     def get_prs_data(self, code: str, res: float, detail: str):
         if code in self.ind_data:
             self.ind_data[code].add_prs_res(res, detail)
@@ -38,6 +65,7 @@ class Human(object):
     def sample_qc(self, temp_dir: str):
         run_plink_cmd(f'--vcf {self.vcf} --missing --out {os.path.join(temp_dir, "sample_qc")}')
         qc_data = pd.read_csv(os.path.join(temp_dir, 'sample_qc.smiss'), '\t', skipinitialspace=True)
+        self.snps = pd.read_csv(os.path.join(temp_dir, 'sample_qc.vmiss'), '\t', skipinitialspace=True)['ID'].to_list()
         self.missing = qc_data.iloc[-1, 1:].to_list()
         self.missing[0] = f'{self.missing[0]:,d}'
         self.missing[1] = f'{self.missing[1]:,d}'
@@ -45,7 +73,7 @@ class Human(object):
 
     @progress_value(10)
     @use_time('Export report result')
-    def export_res(self, output):
+    def export_res(self, output) -> Dict[str, list]:
         result = {}
         for ind in self.ind_data.values():
             if ind.ftype:
@@ -53,7 +81,7 @@ class Human(object):
                     if not ind.detail:
                         logging.warning(f'Code ({ind.code}) has no corresponding algorithm!')
                         ind.detail.append(f'Code ({ind.code}) has no corresponding algorithm!')
-                    ind.outcome = 'Undected'
+                    ind.outcome = 'Undetected'
                 if ind.itype not in result:
                     result[ind.itype] = []
                 result[ind.itype].append(ind.report(output))
@@ -104,7 +132,7 @@ class Ind(object):
         if self.ftype == 'qual':
             if not self.decide:
                 if inter in lan_lib['if']:
-                    # once in if condition, it can not exit this status
+                    # once in if condition, it cannot exit this status
                     # now it only supports one if condition once time
                     self.decide = False if equal_gt(gt, trans_gt(ref)) else \
                         False if equal_gt(gt, trans_gt(gene_filp(ref))) else None
@@ -147,7 +175,7 @@ class Ind(object):
 
     def mis_snp(self, snp: str, inter: str or float or int, ref_rs: pd.DataFrame):
         lan_lib = load_config()['lan_lib']
-        warning = f'Snp ({snp}) can not find in vcf file!'
+        warning = f'Snp ({snp}) cannot be found in your genotype file!'
         if self.ftype == 'quan':
             if f'{self.code}_{snp}' in ref_rs.columns:
                 beta = ref_rs[f"{self.code}_{snp}"].mean()
@@ -158,7 +186,7 @@ class Ind(object):
                 self.decide = None
                 if warning in self.detail:
                     self.detail.remove(warning)
-                warning += f' Code {self.code} algorithm can not process further.'
+                warning += f' Code {self.code} algorithm cannot process further.'
                 self.status = False
         logging.warning(warning)
         if warning not in self.detail:
@@ -173,8 +201,8 @@ class Ind(object):
                 self.distribution['Up'] = self.distribution['All'] - self.distribution['Low']
                 self.distribution['Low_p'] = self.distribution['Low'] / self.distribution['All'] * 100
                 self.distribution['Up_p'] = self.distribution['Up'] / self.distribution['All'] * 100
-                self.distribution['Plot'] = quan_dist_plot(self.code, self.outcome, ref_code[self.code],
-                                                           self.distribution['Low_p'], output)
+                self.distribution['Plot'], self.distribution['SGRS'] = \
+                    quan_dist_plot(self.code, self.outcome, ref_code[self.code], self.distribution['Low_p'], output)
                 self.distribution['Status'] = True
             else:
                 self.distribution['Plot'] = qual_dist_plot(self.code, self.name, output, ref_code)
@@ -182,7 +210,7 @@ class Ind(object):
 
     def report(self, output):
         if self.picture:
-            copy(self.picture, os.path.join(output, 'html_files', 'img', os.path.basename(self.picture)))
+            copy(self.picture, os.path.join(output, 'genetic_report', 'html_files', 'img', os.path.basename(self.picture)))
             self.picture = os.path.join('html_files', 'img', os.path.basename(self.picture))
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
@@ -209,17 +237,31 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
         out_file = cmd.split('--out ')[-1].split(' ')[0]
     else:
         out_file = os.path.join('.', plink)
-    cmd = f'{os.path.join(raw_dir, "bin", plink)} ' + cmd
+    sys_suffix = 'win.exe' if platform == 'Windows' else 'mac' if platform == 'Darwin' else \
+        'linux' if platform == 'Linux' else ''
+    avx_suffix = '' if plink != 'plink2' else '_avx' if cpufeature.CPUFeature['AVX2'] else ''
+    assert sys_suffix, 'Unsupported operating system'
+    plink_file = os.path.join(raw_dir, "bin", plink + avx_suffix + "_" + sys_suffix)
+    assert os.path.isfile(plink_file), f"Cannot find {plink + avx_suffix}_{sys_suffix} in bin directory"
+    cmd = plink_file + ' ' + cmd
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, sterr = a.communicate()
     a.wait()
-    if delete_log:
-        os.remove(out_file + '.log')
     if b'Error' in sterr:
-        raise Exception("PlinkError:\n" + sterr.decode())
+        raise PLINKERROR("PlinkError:\n" + sterr.decode().strip())
+    if delete_log:
+        try:
+            os.remove(out_file + '.log')
+        except FileNotFoundError:
+            raise RUNPLINKERROR("RunPlinkError:\n" + sterr.decode().strip())
 
 
-def equal_gt(gt1: set, gt2: set):
+def select_list(ob_list: list, index) -> list:
+    # assert len(ob_list) < max(index), 'list index out of range'
+    return [ob_list[i] if i < len(ob_list) else None for i in index]
+
+
+def equal_gt(gt1: set, gt2: set) -> bool:
     base = ('A', 'G', 'C', 'T')
     if gt1 == gt2:
         return True
@@ -232,7 +274,7 @@ def equal_gt(gt1: set, gt2: set):
         return False
 
 
-def trans_gt(gt: set or str, connector='/'):
+def trans_gt(gt: set or str, connector: str = '/') -> Set[str] or str:
     if type(gt) == set:
         return connector.join(list(gt)[0] * 2 if len(gt) == 1 else list(gt))  # Todo: not all biallelic
     elif type(gt) == str:
@@ -243,7 +285,7 @@ def trans_gt(gt: set or str, connector='/'):
         return set(gt)
 
 
-def gene_filp(raw: str):
+def gene_filp(raw: str) -> str:
     """
     Filp the genotype
     :param raw: raw genotype
@@ -257,13 +299,13 @@ def gene_filp(raw: str):
         return ''.join([base_dict[char] if char in base_dict.keys() else char for char in raw])
 
 
-def cal_beta(gt: set, ref: str, beta: int or float):
+def cal_beta(gt: set, ref: str, beta: int or float) -> float:
     if type(beta) == str:
         beta = float(beta)
     return 1 if ref not in gt else beta ** 2 if len(gt) == 1 else beta
 
 
-def trans_sex(sex: str or bool):
+def trans_sex(sex: str or bool) -> bool or str:
     lan_lib = load_config()['lan_lib']
     if type(sex) == str:
         return True if sex in lan_lib['sex']['male'] else False if sex in lan_lib['sex']['female'] else None
@@ -271,7 +313,7 @@ def trans_sex(sex: str or bool):
         return 'male' if sex else 'female'
 
 
-def assign_pos(value: float, plt_size: tuple, left_offset=0.29, right_offset=0.04):
+def assign_pos(value: float, plt_size: tuple, left_offset: float = 0.29, right_offset: float = 0.04):
     ran = plt_size[1] - plt_size[0]
     p = (value - plt_size[0]) / ran
     return value + right_offset * ran if p < 0.5 else value - left_offset * ran
@@ -286,14 +328,15 @@ def risk_level(per: float):
     return 11
 
 
-def pie_plot(count: list or pd.Series, labels: list or pd.Index, save_path: str, title=None, arrow=True):
+def pie_plot(count: list or pd.Series, labels: list or pd.Index, save_path: str, title: str or None = None,
+             arrow: bool = True, legend_ratio: int = 3, **other_kwargs):
     plt.figure(figsize=(8, 6), dpi=400)
-    ax1, ax2 = plt.subplot(1, 3, (1, 2)), plt.subplot(1, 3, 3)
-    patches, texts = ax1.pie(count, radius=1.2, pctdistance=1.13)
+    ax1, ax2 = plt.subplot(1, legend_ratio, 1 if legend_ratio == 2 else tuple(range(1, legend_ratio))),\
+               plt.subplot(1, legend_ratio, legend_ratio)
+    patches, texts = ax1.pie(count, radius=1.2, pctdistance=1.13, **other_kwargs)
     ax1.axis('equal')
     ax2.axis('off')
-    ax2.legend(patches, labels, loc='center')
-
+    ax2.legend(patches, labels, loc='lower left', bbox_to_anchor=(0, 0.65))
     if title:
         plt.suptitle(title, size=12, weight="bold", y=0.95)
 
@@ -330,7 +373,7 @@ def pie_plot(count: list or pd.Series, labels: list or pd.Index, save_path: str,
     plt.close()
 
 
-def qual_dist_plot(code: str, name: str, report_dir: str, ref_code: pd.DataFrame):
+def qual_dist_plot(code: str, name: str, report_dir: str, ref_code: pd.DataFrame) -> str:
     population = ref_code[code].value_counts()
     labels = population.index
     labels = [label.split(":")[0] for label in labels]
@@ -339,16 +382,45 @@ def qual_dist_plot(code: str, name: str, report_dir: str, ref_code: pd.DataFrame
     return os.path.join('html_files', 'dist_plot', f'{code}.png')
 
 
-def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, report_dir: str):
+def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, report_dir: str) -> Tuple[str, float]:
+    prs_data = log10(ref_data) if all(ref_data > 0) else ref_data
+    ref_mean = prs_data.mean()
+    ref_sd = prs_data.var() ** 0.5
+    prs_data = prs_data.apply(lambda a: (a - ref_mean) / ref_sd)
+    density = gaussian_kde(prs_data)
+    density.covariance_factor = lambda: .25
+    density._compute_covariance()
+    left, right = min(prs_data), max(prs_data)
+    xs = linspace(left, right, 300)
+    own_value = ((log10(value) if all(ref_data > 0) else value) - ref_mean) / ref_sd
+
     plt.figure(dpi=400)
-    plt.hist(log10(ref_data), bins=100, weights=[1. / len(ref_data)] * len(ref_data))
-    plt.axvline(log10(value), c='r', lw=2, ls='--')
-    plt.text(assign_pos(log10(value), plt.axis(), left_offset=0.33, right_offset=0.03), plt.axis()[3] * 0.816,
-             f'Percentage: {per:.2f}% \nLevel: {risk_level(per)}',
-             bbox={'facecolor': 'white', 'alpha': 0.8})
-    plt.gca().yaxis.set_major_formatter(FuncFormatter(lambda a, b: f'{a * 100:.1f}%'))
-    plt.xlabel("Logarithm of Risk score")
-    plt.ylabel("Percentage")
+    if own_value > left and own_value < right:
+        xs1 = linspace(left, own_value, 150)
+        xs2 = linspace(own_value, right, 150)
+        plt.fill_between(xs1, density(xs1), color='tab:blue', alpha=0.85)
+        plt.fill_between(xs2, density(xs2), color='tab:blue', alpha=0.25)
+    else:
+        plt.fill_between(xs, density(xs), alpha=1)
+    plt.plot(xs, density(xs), c='tab:blue', label='Reference population distribution')
+    plt.axvline(own_value, c='r', lw=2, ls='--', label='Your standardized genetic risk score')
+    plt.text(assign_pos(own_value, plt.axis(), left_offset=0.35, right_offset=0.03), plt.axis()[3] * 0.184,
+             f'Percentage: {per:.2f}% '
+             # f'\nLevel: {risk_level(per)}'
+             , bbox={'facecolor': 'white', 'alpha': 0.8})
+    plt.xlabel("Standardized genetic rise score")
+    plt.yticks([])
+    plt.xlim(symmertry_range(plt.xlim()))
+    plt.ylim(bottom=0, top=plt.ylim()[1] * 1.15)
+    plt.legend(loc='upper left')
+    plt.tight_layout()
     plt.savefig(os.path.join(report_dir, f'{code}.png'), bbox_inches='tight')
     plt.close()
-    return os.path.join('html_files', 'dist_plot', f'{code}.png')
+    return os.path.join('html_files', 'dist_plot', f'{code}.png'), own_value
+
+
+def symmertry_range(limit: Tuple[float, float], center: float = 0) -> Tuple[float, float]:
+    if center - limit[0] > limit[1] - center:
+        return limit[0], 2 * center - limit[0]
+    else:
+        return 2 * center - limit[1], limit[1]

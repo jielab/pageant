@@ -1,3 +1,0 @@
-Name: Alcohol consumption ability
-Chinese name: 饮酒能力
-Description: 

@@ -1,5 +1,0 @@
-Name: Prostate cancer
-Chinese name: 前列腺癌
-Sex: male
-Description: 
-Average lifetime risk: 12.1% (NIH)

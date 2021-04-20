@@ -1,3 +1,0 @@
-Name: Clopidogrel
-Chinese name: 氯吡格雷
-Description: If you were CYP2C19 slow or intermediate metabolic type, the dose needs to be reduced.

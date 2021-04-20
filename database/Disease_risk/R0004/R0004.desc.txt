@@ -1,4 +1,0 @@
-Name: Colon cancer
-Chinese name: 结肠癌
-Description: 
-Average lifetime risk: 4.2% (NIH)

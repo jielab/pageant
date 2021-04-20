@@ -1,11 +1,23 @@
 from collections import OrderedDict
 import os
+import sys
 import pickle
+from platform import system as platform_check
 from time import sleep
 
+platform = platform_check()
 
-raw_dir = os.getcwd()
-default_config = config = {
+if platform == 'Darwin':
+    if hasattr(sys, 'frozen'):
+        raw_dir = os.path.dirname(sys.executable)
+    else:
+        raw_dir = os.path.dirname(sys.argv[0])
+        if not raw_dir:
+            raw_dir = os.getcwd()
+else:
+    raw_dir = os.getcwd()
+
+default_config = {
     'columns': {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3, 'Disease_description': 5}),
                 'columns_quan': OrderedDict({'snp': 0, 'reference': 1, 'beta': 2}),
                 'columns_qual': OrderedDict(
@@ -16,14 +28,15 @@ default_config = config = {
                 None: ['', '无', 'None', 'No', None], 'if': ['条件', 'if', 'IF'],
                 'and': ['并列', 'and', 'AND', '&', 'And']},
     'parameter': {'file_type': 'vcf', 'logo_dir': f'{os.path.join("database", "logo")}',
-                  'ref_structure': f'{os.path.abspath(os.path.join("reference", "ld_ref", "hapmap3.vcf.gz"))}',
-                  'text_sep': '\t', 'encoding': 'UTF-8',
-                  'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'sep': '\t', 'p_threshold': 1e-5,
+                  'ref_structure': f'{os.path.abspath(os.path.join("personal_genome", "hapmap3.vcf.gz"))}',
+                  'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'p_threshold': 1e-5,
                   'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01,
                   'show_code': 1, 'description_suf': ".desc.txt", 'need_suf': '.snps.ref', 'gwas_suf': ".tsv",
                   'qc_maf': 0.01, 'qc_vmiss': 0.02, 'qc_smiss': 0.02, 'qc_hardy': 50,
                   'qc_het': 3, 'qc_male_F': 0.4, 'qc_female_F': 0.6, 'qc_pihat': 0.2,
-                  'use_qc_ref': True,
+                  'use_qc_ref': False, 'population_sep': '\t', 'population_col': 'population',
+                  'population_file': os.path.join('.', 'personal_genome', 'hapmap3_samples.txt'),
+                  'population_id': 'IID',
                   },
     'module': {
         'sample_qc': True, 'ref_dist': True, 'ref_qc': True, 'vep': False,
@@ -60,6 +73,6 @@ def set_config(other_parameters: dict, config_txt=os.path.join(raw_dir, 'bin', '
     sleep(2)
 
 
-def average_progress(all_progress=50):
+def average_progress(all_progress=45):
     progresses = [10, 5, 10, 10, 0, 10, 10, 5]
-    return all_progress / sum([progresses[i] * list(default_config['module'].values())[i] for i in range(8)])
+    return all_progress / sum([progresses[i] * list(load_config()['module'].values())[i] for i in range(8)])

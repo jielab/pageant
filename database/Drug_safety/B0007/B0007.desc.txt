@@ -1,3 +1,0 @@
-Name: Tacrolimus
-Chinese name: 他克莫司
-Description: If you gene CYP3A5 is CC type, the dose needs to be reduced.
