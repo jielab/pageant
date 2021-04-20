@@ -1,62 +1,47 @@
 
-# PAGEANT: Personal Analysis of Genome and Annotation Toolkit
-# DTC genome report, free, reliable, and DIY.
-PAGEANT differs from other similar tools, summarized by “A-C-G-T”: 
-1. Academic quality standard, where start-of-the-art algorithms and millions of genetic variants could be used to calculate PRS; 
-2. Confidential data run locally, no need to send genomic data to cloud servers;
-3. Generalizable health assessment, easy to add/remove scope of health reports based on users' preference and comfort level. 
-4. Transparent source code for all underlying programming scripts..
+# PAGEANT: Personal Access to Genome and Analysis of Natural Traits
+
+Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health)
+
+<br />
 
 
-Author: Zhisheng Liang MS, Jie Huang MD PhD, Department of Global Health, Peking University School of Public Health
+# 1. Core functionalities (5Qs)
 
+The hard core of PAGEANT is a suite of common bioinformatics software including VEP and PLINK to manage and annotate user provided genetic data. 
+The main python script is used to generate user interface, manage the process and data flow, and eventually generate an easy-to-read report. 
 
+<img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
 
-# 1. Download and Test run
+<br />
+<br />
 
-## 1.1 Download the executable file
+# 2. Install and click to run
 
-
-* Download the executable files from [PKU Disk](https://disk.pku.edu.cn:443/link/23D5306029AA16DC8A9186155AA4F5FB) or [Google Drive](https://drive.google.com/file/d/1d8s8oSPEl0z6zVYvpBbyko-EvLlk3LJ9/view?usp=sharing), and then unzip it into an any empty directory. 
+* Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
+![Figure 2](./pictures/figure2NEW.png)
 
+<br />
+<br />
 
+# 3. Example report Q1: QA/QC of genotype data
 
+![Figure 4](./pictures/figure4.png)
 
-## 1.2 Run from the GUI interface
+<br />
 
-<img src="./pictures/figure1A.jpg" width = "500" height = "" alt="figure1A" align=center />
-<img src="./pictures/figure1B.jpg" width = "500" height = "" alt="figure1A" align=center />
-<img src="./pictures/figure1C.jpg" width = "500" height = "" alt="figure1A" align=center />
+# 4. Example report Q2 - Q4
 
+![Figure 6](./pictures/figure6.png)
 
-# 2. Examine the report
+<br />
 
-![Figure 2A](./pictures/figure2A.jpg)
-![Figure 2A](./pictures/figure2C.jpg)
-![Figure 2B](./pictures/figure2B.jpg)
+# 5. Customize PAGEANT
 
-
-# 3. Customize PAGEANT
-
-## 3.1 Replace reference genome by 1000 genomes data, for example
-
-```
-start from 1000 genomes project main page https://www.internationalgenome.org. 
-Then Click the "EBI FTP site" link under the "Alignments" section, and click "1000_genomes_project" link on the next page.
-Users will directed to http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/.
-The "1000genomes.exome.GRCh38DH.alignment.index" file listed the FTP URL for 2,692 samples.
-The New York Genome Center (NYGC) released high-coverage (30x) data for a total of 3,202 samples.
-Users could download the aligned sequencing data for any set of samples from this link https://www.internationalgenome.org/data-portal/data-collection/30x-grch38, aligned to the GRCh38 reference genome. Once the CRAM file is downloaded, users could use samtools to extract certain regions of the genome to created a much smaller dataset, by using scripts such as below:
-
-```
-
-
-## 3.2 Replace PRS reference file
-
-### 3.2.1 Download HapMap3 genotype, for calculating population risk reference
+### 5.1 Download HapMap3 genotype, used as population reference by default
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -67,8 +52,13 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-### 3.2.2 Download G1k genotype, for calculating population risk reference
+## 5.2 download 1000 genomes project (1000G) genotype data, if needed
+
 ```
+
+open https://www.internationalgenome.org, click "Data" menu on the top.
+under "Available data" section, click "Phase 3" VCF files.
+
 use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
 
 # rename the long file names to something short such as below:
@@ -88,12 +78,8 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ```
 
-## 3.3 Choose different PRS calculation methods
+## 5.3 Add or remove traits from the genetic report
 
+Please follow the following design.
 
-## 3.4 Add or remove report items
-
-
-
-
-
+![Figure 3](./pictures/figure3b.png)
