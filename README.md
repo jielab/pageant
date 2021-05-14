@@ -11,8 +11,6 @@ Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Heal
 The hard core of PAGEANT is a suite of common bioinformatics software including VEP and PLINK to manage and annotate user provided genetic data. 
 The main python script is used to generate user interface, manage the process and data flow, and eventually generate an easy-to-read report. 
 
-<img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
-
 <br />
 <br />
 
@@ -22,14 +20,10 @@ The main python script is used to generate user interface, manage the process an
 
 * The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
-![Figure 2](./pictures/figure2NEW.png)
-
 <br />
 <br />
 
 # 3. Example report Q1: QA/QC of genotype data
-
-![Figure 4](./pictures/figure4.png)
 
 <br />
 
