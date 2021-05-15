@@ -13,9 +13,8 @@ The main scripts include GUI.py and main.py and a suite of extra libraries. They
 
 Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 * For Windows OS, the program could be run directly by double clicking "PAGEANT.exe".
-* For MAC OS, please use brew (https://brew.sh/) to run "brew install zbar" to install necessary libraries first, and then double click "PAGEANT".
+* For MAC OS, please use brew (https://brew.sh/) to run "brew install zbar" first to install necessary libraries, and then double click "PAGEANT".
 * For Linux, the program could be run directly by typing "./PAGEANT".
-<br />
 <br />
 
 # 2. Example report of Principal Component, as part of QA/QC
