@@ -2,39 +2,35 @@
 # PAGEANT: Personal Access to Genome and Analysis of Natural Traits
 
 Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health)
-
+<br />
 <br />
 
-
-# 1. Core functionalities (5Qs)
+# 1. Install and click to run
 
 The hard core of PAGEANT is a suite of common bioinformatics software including VEP and PLINK to manage and annotate user provided genetic data. 
-The main python script is used to generate user interface, manage the process and data flow, and eventually generate an easy-to-read report. 
-<br />
+The main scripts include GUI.py and main.py and a suite of extra libraries. They generate user interface, manage bioinformatics processes and data flow, and eventually generate an easy-to-read report. 
 <br />
 
-# 2. Install and click to run
-
-* Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. The hard core scripts include GUI.py and main.py and a suite of extra libraries.
+Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 * For Windows OS, the program could be run directly by double clicking "PAGEANT.exe".
 * For MAC OS, please use brew (https://brew.sh/) to run "brew install zbar" to install necessary libraries first, and then double click "PAGEANT".
 * For Linux, the program could be run directly by typing "./PAGEANT".
 <br />
 <br />
 
-# 3. Example report of Principal Component, as part of QA/QC
+# 2. Example report of Principal Component, as part of QA/QC
 
 ![example report for QC](./pictures/Fig_QC.png)
 <br />
 
-# 4. Example report of Quantitative traits
+# 3. Example report of Quantitative traits
 
 ![example report for Quantitative traits](./pictures/figure6.png)
 <br />
 
-# 5. Customize PAGEANT
+# 4. Customize PAGEANT
 
-### 5.1 Download HapMap3 genotype, used as population reference by default
+### 4.1 Download HapMap3 genotype, used as population reference by default
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -45,7 +41,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-## 5.2 download 1000 genomes project (1000G) genotype data, if needed
+## 4.2 download 1000 genomes project (1000G) genotype data, if needed
 
 ```
 
@@ -71,7 +67,7 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ```
 
-## 5.3 Add or remove traits from the genetic report
+## 4.3 Add or remove traits from the genetic report
 
 Please follow the following design.
 
