@@ -22,7 +22,7 @@ The main python script is used to generate user interface, manage the process an
 <br />
 <br />
 
-# 3. Example report of QA/QC
+# 3. Example report of Principal Component, as part of QA/QC
 
 ![example report for QC](./pictures/Fig_QC.png)
 <br />
