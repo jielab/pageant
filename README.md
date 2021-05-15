@@ -18,19 +18,18 @@ The main python script is used to generate user interface, manage the process an
 * Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. The hard core scripts include GUI.py and main.py and a suite of extra libraries.
 * For Windows OS, the program could be run directly by double clicking "PAGEANT.exe".
 * For MAC OS, please use brew (https://brew.sh/) to run "brew install zbar" to install necessary libraries first, and then double click "PAGEANT".
-* For Linux, the program could be run directly by typing "./PAGEANT.exe".
+* For Linux, the program could be run directly by typing "./PAGEANT".
 <br />
 <br />
 
 # 3. Example report of QA/QC
 
-![Figure QC](./pictures/figure6.png)
-
+![example report for QC](./pictures/Fig_QC.png)
+<br />
 
 # 4. Example report of Quantitative traits
 
-![Figure 6](./pictures/figure6.png)
-
+![example report for Quantitative traits](./pictures/figure6.png)
 <br />
 
 # 5. Customize PAGEANT
