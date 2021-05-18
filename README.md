@@ -27,9 +27,14 @@ Three zipped folders are downloadable from [Google Drive](https://drive.google.c
 ![example report for Quantitative traits](./pictures/Fig_Qt.png)
 <br />
 
-# 4. Customize PAGEANT
+# 4. Example report of QR code
 
-### 4.1 Download HapMap3 genotype, used as population reference by default
+![example report for QR code](./pictures/Fig_QR.png)
+<br />
+
+# 5. Customize PAGEANT
+
+### 5.1 Download HapMap3 genotype, used as population reference by default
 
 ```
 Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
@@ -40,7 +45,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-## 4.2 download 1000 genomes project (1000G) genotype data, if needed
+## 5.2 download 1000 genomes project (1000G) genotype data, if needed
 
 ```
 
@@ -66,7 +71,7 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ```
 
-## 4.3 Add or remove traits from the genetic report
+## 5.3 Add or remove traits from the genetic report
 
 Please follow the following design.
 
