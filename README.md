@@ -24,7 +24,7 @@ Three zipped folders are downloadable from [Google Drive](https://drive.google.c
 
 # 3. Example report of Quantitative traits
 
-![example report for Quantitative traits](./pictures/figure6.png)
+![example report for Quantitative traits](./pictures/Fig_Qt.png)
 <br />
 
 # 4. Customize PAGEANT
@@ -70,4 +70,4 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 Please follow the following design.
 
-![Figure 3](./pictures/figure3b.png)
+![Folder Structure](./pictures/Fig_structure.png)
