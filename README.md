@@ -75,4 +75,4 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 Please follow the following design.
 
-![Folder Structure](./pictures/Fig_folders.png)
+![Folder Structure](./pictures/Fig_folder.png)
