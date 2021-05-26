@@ -45,7 +45,7 @@ But this is not needed for PAGEANT, since only SNP rsID is used for querying and
 
 ```
 
-## 5.2 download 1000 genomes project (1000G) genotype data, if needed
+## 5.2 Download 1000 genomes project (G1K) genotype, to be used as population reference
 
 ```
 
