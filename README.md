@@ -16,7 +16,6 @@ Three zipped folders are downloadable from [Google Drive](https://drive.google.c
 * For MAC OS, please use brew (https://brew.sh/) to run "brew install zbar" first to install necessary libraries, and then double click "PAGEANT".
 * For Linux, the program could be run directly by typing "./PAGEANT".
 <br />
-<br />
 
 # 2. Example report of Principal Component, as part of QA/QC
 
