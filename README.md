@@ -73,6 +73,6 @@ plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf b
 
 ## 5.3 Add or remove traits from the genetic report
 
-Please follow the following design.
+The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. Users could follow this structure to add many new traits to be included in the genetic report.  
 
 ![Folder Structure](./pictures/Fig_folder.png)
