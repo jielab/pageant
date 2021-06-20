@@ -19,7 +19,7 @@ Three zipped folders are downloadable from [Google Drive](https://drive.google.c
 
 # 2. Example report of Principal Component, as part of QA/QC
 
-![example report for QC](./pictures/Fig_QC.png)
+![example report for QC](./pictures/Fig_PC.png)
 <br />
 <br />
 
