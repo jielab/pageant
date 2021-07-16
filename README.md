@@ -2,14 +2,27 @@
 # PAGEANT: Personal Access to Genome & Analysis of Natural Traits
 
 
-# #1. Install and click to run
+# #1. The "ACGTU" Philosophy & The "5Q" Design
 
-### The hard core of PAGEANT is a suite of common bioinformatics tools and python modules, combined to manage and annotate user provided genetic data. 
-### The main scripts include GUI.py and main.py and a suite of extra libraries. They work together to generate a user interface, manage bioinformatics processes and data flow, and eventually generate an easy-to-read report. 
+> ### The hard core of PAGEANT is a suite of common bioinformatics tools and python modules, combined to manage and annotate user provided genetic data. 
+> ### The main scripts include GUI.py and main.py and a suite of extra libraries. They work together to generate a user interface, manage bioinformatics processes and data flow, and eventually generate an easy-to-read report. 
+> ### The "ACGTU" Philosophy:
+> > - #### Academic quality standard, where state-of-the-art algorithms and millions of genetic variants could be used to calculate individual Polygenic Risk Score (PRS); 
+> > - #### Confidential data run locally, without the need of sending genomic data to cloud servers; 
+> > - #### Generalizable architecture and algorithm, where our “five-Q” design could scale the genetic report from dozens of traits to hundreds and thousands of traits; 
+> > - #### Transparent source code for all underlying programming scripts; 
+> > - #### User centric, where users have the full control to add/remove certain traits into/from a genetic report. 
+
+> ### The "5Q" Design:
+> > - #### (1) Quality assurance and control report of genetic data itself; 
+> > - #### (2) Qualitative assessment for genetic characteristics with absolute or relatively high certainty; 
+> > - #### (3) Quantitative assessment of health risk susceptibility based on PRS and population reference; 
+> > - #### (4) Query of third-party variants databases such as ClinVAR and PharmGKB; 
+> > - #### (5) QR code display of genetic variants of interest, such as those variants for genetic identification and for certain drug prescription.
 
 <br/><br/>
 
-## Below are the downloading link:
+## To download:
 > - ### [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing)
 > - ### [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing)
 > - ### [MacOS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
