@@ -10,13 +10,13 @@
 <br/><br/>
 
 ## Below are the downloading link:
-> - ### Windows: https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing
-> - ### Linux: https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing
-> - ### MacOS: https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing
+> - ### [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing)
+> - ### [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing)
+> - ### [MacOS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
 
 ## To run:
 > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> - ### For MAC OS:  run "brew install zbar" first (https://brew.sh/) to install necessary libraries, and then double click "PAGEANT".
+> - ### For MAC OS:  run "[brew](https://brew.sh/) install zbar" first  to install necessary libraries, and then double click "PAGEANT".
 > - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
 <br/><br/>
