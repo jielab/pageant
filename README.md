@@ -64,8 +64,7 @@
 > ### 5.2 Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference for genetic data imputed into G1K.
 
 > ### 5.3 Add or remove traits from the genetic report
-
-## The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. Users could follow this structure to add many new traits to be included in the genetic report.  
+> - ### The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. Users could follow this structure to add many new traits to be included in the genetic report.  
 
 ![Folder Structure](./images/Fig_folder.png)
 
