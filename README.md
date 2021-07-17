@@ -1,5 +1,6 @@
 
 ## PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+
 <br/><br/>
 
 ## #1. The "ACGTU" Philosophy & The "5Q" Design
@@ -70,4 +71,4 @@
 ![Folder Structure](./images/Fig_folder.png)
 
 
-### **Contact**:  ([Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health)
+### Contact:  [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
