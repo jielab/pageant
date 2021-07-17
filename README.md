@@ -1,8 +1,8 @@
 
-# PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+## PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+<br/><br/>
 
-
-# #1. The "ACGTU" Philosophy & The "5Q" Design
+## #1. The "ACGTU" Philosophy & The "5Q" Design
 
 > ### The hard core of PAGEANT is a suite of common bioinformatics tools and python modules, combined to manage and annotate user provided genetic data. 
 > ### The main scripts include GUI.py and main.py and a suite of extra libraries. They work together to generate a user interface, manage bioinformatics processes and data flow, and eventually generate an easy-to-read report. 
@@ -35,21 +35,21 @@
 <br/><br/>
 
 
-# #2. Example report of QA/QC
+## #2. Example report of QA/QC
 
 ![example report for QC](./images/Fig_PC.png)
 
 <br/><br/>
 
 
-# #3. Example report of Quantitative traits
+## #3. Example report of Quantitative traits
 
 ![example report for Quantitative traits](./images/Fig_Qt.png)
 
 <br/><br/>
 
 
-# #4. Example report of QR code
+## #4. Example report of QR code
 
 ![example report for QR code](./images/Fig_QR.png)
 
@@ -57,7 +57,7 @@
 
 
 
-# #5. Customize PAGEANT
+## #5. Customize PAGEANT
 
 > ### 5.1 Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 
