@@ -24,45 +24,40 @@
 
 <br/>
 
-## Download:
-> - ### [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing)
-> - ### [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing)
-> - ### [MacOS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
-> - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
-> - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+
+## #2. Install & Run
+> ## Download:
+> > - ### [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing)
+> > - ### [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing)
+> > - ### [MacOS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
+> > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
+> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+> ## Run:
+> > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
+> > - ### For Mac-OS:  run "[brew](https://brew.sh/) install zbar" first  to install necessary libraries, and then double click "PAGEANT".
+> > - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
 <br/>
 
-## Run:
-> - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> - ### For Mac-OS:  run "[brew](https://brew.sh/) install zbar" first  to install necessary libraries, and then double click "PAGEANT".
-> - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
-<br/>
+## #3. Example reports 
 
-
-## #2. Example report of QA/QC
+> ## QA/QC using principal components
 
 ![example report for QC](./images/Fig_PC.png)
 
-<br/>
-
-
-## #3. Example report of Quantitative traits
+> ## Quantitative traits
 
 ![example report for Quantitative traits](./images/Fig_Qt.png)
 
-<br/>
-
-
-## #4. Example report of QR code
+> ## QR code
 
 ![example report for QR code](./images/Fig_QR.png)
 
 <br/>
 
 
-## #5. Customize PAGEANT
+## #4. Customize
 
 > - ### The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. 
 > - ### For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. 
