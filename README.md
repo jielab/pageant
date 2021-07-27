@@ -32,7 +32,7 @@
 > > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> > - ### For Mac-OS:  run "[brew](https://brew.sh/) install zbar" first  to install necessary libraries, and then double click "PAGEANT".
+> > - ### For Mac-OS:  fullow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first, to install necessary libraries, and then double click "PAGEANT".
 > > - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
 <br/>
