@@ -26,17 +26,15 @@
 
 ## #2. Install & Run
 ### Requirement
-> - [Git](https://git-scm.com/)
+> - ######[Git](https://git-scm.com/)
+> - ######[PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/)
+> > Make sure the plink and plink2 can be found in your "PATH" enironment variable. Or you can edit the "plink_dir" settings in the "./bin/config.ini" to help PAGEANT to find the PLINK softwares(plink and plink2).
 > <br><br/>
-> - [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/)**
-Make sure the plink and plink2 can be found in your "PATH" enironment variable. Or you can edit the "plink_dir" settings in the "./bin/config.ini" to help PAGEANT to find the PLINK softwares(plink and plink2).
+> - ######[Conda](https://docs.conda.io/en/latest/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+> > Conda is a package and environment management system that allows you to install Python and other software into controlled environments without disrupting other software you have installed.
 > <br><br/>
-> - [Conda](https://docs.conda.io/en/latest/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)**
-Conda is a package and environment management system that allows you to install Python and other software into controlled environments without disrupting other software you have installed.
-> <br><br/>
-> - [Homebrew](https://brew.sh/) (For mac)
-> <br><br/>
-> - Reference data:
+> - ######[Homebrew](https://brew.sh/) (For mac)
+> - ######Reference data:
 > >- Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > >- Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
 ### Installation
@@ -47,18 +45,18 @@ Conda is a package and environment management system that allows you to install 
 > cd pageant
 > ```
 > For different operation system, run the corresponding command to create the environment for `PAGEANT`
-> - Windows: 
+> - ###### Windows: 
 >> ```
 >> conda env create -f environment_win.yml
 >> ```
 
-> - Linux: 
+> - ###### Linux: 
 >> ```
 >> sudo apt-get install libzbar0
 >> conda env create -f environment_linux.yml
 >> ```
 
-> - macOS:
+> - ###### macOS:
 >> ```
 >> brew install zbar llvm
 >> conda env create -f environment_macos.yml
