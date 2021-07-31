@@ -34,9 +34,7 @@
 > > Conda is a package and environment management system that allows you to install Python and other software into controlled environments without disrupting other software you have installed.
 > <br><br/>
 > - ###### [Homebrew](https://brew.sh/) (For mac)
-> - ###### Reference data:
-> >- Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
-> >- Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+
 ### Installation
 
 > In order to download `PAGEANT`, you should clone this repository via the command
@@ -84,9 +82,6 @@
 > > > For qualitative trait, algorithm data need four columns: variants' name, genotype, phenotype for corresponding genotype, phenotype for non-corresponding genotype. <br></br>
 > > > For quantitative trait, algorithm data need three columns: variants' name, allele, effect size for corresponding allele.
 
-
-
-> For quantitative trait, 
 > - ###### Reference data:
 > >- Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > >- Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
