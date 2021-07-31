@@ -25,7 +25,7 @@
 
 
 ## #2. Install & Run
-###Requirement
+### Requirement
 > - [Git](https://git-scm.com/)
 > <br><br/>
 > - [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/)**
@@ -39,7 +39,7 @@ Conda is a package and environment management system that allows you to install 
 > - Reference data:
 > >- Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > >- Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
-###Installation
+### Installation
 
 > In order to download `PAGEANT`, you should clone this repository via the command
 > ```
@@ -64,7 +64,7 @@ Conda is a package and environment management system that allows you to install 
 >> conda env create -f environment_macos.yml
 >> ```
 
-###Run
+### Run
 
 > **GUI version:**
 > ```
@@ -76,13 +76,13 @@ Conda is a package and environment management system that allows you to install 
 > conda activate pageant
 > python ./pageant.py -h
 > ```
-###Updating PAGEANT
+### Updating PAGEANT
 > You can update to the newest version of `PAGEANT` using git. First, navigate to your pageant/ directory, then run
 > ```
 > git pull
 > ```
 
-###Support
+### Support
 > Some bugs might have been reported and solved in the latest version of `PAGEANT`. Therefore, please make sure your `PAGEANT` has been updated to the latest version.
 <br><br/>
 > If you are unfamiliar with the above operations, you can download the executable file from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing). The executable file could be run directly. It is compiled from GUI.py and pageant.py and a suite of extra libraries.
