@@ -62,6 +62,36 @@
 >> conda env create -f environment_macos.yml
 >> ```
 
+### Preparing database
+> - ###### Algorithm database
+> There two type of traits(Qualitative & quantitative) in algorithm database.
+> Each algorithm is stored as a folder in a category folder. 
+> There are three needed files in each folder: 
+> > - ###### Description text
+> > > A text described the indicator. <br></br>
+> > > Example:
+> > > ```
+> > > Name: Example
+> > > Description: description
+> > > Reference: PMID: 12345678
+> > > ```
+
+> > - ###### Picture
+> > > > A picture described the indicator.
+
+> > - ###### Algorithm data
+> > > An algorihtm text which use for calculating indicator. Text's separator is `\t`. No header in the text. <br></br>
+> > > For qualitative trait, algorithm data need four columns: variants' name, genotype, phenotype for corresponding genotype, phenotype for non-corresponding genotype. <br></br>
+> > > For quantitative trait, algorithm data need three columns: variants' name, allele, effect size for corresponding allele.
+
+
+
+> For quantitative trait, 
+> - ###### Reference data:
+> >- Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
+> >- Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+
+
 ### Run
 
 > **GUI version:**
@@ -72,10 +102,11 @@
 > **Command line version:**
 > ```
 > conda activate pageant
-> python ./pageant.py -h
+> python ./pageant.py -n test -i ./personal_genome/sample.vcf.gz -o output
 > ```
 ### Updating PAGEANT
-> You can update to the newest version of `PAGEANT` using git. First, navigate to your pageant/ directory, then run
+> You can update to the newest version of `PAGEANT` using git. 
+> First, navigate to your pageant/ directory, then run
 > ```
 > git pull
 > ```
