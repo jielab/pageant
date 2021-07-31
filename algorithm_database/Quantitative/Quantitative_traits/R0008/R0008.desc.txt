@@ -1,0 +1,5 @@
+Name: Breast cancer
+Chinese name: 乳腺癌
+Sex: female
+Description: 
+Average lifetime risk: 12.9% (NIH)

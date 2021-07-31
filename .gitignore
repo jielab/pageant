@@ -5,9 +5,6 @@
 GUI.spec
 .gitignore
 .gitattributes
-/population_genome/
-/personal_genome/
-/algorithm_database/
 /output/
 PAGEANT.exe
 /venv/

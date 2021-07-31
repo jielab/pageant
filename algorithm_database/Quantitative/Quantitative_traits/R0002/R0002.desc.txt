@@ -1,0 +1,4 @@
+Name: Colorectal cancer
+Chinese name: 结肠癌
+Description: Colorectal cancer (CRC) is the third and fourth most common cancer in women and men worldwide, respectively, and the fourth most common cause of cancer death. CRC exhibits global geographic variations in its incidence with multiple factors (social, demographic, environmental, and genetic) playing different roles in its pathogenesis. Diet rich in fat and low in fiber, high levels of triglycerides, physical inactivity, diabetes, alcohol, obesity, and smoking are the identified risk factors of colorectal cancer. Hereditary factors play a definite role as well. CRC is generally sporadic but approximately 25% of the patients have a genetic predisposition. Instability in chromosomes, CpG island methylation, and microsatellite instability have been reported in key genes leading to the developing of CRC. Gene–environment interactions are also important in the pathogenesis.
+Average lifetime risk: 4.2% (NIH)
