@@ -1,15 +1,20 @@
-import matplotlib.pyplot as plt
-from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
-from typing import List, Dict, Set, Tuple, Generator, Iterable
-from typing.io import IO, TextIO, BinaryIO
-import pandas as pd
-from scipy.stats import gaussian_kde
 import subprocess
-import cpufeature
 from re import search
 from shutil import copy
+# import cpufeature
+import matplotlib.pyplot as plt
+import pandas as pd
+from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace
+from scipy.stats import gaussian_kde
 from src.decorator import *
-from src.config import *
+
+
+objects_config = configparser.ConfigParser()
+
+
+def load_config_obj(main_config: configparser.ConfigParser):
+    global objects_config
+    objects_config = main_config
 
 
 class PLINKERROR(Exception):
@@ -46,8 +51,7 @@ class Human(object):
 
     @auto_encoding
     @auto_sep
-    def cal_ind_from_txt(self, file: str, type_dir: str, ind_dir: str, ref_rs: pd.DataFrame,
-                         type_list: dict, columns: dict, *,
+    def cal_ind_from_txt(self, file: str, type: str, ind_dir: str, ref_rs: pd.DataFrame, columns: dict, *,
                          encoding: str = 'UTF-8', sep: str = '\t') -> None:
         with open(file, encoding=encoding) as f:
             for line in f:
@@ -55,8 +59,8 @@ class Human(object):
                 if line:
                     line = line.split(sep)
                     assert len(line) > 1, sep.join(line)
-                    self.cal_ind(type_list[type_dir], ind_dir,
-                                 *select_list(line, columns['columns_' + type_list[type_dir]].values()), ref_rs=ref_rs)
+                    self.cal_ind(type, ind_dir,
+                                 *select_list(line, columns['columns_' + type].values()), ref_rs=ref_rs)
 
     def get_prs_data(self, code: str, res: float, detail: str):
         if code in self.ind_data:
@@ -91,9 +95,9 @@ class Human(object):
 class Ind(object):
     def __init__(self, code: str, name: str, sex: str, itype: str, ind_dir, **other):
         self.code = code
-        self.name = name if load_config()['parameter']['show_code'] == 0 else f'{name} ({code})'
+        self.name = name if eval(objects_config['parameter']['show_code']) else f'{name} ({code})'
         self.sex = sex
-        self.itype = itype
+        self.itype = os.path.basename(itype)
         self.ftype = None
         self.outcome = None
         self.detail = []
@@ -128,7 +132,7 @@ class Ind(object):
         self.status = True
 
     def cal(self, snp: str, gt: set, ref: str, inter: str or float or int, no_inter=None):
-        lan_lib = load_config()['lan_lib']
+        lan_lib = convert_dict(objects_config['lan_lib'])
         if self.ftype == 'qual':
             if not self.decide:
                 if inter in lan_lib['if']:
@@ -152,7 +156,7 @@ class Ind(object):
                             else:
                                 self.outcome = no_inter
                                 self.and_status = True
-                            self.outcome = 'normal' if self.outcome in lan_lib[None] else self.outcome
+                            self.outcome = 'normal' if self.outcome in lan_lib['none'] else self.outcome
                             if self.outcome != 'normal':
                                 self.decide = True
                             self.status = True
@@ -165,16 +169,18 @@ class Ind(object):
                 if type(item) == dict:
                     if snp in item.keys():
                         logging.warning(f"There are duplicate snps ({snp}) when calculate the quantitative trait!")
-                        self.outcome /= item['outcome']
+                        self.outcome /= outcome
                         item['beta'] = inter
                         item['effect allele'] = ref
-                        item['outcome'] = outcome
-            if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome} not in self.detail:
-                self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome})
+                        # item['outcome'] = outcome
+            # if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome} not in self.detail:
+            if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter} not in self.detail:
+                # self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome})
+                self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter})
             self.status = True
 
     def mis_snp(self, snp: str, inter: str or float or int, ref_rs: pd.DataFrame):
-        lan_lib = load_config()['lan_lib']
+        lan_lib = convert_dict(objects_config['lan_lib'])
         warning = f'Snp ({snp}) cannot be found in your genotype file!'
         if self.ftype == 'quan':
             if f'{self.code}_{snp}' in ref_rs.columns:
@@ -210,7 +216,8 @@ class Ind(object):
 
     def report(self, output):
         if self.picture:
-            copy(self.picture, os.path.join(output, 'genetic_report', 'html_files', 'img', os.path.basename(self.picture)))
+            copy(self.picture,
+                 os.path.join(output, 'genetic_report', 'html_files', 'img', os.path.basename(self.picture)))
             self.picture = os.path.join('html_files', 'img', os.path.basename(self.picture))
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
@@ -237,12 +244,18 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
         out_file = cmd.split('--out ')[-1].split(' ')[0]
     else:
         out_file = os.path.join('.', plink)
-    sys_suffix = 'win.exe' if platform == 'Windows' else 'mac' if platform == 'Darwin' else \
-        'linux' if platform == 'Linux' else ''
-    avx_suffix = '' if plink != 'plink2' else '_avx' if cpufeature.CPUFeature['AVX2'] else ''
-    assert sys_suffix, 'Unsupported operating system'
-    plink_file = os.path.join(raw_dir, "bin", plink + avx_suffix + "_" + sys_suffix)
-    assert os.path.isfile(plink_file), f"Cannot find {plink + avx_suffix}_{sys_suffix} in bin directory"
+    if detect_plink(plink):
+        plink_file = plink
+    else:
+        plink_dir = load_config()['file']['plink_dir']
+        sys_suffix = '.exe' if platform == 'Windows' else ''
+        # # avx_suffix = '' if plink != 'plink2' else '_avx' if cpufeature.CPUFeature['AVX2'] else ''
+        # avx_suffix = ''
+        # assert sys_suffix, 'Unsupported operating system'
+        # plink_file = os.path.join(raw_dir, "bin", plink + avx_suffix + "_" + sys_suffix)
+        plink_file = os.path.join(raw_dir, plink_dir, plink + sys_suffix)
+        # assert os.path.isfile(plink_file), f"Cannot find {plink}{avx_suffix}_{sys_suffix} in bin directory"
+        assert os.path.isfile(plink_file), f"Cannot find {plink}{sys_suffix} in plink directory"
     cmd = plink_file + ' ' + cmd
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, sterr = a.communicate()
@@ -254,6 +267,13 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
             os.remove(out_file + '.log')
         except FileNotFoundError:
             raise RUNPLINKERROR("RunPlinkError:\n" + sterr.decode().strip())
+
+
+def detect_plink(plink: str = 'plink' or 'plink2'):
+    a = subprocess.Popen(f'which {plink}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    stdout, sterr = a.communicate()
+    a.wait()
+    return True if stdout else False
 
 
 def select_list(ob_list: list, index) -> list:
@@ -306,9 +326,9 @@ def cal_beta(gt: set, ref: str, beta: int or float) -> float:
 
 
 def trans_sex(sex: str or bool) -> bool or str:
-    lan_lib = load_config()['lan_lib']
+    lan_lib = convert_dict(objects_config['lan_lib'])
     if type(sex) == str:
-        return True if sex in lan_lib['sex']['male'] else False if sex in lan_lib['sex']['female'] else None
+        return True if sex in lan_lib['male'] else False if sex in lan_lib['female'] else None
     elif type(sex) == bool:
         return 'male' if sex else 'female'
 
@@ -331,7 +351,7 @@ def risk_level(per: float):
 def pie_plot(count: list or pd.Series, labels: list or pd.Index, save_path: str, title: str or None = None,
              arrow: bool = True, legend_ratio: int = 3, **other_kwargs):
     plt.figure(figsize=(8, 6), dpi=400)
-    ax1, ax2 = plt.subplot(1, legend_ratio, 1 if legend_ratio == 2 else tuple(range(1, legend_ratio))),\
+    ax1, ax2 = plt.subplot(1, legend_ratio, 1 if legend_ratio == 2 else tuple(range(1, legend_ratio))), \
                plt.subplot(1, legend_ratio, legend_ratio)
     patches, texts = ax1.pie(count, radius=1.2, pctdistance=1.13, **other_kwargs)
     ax1.axis('equal')

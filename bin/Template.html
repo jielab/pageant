@@ -56,7 +56,7 @@
         }
 
         $(function () {
-            for (var i = 0; i < 4; i++) {
+            for (var i = 0; i < 5; i++) {
                 var $table = $('.pager_table' + i),
                     pagerOptions = {
                         container: $(".pager" + i),
@@ -92,7 +92,7 @@
     </script>
 
 </head>
-<body>
+<body style="font-family: {{ font }}">
 <header>
     <h1><a onclick="show_all()" style="cursor: pointer">PAGEANT Report</a></h1>
     <div class="header-detail">
@@ -105,27 +105,8 @@
 </header>
 <nav id="nav">
     <ul>
-        {% if success %}
-        <li><a href="#Qual_res">Qualitative Traits</a>
-            <ul>
-                {% for key in type.keys() %}
-                {% if type[key] == 'qual' %}
-                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </li>
-        <li><a href="#Quan_res">Quantitative Traits</a>
-            <ul>
-                {% for key in type.keys() %}
-                {% if type[key] == 'quan' %}
-                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </li>
         {% if module['sample_qc'] or module['ref_qc'] %}
-        <li><a href="#qc">Quality control</a>
+        <li><a href="#qc">1<sup>st</sup> Q</a>
             <ul>
                 {% if module['sample_qc'] %}
                 <li><a href="#sample_qc">Sample QC</a></li>
@@ -136,8 +117,27 @@
             </ul>
         </li>
         {% endif %}
+        {% if success %}
+        <li><a href="#Qual_res">2<sup>nd</sup> Q</a>
+            <ul>
+                {% for key in type.keys() %}
+                {% if type[key] == 'qual' %}
+                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </li>
+        <li><a href="#Quan_res">3<sup>rd</sup> Q</a>
+            <ul>
+                {% for key in type.keys() %}
+                {% if type[key] == 'quan' %}
+                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </li>
         {% if module['query_database'] %}
-        <li><a href="#query_database">Query database</a>
+        <li><a href="#query_database">4<sup>th</sup> Q</a>
             <ul>
                 {% if module['clinvar'] %}
                 <li><a href="#clinvar">Clinvar</a></li>
@@ -145,11 +145,18 @@
                 {% if module['pharmgkb'] %}
                 <li><a href="#pharmgkb">PharmGKB</a></li>
                 {% endif %}
+                {% if extra_res[0][2] %}
+                <li><a href="#third_party_db">Third-party DB</a></li>
+                {% endif %}
             </ul>
         </li>
         {% endif %}
         {% if module['qr_code'] %}
-        <li><a href="#qr_code">QR code</a></li>
+        <li><a href="#qr_code">5<sup>th</sup> Q</a>
+            <ul>
+                <li><a href="#qr_code_sub">QR Code</a></li>
+            </ul>
+        </li>
         {% endif %}
         {% endif %}
         <li><a href="#Report_detail">Running Log</a></li>
@@ -158,8 +165,103 @@
 <main id="main">
     <div id="main_top"></div>
     {% if success %}
+        {% if module['ref_qc'] or module['sample_qc'] %}
+    <div id="qc" class="section">
+        <h2>1<sup>st</sup> Q</h2>
+            <p class="section_text">This section reports quality control (QC) statistics for the personal genotype data,
+            as well as for the reference genotype data.</p>
+        {% if module['sample_qc'] %}
+        <div id="sample_qc">
+            <h2 class="Detected_title">Sample QC</h2>
+            <ul style="font-size: 20px">
+                <li>The genetically determined sex is: {{ human.sex }}</li>
+                <li>{{ human.missing[0] }} of {{ human.missing[1] }} variants are missing, missing rate is:
+                    {{ human.missing[2] }}
+                </li>
+            </ul>
+            <h3>Variants count in each chromosome:</h3>
+            <img src="./html_files/img/chromosome_count.png" alt="Variants count in each chromosome" width="88%">
+            {% if extra_res[0][0] %}
+            <h3>Minor allele frequency in sample based on MAF reference data:</h3>
+            <ul style="font-size: 20px">
+                <li>{{ extra_res[0][0] }}</li>
+            </ul>
+            <img src="./html_files/img/QC_SAMPLE_MAF.png" alt="Minor allele frequency of each variants in sample"
+                 width="75%">
+            {% endif %}
+            {% if extra_res[0][1] %}
+            <h3>Population stratification analysis:</h3>
+                <div style="float: left; display: inline-block; width: 43%">
+                    <h3>PCA</h3>
+                    <img src="./html_files/img/QC_PCA.png" alt="Principal Components of Sample based on reference"
+                         width="100%">
+                </div>
+                <div style="display: inline-block; clear: right; width: 43%">
+                    <h3>UMAP</h3>
+                    <img src="./html_files/img/QC_UMAP.png" alt="UMAP result of Sample based on reference"
+                         width="100%">
+                </div>
+            {% endif %}
+            {% if extra_res[0][2] %}
+            <h3>Concordance check:</h3>
+            <ul style="font-size: 20px">
+                {% for res in extra_res[0][2].split('\n') %}
+                <li>{{ res }}</li>
+                {% endfor %}
+            </ul>
+            <img src="./html_files/img/QC_concordence.png" alt="Venn diagram of genotype files' variants"
+                 width="50%">
+            {% endif %}
+            {% if module['vep'] %}
+            <h3>Class and consequence of variations in sample:</h3>
+            <img src="./html_files/img/vep_class_res.png" alt=" Variants' classes in sample" width="36%">
+            <img src="./html_files/img/vep_type_res.png" alt="Variants' consequences in sample" width="50%">
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+        {% if module['ref_qc'] %}
+        <div id="ref_qc">
+            {% if one %}
+            {% set suffix = [''] %}
+            {% else %}
+            {% set suffix = ['qual', 'quan'] %}
+            {% endif %}
+            <h2 class="Detected_title">Population QC</h2>
+            {% for i in suffix %}
+            <div style="margin-bottom: 100pt">
+                {% if i == 'qual' %}
+                <h3>Population QC for qualitative traits:</h3>
+                {% elif i == 'quan' %}
+                <h3>Population QC for quantitative traits:</h3>
+                {% endif %}
+                <h3>Minor allele frequency:</h3>
+                <img src="./html_files/img/QC_MAF{{ '_' + i if i else ''}}.png" alt="Minor allele frequency of each variant" width="86%">
+                <h3>Missing genotype rates:</h3>
+                <img src="./html_files/img/QC_ind_miss{{ '_' + i if i else ''}}.png" alt="Missing genotype rates per variant" width="43%"
+                     style="float: left">
+                <img src="./html_files/img/QC_var_miss{{ '_' + i if i else ''}}.png" alt="Missing genotype rates per sample" width="43%">
+                <h3>Sex discrepancy:</h3>
+                <img src="./html_files/img/QC_sex{{ '_' + i if i else ''}}.png" alt="F value (X chromosome homozygosity estimate) of each sample"
+                     width="86%">
+                <h3>Cryptic relatedness:</h3>
+                <img src="./html_files/img/QC_relatedness{{ '_' + i if i else ''}}.png" alt="Pihat value of each sample-sample pair" width="86%">
+                <h3>Hardy-Weinberg equilibrium:</h3>
+                <img src="./html_files/img/QC_hardy{{ '_' + i if i else ''}}.png" alt="Hardy-Weinberg equilibrium p-value in each variant"
+                     width="86%">
+                <h3>Heterozygosity rate:</h3>
+                <img src="./html_files/img/QC_het{{ '_' + i if i else ''}}.png" alt="Heterozygosity rate in each sample" width="86%">
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% endif %}
+
     <div id="Qual_res" class="section">
-        <h2>Qualitative Traits</h2>
+        <h2>2<sup>nd</sup> Q</h2>
         <p class="section_text">The traits listed in this section are almost definitely determined by genetics. However,
             the association with relevant disease outcome is certainly not definite. For example,
             “FTO related obesity” simply reports one widely cited FTO SNP that is associated with
@@ -186,7 +288,7 @@
                 </tbody>
             </table>
             <div class="detail">
-                <p class="miss_h3">Detail: </p>
+                <p class="miss_h3">Scientific detail: </p>
                 {% for indicator in basic_res[key] %}
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}" style="padding-bottom: 10px;
                  border-bottom-style: groove; border-bottom-width: medium; margin-bottom: 35px">
@@ -263,7 +365,7 @@
         {% endfor %}
     </div>
     <div id="Quan_res" class="section">
-        <h2>Quantitative Traits</h2>
+        <h2>3<sup>rd</sup> Q</h2>
         <p class="section_text">The risk assessment is purely based on polygenic risk score, whose association with various diseases is
             usually very limited. Furthermore, the information provided here should be in no way treated similarly
             as information from your physician. Most complex traits are determined by both genetics, lifestyle factors,
@@ -307,7 +409,7 @@
                 </tbody>
             </table>
             <div class="detail">
-                <p class="miss_h3">Detail: </p>
+                <p class="miss_h3">Scientific detail: </p>
                 {% for indicator in basic_res[key] %}
                 <div id="{{ indicator['Name'] | replace(' ', '_') }}" style="padding-bottom: 10px;
                  border-bottom-style: groove; border-bottom-width: medium; margin-bottom: 35px">
@@ -331,7 +433,8 @@
                         <div class="dist_block_left quan_width_left">
                             {% if 'Distribution' in indicator %}
                             <h4>Standardized genetic risk score:</h4>
-                            <p class="Detail_text">{{ indicator['Distribution']['SGRS'] | round(2) }}</p>
+                            <p class="Detail_text">Mean {{ '+' if indicator['Distribution']['SGRS'] >= 0 else '-' }}
+                                {{ indicator['Distribution']['SGRS'] | round(2) | abs }} * SD</p>
                             <h4>Distribution:</h4>
                             <p class="Detail_text">
                                 <b>N of reference population:</b> {{ indicator['Distribution']['All'] }}</p>
@@ -414,82 +517,9 @@
         {% endfor %}
     </div>
 
-    {% if module['ref_qc'] or module['sample_qc'] %}
-    <div id="qc" class="section">
-        <h2>Quality control</h2>
-            <p class="section_text">This section reports quality control (QC) statistics for the personal genotype data,
-            as well as for the reference genotype data.</p>
-        {% if module['sample_qc'] %}
-        <div id="sample_qc">
-            <h2 class="Detected_title">Sample QC</h2>
-            <ul style="font-size: 20px">
-                <li>The genetically determined sex is: {{ human.sex }}</li>
-                <li>{{ human.missing[0] }} of {{ human.missing[1] }} variants are missing, missing rate is:
-                    {{ human.missing[2] }}
-                </li>
-            </ul>
-            <h3>Variants count in each chromosome:</h3>
-            <img src="./html_files/img/chromosome_count.png" alt="Variants count in each chromosome" width="88%">
-            {% if extra_res[0][0] %}
-            <h3>Minor allele frequency in sample based on MAF reference data:</h3>
-            <ul style="font-size: 20px">
-                <li>{{ extra_res[0][0] }}</li>
-            </ul>
-            <img src="./html_files/img/QC_SAMPLE_MAF.png" alt="Minor allele frequency of each variants in sample"
-                 width="75%">
-            {% endif %}
-            {% if extra_res[0][1] %}
-            <h3>Principal Components of Sample based on PCA reference data:</h3>
-            <img src="./html_files/img/QC_PCA.png" alt="Principal Components of Sample based on reference"
-                 width="75%">
-            {% endif %}
-            {% if extra_res[0][2] %}
-            <h3>Concordance check:</h3>
-            <ul style="font-size: 20px">
-                {% for res in extra_res[0][2].split('\n') %}
-                <li>{{ res }}</li>
-                {% endfor %}
-            </ul>
-            <img src="./html_files/img/QC_concordence.png" alt="Venn diagram of genotype files' variants"
-                 width="50%">
-            {% endif %}
-            {% if module['vep'] %}
-            <h3>Class and consequence of variations in sample:</h3>
-            <img src="./html_files/img/vep_class_res.png" alt=" Variants' classes in sample" width="36%">
-            <img src="./html_files/img/vep_type_res.png" alt="Variants' consequences in sample" width="50%">
-            {% endif %}
-
-        </div>
-        {% endif %}
-
-        {% if module['ref_qc'] %}
-        <div id="ref_qc">
-            <h2 class="Detected_title">Population QC</h2>
-            <h3>Minor allele frequency:</h3>
-            <img src="./html_files/img/QC_MAF.png" alt="Minor allele frequency of each variant" width="86%">
-            <h3>Missing genotype rates:</h3>
-            <img src="./html_files/img/QC_ind_miss.png" alt="Missing genotype rates per variant" width="43%"
-                 style="float: left">
-            <img src="./html_files/img/QC_var_miss.png" alt="Missing genotype rates per sample" width="43%">
-            <h3>Sex discrepancy:</h3>
-            <img src="./html_files/img/QC_sex.png" alt="F value (X chromosome homozygosity estimate) of each sample"
-                 width="86%">
-            <h3>Cryptic relatedness:</h3>
-            <img src="./html_files/img/QC_relatedness.png" alt="Pihat value of each sample-sample pair" width="86%">
-            <h3>Hardy-Weinberg equilibrium:</h3>
-            <img src="./html_files/img/QC_hardy.png" alt="Hardy-Weinberg equilibrium p-value in each variant"
-                 width="86%">
-            <h3>Heterozygosity rate:</h3>
-            <img src="./html_files/img/QC_het.png" alt="Heterozygosity rate in each sample" width="86%">
-        </div>
-        {% endif %}
-    </div>
-
-    {% endif %}
-
     {% if module['query_database'] %}
     <div id="query_database" class="section">
-        <h2>Query database</h2>
+        <h2>4<sup>th</sup> Q</h2>
         <p class="section_text">This section uses PharmGKB and ClinVAR as an example, to illustrate how PAGEMENT
             could query third party genotype-based databases. Right now, only VCF file format is supported.
             By default, the first five INFO fields are displayed in the output table, unless specified otherwise
@@ -526,13 +556,7 @@
                     <td>{{ row['Variant'] }}</td>
                     <td>{{ row['Allele'] }}</td>
                     <td>{{ row['Allele type'] | replace("<", "&lt") | replace(">", "&gt") }}</td>
-                    {% if row['Color'] == 'Red' %}
-                    <td style="background-color: rgba(255, 69, 0, 0.8)">{{ row['Genotype'] }}</td>
-                    {% elif row['Color'] == 'Green' %}
-                    <td style="background-color: rgba(34, 139, 34, 0.8)">{{ row['Genotype'] }}</td>
-                    {% else %}
-                    <td style="background-color: rgba(255, 255, 0, 0.8)">{{ row['Genotype'] }}</td>
-                    {% endif %}
+                    <td><b>{{ row['Genotype'] }}</b></td>
                     <td><a href="https://www.ncbi.nlm.nih.gov/clinvar/variation/{{ row['Clinvar ID'] }}/"
                            class="show_href" target="_blank"> {{ row['Clinvar ID'] }}</a></td>
                 </tr>
@@ -590,13 +614,7 @@
                     <td>{{ row['Variant'] }}</td>
                     <td>{{ row['Alleles'] }}</td>
                     <td>{{ row['Sentence'] | replace("<", "&lt") | replace(">", "&gt") }}</td>
-                    {% if row['Color'] == 'Red' %}
-                    <td style="background-color: rgba(255, 69, 0, 0.8)">{{ row['Genotype'] }}</td>
-                    {% elif row['Color'] == 'Green' %}
-                    <td style="background-color: rgba(34, 139, 34, 0.8)">{{ row['Genotype'] }}</td>
-                    {% else %}
-                    <td style="background-color: rgba(255, 255, 0, 0.8)">{{ row['Genotype'] }}</td>
-                    {% endif %}
+                    <td><b>{{ row['Genotype'] }}</b></td>
                     <td><a class="show_href" href="https://pubmed.ncbi.nlm.nih.gov/{{ row['PMID'] }}/" target="_blank">
                         {{ row['PMID'] }}</a></td>
                 </tr>
@@ -620,20 +638,78 @@
             {% endwith %}
         </div>
         {% endif %}
+        {% if extra_res[0][2] %}
+        <div id="third_party_db">
+            <h2 class="Detected_title">Third-party DB</h2>
+            <div class="pager4" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+            <table class="pager_table4">
+                <thead>
+                <tr>
+                    {% for column in extra_res[1][2].columns %}
+                    <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for i, row in extra_res[1][2].iterrows() %}
+                <tr>
+                    {% for cell in row %}
+                    <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pager4" style="font-size: 20px; margin-left: 20px">
+                Page: <select class="gotoPage" style="font-size: 16px"></select>
+                <span class="ui-icon ui-icon-arrowthickstop-1-w first" alt="First" title="First page"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-w prev" alt="Prev" title="Previous page"></span>
+                <span class="pagedisplay"></span>
+                <span class="ui-icon ui-icon-arrowthick-1-e next" alt="Next" title="Next page"></span>
+                <span class="ui-icon ui-icon-arrowthickstop-1-e last" alt="Last" title="Last page"></span>
+                <select class="pagesize" style="font-size: 16px">
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="30">50</option>
+                </select>
+            </div>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 
     {% if module['qr_code'] %}
     <div id="qr_code" class="section">
-        <div>
-            <h2>QR code</h2>
+        <h2>5<sup>th</sup> Q</h2>
+        <div id="qr_code_sub">
+            <h2>QR Code</h2>
+            {% set qr_code_num = 2 if module['query_database'] else 1 %}
             <p class="section_text">This section allows users to specify a relatively concise list of SNPs freely
                 and to generate a QR code. This feature is expected to facilitate genetic data transmission and
                 encryption, while increasing the possibility to maintain individual privacy.</p>
-            <img src="./html_files/img/qr_code.png" alt="QR code" width="43%" style="float: left">
-            <div style="width: 43%; max-height: 23em; display: inline-block; clear: right; overflow-y: auto">
-                <h3>SNPs list:</h3>
-                <div><p>{{ ', '.join(extra_res[2] if module['query_database'] else extra_res[1]) }}</p></div>
+            <div style="float: left; display: inline-block; width: 43%">
+            <h3>Doctor QR code:</h3>
+            <img src="./html_files/img/dr_qr_code.png" alt="Doctor QR code" width="100%" >
+            </div>
+            <div style="display: inline-block; clear: right; width: 43%">
+            <h3>User QR code:</h3>
+            <img src="./html_files/img/user_qr_code.png" alt="User QR code" width="100%">
+            </div>
+            <h3>Decrypted user genotype:</h3>
+            <div style="max-height: 23em; display: inline-block; overflow-y: auto; text-indent: 2em">
+            <div><p>{{ extra_res[qr_code_num].__str__().strip('{}').replace("'", "") }}</p></div>
             </div>
         </div>
     </div>
@@ -649,11 +725,19 @@
             </div>
             <div>
                 <h3 style="display:inline-block">Database directory: </h3>
-                <p style="display: inline-block">{{config['data_dir']}}</p>
+                <ul>
+                {% for db_file in config['type_list'] %}
+                <li>{{ db_file }}</li>
+                {% endfor %}
+                </ul>
             </div>
             <div>
                 <h3 style="display:inline-block">Reference population data: </h3>
-                <p style="display: inline-block">{{config['ref']}}</p>
+                <ul>
+                {% for ref_file in config['ref_file_list'] %}
+                <li>{{ ref_file }}</li>
+                {% endfor %}
+                </ul>
             </div>
         </div>
         <div class="log">
