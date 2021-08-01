@@ -2,7 +2,6 @@ from time import strftime
 from jinja2 import Environment, FileSystemLoader
 from src.functions import *
 
-
 ref_code = pd.DataFrame()
 ref_rs = pd.DataFrame()
 ref_code_quan = pd.DataFrame()
@@ -79,9 +78,16 @@ def initial_ref_data(ref_file_list: List[List[str]], type_list: dict, output: st
     """
     global ref_rs, ref_code, ref_rs_qual, ref_code_qual, ref_rs_quan, ref_code_quan
     assert ref_file_list[0], 'There is no vcf file in population reference directory.'
+    quan_pop = module_config['name']['quan_pop']
     quan_num = 1
     if len(ref_file_list) == 1:
         ref_rs, ref_code = get_ref_cal(ref_file_list[0], type_list, failed_snps, failed_samples, output)
+        if quan_pop != 'All':
+            ref_data = pd.read_csv(os.path.join('bin', '1KGP_sample.info'), sep='\t')
+            ref_rs_quan, ref_code_quan = ref_rs.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :], \
+                                         ref_code.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :]
+        else:
+            ref_rs, ref_code = get_ref_cal(ref_file_list[0], type_list, failed_snps, failed_samples, output)
         if 'quan' in model:
             quan_num = 0
     elif len(ref_file_list) == 2:
@@ -90,6 +96,10 @@ def initial_ref_data(ref_file_list: List[List[str]], type_list: dict, output: st
                                                  failed_snps_qual, failed_samples_qual, output, 'qual')
         ref_rs_quan, ref_code_quan = get_ref_cal(ref_file_list[1], get_subtype_list(type_list, 'quan'),
                                                  failed_snps_quan, failed_samples_quan, output, 'quan')
+        if quan_pop != 'All':
+            ref_data = pd.read_csv(os.path.join('bin', '1KGP_sample.info'), sep='\t')
+            ref_rs_quan, ref_code_quan = ref_rs_quan.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :], \
+                                         ref_code_quan.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :]
     else:
         raise Exception()  # todo: test
     if 'quan' in model:
@@ -126,7 +136,6 @@ def recode_and_sex_impute(human: Human, file: str, temp_dir: str):
                       "--recode vcf "
                       "--rm-dup force-first "
                       f"--out {os.path.join(temp_dir, 'temp')}")
-        # os.system('rm sex_impute.*')
         if file_type == 'vcf':
             human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
         else:
@@ -330,7 +339,11 @@ def add_distribution(human: Human, output: str, one: bool = True) -> None:
     if one:
         assert not ref_code.empty, "Can not get reference data"
         for ind in tqdm(human.ind_data.values()):
-            ind.add_dist(output, ref_code)
+            if module_config['name']['quan_pop'] != 'ALL':
+                assert not ref_code_quan.empty, "Can not get reference data for quantitative traits"
+                ind.add_dist(output, eval(f'ref_code{"_quan" if ind.ftype == "quan" else ""}'))
+            else:
+                ind.add_dist(output, ref_code)
     else:
         assert not ref_code_qual.empty, "Can not get reference data for qualitative traits"
         assert not ref_code_quan.empty, "Can not get reference data for quantitative traits"

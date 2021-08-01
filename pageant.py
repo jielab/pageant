@@ -4,9 +4,10 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-07-31'
+version = '2021-08-01'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
+# todo: add description for function
 
 # stream log start
 if __name__ == '__main__':
@@ -18,7 +19,12 @@ def get_kwargs(kwargs_str: str) -> dict:
     return dict([pair.split('=') for pair in pairs])
 
 
-def arg(args):
+def arg(args: list) -> Tuple[List, Dict]:
+    """
+    Parses command line options and parameter list.
+    :param args: Argument list to be parsed, without the leading reference to the running program.
+    :return: Parameters needed for running pageant.
+    """
     try:
         opts, temp = getopt.getopt(args, "hn:i:o:c:s:v:",
                                    ['help', 'name=', 'input=', 'output=', 'config=', 'set-config=', 'version'])
@@ -106,7 +112,6 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
                     log_name, output, basic_res=basic_res_dict, module=module, extra_res=extra_res,
                     one=len(ref_file_list) == 1, success=success)
         rm_dir(temp_dir)
-        # return human, basic_res_dict, extra_res
         return res_str + ' Report has saved in output directory.'
 
 

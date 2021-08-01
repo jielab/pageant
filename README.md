@@ -95,7 +95,7 @@
 > **Command line version:**
 > ```
 > conda activate pageant
-> python ./pageant.py -n test -i ./personal_genome/sample.vcf.gz -o output
+> python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
 > ```
 ### Updating PAGEANT
 > You can update to the newest version of `PAGEANT` using git. 

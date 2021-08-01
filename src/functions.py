@@ -12,13 +12,11 @@ import numpy as np
 from tqdm import tqdm
 from src.objects import *
 
-
 pattern = compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
 pat_header1 = compile(rb'^##')
 pat_header2 = compile(rb'^#')
 pattern_clinvar = compile(r'(?<=CLNSIG=)\w+(?=[,;])')
 pattern_clinvar_rs = compile(r'(?<=RS=)\d+')
-# pattern_load_num = compile(r'\d+(?= valid predictors loaded)')  # use for plink1.9
 split_str = compile(r'\w{1,28}')
 pattern_load_num = compile(r'\d+(?= variants processed\.)')
 functions_config = configparser.ConfigParser()
@@ -80,7 +78,6 @@ def cal_multi_sha(file_list: str or list, vcf_only=True, re=r'', include=True):
     return value.hexdigest()
 
 
-# @use_time('Extract_snp from reference data')
 def extract_snp(vcf_file: str, temp_dir: str) -> None:
     """
     Extract snp using plink2
@@ -178,7 +175,7 @@ def snp_list_rw(tempdir: str, method: str = 'w', need_snp_list: None or set or l
 
 
 def rm_dir(rmdir: str) -> None:
-    # danger function, only can delete one level directory
+    # Danger function, only can delete one level directory
     if os.listdir(rmdir):
         for file in os.listdir(rmdir):
             os.remove(os.path.join(rmdir, file))
@@ -219,7 +216,7 @@ def get_ref_freq(data_dir: List[str], vcf_files: list, output: str) -> None:
 
 
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    def_config = convert_dict(load_config()['file'], False)
+    def_config = convert_dict(functions_config['file'], False)
     sha_cal = cal_sha if mode == 'single' else \
         partial(cal_multi_sha, vcf_only=False,
                 re=def_config['need_suf'].replace('.', '\\.') + "|" +
@@ -321,8 +318,6 @@ def get_subtype_list(type_list: Dict[str, str], need_type: str = 'quan' or 'qual
 
 
 def get_gt(vcf_gt: str, ref: str, alt: str, snp: None or str = None, warning: bool = True) -> Set[str]:
-    # if sum(not i.isnumeric() for i in vcf_gt) != 1:
-    #     logging.warning('Not biallelic alleles appear')
     if '/' in vcf_gt:
         gt_n = vcf_gt.split('/')
     elif '|' in vcf_gt:
@@ -966,8 +961,6 @@ def pca_data(human: Human, temp_dir: str, pca_ref: str) -> None:
                                 os.path.join(temp_dir, "fill.vcf"))
     run_plink_cmd(f'--vcf {fill_vcf} --read-freq {os.path.join(temp_dir, "ref_pcs.acount")} '
                   f'--min-alleles 2 '
-                  # f'--score {os.path.join(temp_dir, "ref_pcs.eigenvec.allele")} 2 5 header-read no-mean-imputation '
-                  # f'variance-standardize --score-col-nums 6-7 '
                   f'--score {os.path.join(temp_dir, "ref_pcs.eigenvec.allele")} 2 5 header-read no-mean-imputation '
                   f'variance-standardize '
                   f'--score-col-nums 6-7 '
@@ -996,7 +989,6 @@ def umap_data(human: Human, temp_dir: str, umap_ref: str, img_dir: str) -> None:
     with open(functions_config['file']['population_file']) as f:
         population_sep = detect(f.readline(10))
     population_data = pd.read_csv(functions_config['file']['population_file'], sep=population_sep)
-    # population_len = len(population_data[pop_column].unique())
 
     file_prefix, file_name = file_recognize(umap_ref)
     run_plink_cmd(f'--{file_prefix} {file_name} --maf 0.01 --geno 0.01 --hwe 1e-50 --indep-pairwise 50 10 0.2 '
@@ -1017,16 +1009,6 @@ def umap_data(human: Human, temp_dir: str, umap_ref: str, img_dir: str) -> None:
     )
     select_columns(os.path.join(temp_dir, "snp_info.bim"), [1, 4], os.path.join(temp_dir, "snp_info"))
 
-    # with open(f'{os.path.join(temp_dir, "prune_pop.raw")}', 'rb') as f_in:
-    #     with gzip.GzipFile(f'{os.path.join(temp_dir, "prune_pop.raw.gz"}') as f_out:
-    #
-
-    # file_gz = subprocess.Popen(f'gzip {os.path.join(temp_dir, "prune_pop.raw")}',
-    #                            shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
-    # file_gz.communicate()
-    # file_gz.wait()
-    # umap_dat = np.genfromtxt(f'{os.path.join(temp_dir, "prune_pop.raw")}', skip_header=1, delimiter='\t')
-    # umap_dat = pd.read_csv(f'{os.path.join(temp_dir, "prune_pop.raw")}', sep='\t')
     with open(f'{os.path.join(temp_dir, "prune_pop.raw")}', 'rb') as f:
         total = 1
         dat = []
@@ -1035,12 +1017,12 @@ def umap_data(human: Human, temp_dir: str, umap_ref: str, img_dir: str) -> None:
         with tqdm(desc='Getting genotype data...', unit=' samples', unit_scale=True) as pbar:
             with Pool(processes=cpu_count()) as pool:
                 rs_id = pd.DataFrame([rs.split('_') for rs in f.readline().decode().strip().split('\t')[6:]])
-                pool.apply_async(process_line, args=(f.readline(), ),
+                pool.apply_async(process_line, args=(f.readline(),),
                                  callback=lambda a: add_res(*a, dat, iid_list, pbar))
                 for line in f:
                     total += 1
                     pbar.format_meter(0, total, 0)
-                    pool.apply_async(process_line, args=(line, ), callback=lambda a: add_res(*a, dat, iid_list, pbar))
+                    pool.apply_async(process_line, args=(line,), callback=lambda a: add_res(*a, dat, iid_list, pbar))
                 pool.close()
                 pool.join()
     dat = np.vstack(tuple(dat))
@@ -1212,7 +1194,7 @@ def load_database(database: str, human: Human) -> pd.DataFrame:
     data = pd.read_csv(database, sep=sep, dtype=object, error_bad_lines=False)
     res = data.loc[data[functions_config['name']['database_snp']].isin(human.gt_data), :]
     res.loc['Genotype'] = res.apply(lambda a: trans_gt(human.gt_data[a[functions_config['name']['database_snp']]],
-                                                   connector=''), axis=1)
+                                                       connector=''), axis=1)
     return res.dropna().sort_values([functions_config['name']['database_snp']], ascending=[True]).reset_index(drop=True)
 
 

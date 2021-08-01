@@ -1,7 +1,6 @@
 import subprocess
 from re import search
 from shutil import copy
-# import cpufeature
 import matplotlib.pyplot as plt
 import pandas as pd
 from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace
@@ -105,9 +104,6 @@ class Ind(object):
         self.decide = False
         self.distribution = None
         self.and_status = True
-        # if 'ftype' in other:
-        #     self.set_ftype(other['ftype'])
-        #     other.pop('ftype')
         self.other = other
         try:
             self.picture = next(os.path.abspath(os.path.join(ind_dir, file)) for file in os.listdir(ind_dir)
@@ -172,10 +168,7 @@ class Ind(object):
                         self.outcome /= outcome
                         item['beta'] = inter
                         item['effect allele'] = ref
-                        # item['outcome'] = outcome
-            # if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome} not in self.detail:
             if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter} not in self.detail:
-                # self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome})
                 self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter})
             self.status = True
 
@@ -247,14 +240,9 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
     if detect_plink(plink):
         plink_file = plink
     else:
-        plink_dir = load_config()['file']['plink_dir']
+        plink_dir = objects_config['file']['plink_dir']
         sys_suffix = '.exe' if platform == 'Windows' else ''
-        # # avx_suffix = '' if plink != 'plink2' else '_avx' if cpufeature.CPUFeature['AVX2'] else ''
-        # avx_suffix = ''
-        # assert sys_suffix, 'Unsupported operating system'
-        # plink_file = os.path.join(raw_dir, "bin", plink + avx_suffix + "_" + sys_suffix)
         plink_file = os.path.join(raw_dir, plink_dir, plink + sys_suffix)
-        # assert os.path.isfile(plink_file), f"Cannot find {plink}{avx_suffix}_{sys_suffix} in bin directory"
         assert os.path.isfile(plink_file), f"Cannot find {plink}{sys_suffix} in plink directory"
     cmd = plink_file + ' ' + cmd
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -277,7 +265,6 @@ def detect_plink(plink: str = 'plink' or 'plink2'):
 
 
 def select_list(ob_list: list, index) -> list:
-    # assert len(ob_list) < max(index), 'list index out of range'
     return [ob_list[i] if i < len(ob_list) else None for i in index]
 
 

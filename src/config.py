@@ -41,7 +41,7 @@ default_config = {
              },
     'name': {'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA',
              'population_col': 'population', 'population_id': 'IID',
-             'database_SNP': 'snp'
+             'database_SNP': 'snp', 'quan_pop': 'EUR'
              },
     'parameter': {'p_threshold': 1e-5, 'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01,
                   'show_code': True, 'qc_maf': 0.01, 'qc_vmiss': 0.02, 'qc_smiss': 0.02, 'qc_hardy': 50,

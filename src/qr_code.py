@@ -147,14 +147,3 @@ def obtain(qr_code: str, send_qr_code: str, key_file: str, output: str) -> None:
         os.mkdir(output)
     with open(os.path.join(output, 'User_genotype.json'), 'w') as f:
         json.dump(res, f)
-
-
-if __name__ == '__main__':
-    if not os.path.isfile('./output/qr_code/doctor/key'):
-        generate_key('./output/qr_code/doctor')
-    request('./output/qr_code/doctor/key', './personal_genome/fingerprint_snps.txt', './output/qr_code/doctor',
-            './bin/DR_logo.png')
-    give_qr = './output/genetic_report/html_files/img/qr_code.png'
-    if os.path.isfile(give_qr):
-        obtain(give_qr, './output/qr_code/doctor/Dr_QR_code.png', './output/qr_code/doctor/key',
-               './output/qr_code/doctor')

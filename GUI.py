@@ -21,7 +21,7 @@ QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 default_config = {value: key[value] for key in main.load_config().values() for value in key}
 default_config.update({
     'name': 'Test',
-    'input_file': './personal_genome/sample.vcf.gz',
+    'input_file': './personal_genome/HG001.vcf.gz',
     'config_file': './bin/config.ini',
     'quan_data': './algorithm_database/Quantitative',
     'qual_data': './algorithm_database/Qualitative',
@@ -445,35 +445,51 @@ class Ui_PAGEANT(object):
         self.g_quan.setGeometry(QtCore.QRect(20, 20, 521, 351))
         self.g_quan.setObjectName("g_quan")
         self.l_database_quan = QtWidgets.QLabel(self.g_quan)
-        self.l_database_quan.setGeometry(QtCore.QRect(30, 80, 201, 25))
+        self.l_database_quan.setGeometry(QtCore.QRect(30, 50, 201, 25))
 
         self.l_database_quan.setFont(font)
         self.l_database_quan.setObjectName("l_database_quan")
         self.s_ref_quan = QtWidgets.QToolButton(self.g_quan)
-        self.s_ref_quan.setGeometry(QtCore.QRect(430, 230, 41, 27))
+        self.s_ref_quan.setGeometry(QtCore.QRect(430, 170, 41, 27))
 
         self.s_ref_quan.setFont(font1)
         self.s_ref_quan.setObjectName("s_ref_quan")
         self.i_database_quan = QtWidgets.QLineEdit(self.g_quan)
-        self.i_database_quan.setGeometry(QtCore.QRect(69, 111, 365, 25))
+        self.i_database_quan.setGeometry(QtCore.QRect(69, 81, 365, 25))
 
         self.i_database_quan.setFont(font1)
         self.i_database_quan.setObjectName("i_database_quan")
         self.i_ref_quan = QtWidgets.QLineEdit(self.g_quan)
-        self.i_ref_quan.setGeometry(QtCore.QRect(69, 231, 365, 25))
+        self.i_ref_quan.setGeometry(QtCore.QRect(69, 171, 365, 25))
 
         self.i_ref_quan.setFont(font1)
         self.i_ref_quan.setObjectName("i_ref_quan")
         self.s_database_quan = QtWidgets.QToolButton(self.g_quan)
-        self.s_database_quan.setGeometry(QtCore.QRect(430, 110, 41, 27))
+        self.s_database_quan.setGeometry(QtCore.QRect(430, 80, 41, 27))
 
         self.s_database_quan.setFont(font1)
         self.s_database_quan.setObjectName("s_database_quan")
         self.l_ref_quan = QtWidgets.QLabel(self.g_quan)
-        self.l_ref_quan.setGeometry(QtCore.QRect(30, 200, 201, 25))
+        self.l_ref_quan.setGeometry(QtCore.QRect(30, 140, 201, 25))
 
         self.l_ref_quan.setFont(font)
         self.l_ref_quan.setObjectName("l_ref_quan")
+        self.l_quan_pop = QtWidgets.QLabel(self.g_quan)
+        self.l_quan_pop.setGeometry(QtCore.QRect(30, 230, 371, 25))
+
+        self.l_quan_pop.setFont(font)
+        self.l_quan_pop.setObjectName("l_quan_pop")
+        self.s_quan_pop = QtWidgets.QComboBox(self.g_quan)
+        self.s_quan_pop.setGeometry(QtCore.QRect(70, 260, 401, 25))
+
+        self.s_quan_pop.setFont(font1)
+        self.s_quan_pop.setObjectName("s_quan_pop")
+        self.s_quan_pop.addItem("")
+        self.s_quan_pop.addItem("")
+        self.s_quan_pop.addItem("")
+        self.s_quan_pop.addItem("")
+        self.s_quan_pop.addItem("")
+        self.s_quan_pop.addItem("")
         self.Function.addTab(self.Quantitative, "")
 
         self.Query_database = QtWidgets.QWidget()
@@ -622,14 +638,55 @@ class Ui_PAGEANT(object):
         self.retranslateUi(PAGEANT)
         self.Function.setCurrentIndex(0)
         self.s_pop_sep.setCurrentIndex(0)
+        self.s_quan_pop.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(PAGEANT)
 
+        self.l_database_quan.raise_()
+        self.i_database_quan.raise_()
+        self.i_ref_quan.raise_()
+        self.s_database_quan.raise_()
+        self.l_ref_quan.raise_()
+        self.l_quan_pop.raise_()
+        self.s_ref_quan.raise_()
+        self.s_quan_pop.raise_()
+        self.l_database_qual.raise_()
+        self.i_database_qual.raise_()
+        self.i_ref_qual.raise_()
+        self.s_database_qual.raise_()
+        self.l_ref_qual.raise_()
+        self.s_ref_qual.raise_()
+        self.g_qual.raise_()
+        self.b_default_qual.raise_()
+        self.i_output.raise_()
+        self.i_vcf.raise_()
+        self.b_analyze.raise_()
+        self.l_vcf.raise_()
+        self.l_output.raise_()
+        self.s_output.raise_()
+        self.l_name.raise_()
+        self.i_name.raise_()
+        self.s_vcf.raise_()
+        self.l_config.raise_()
+        self.i_config.raise_()
+        self.s_config.raise_()
+        self.l_ps_ref.raise_()
+        self.i_ps_ref.raise_()
+        self.s_ps_ref.raise_()
+        self.l_ps_pop.raise_()
+        self.i_pop.raise_()
+        self.l_pop.raise_()
+        self.l_pop_sep.raise_()
+        self.i_ps_pop.raise_()
+        self.i_pop_id.raise_()
+        self.l_pop_id.raise_()
+        self.s_pop_sep.raise_()
+        self.s_ps_pop.raise_()
 
     def retranslateUi(self, PAGEANT):
         _translate = QtCore.QCoreApplication.translate
         PAGEANT.setWindowTitle(_translate("PAGEANT", f"PAGEANT ({main.version})"))
         self.i_vcf.setToolTip(_translate("PAGEANT", "Select the genotype file that you want to analyze"))
-        self.i_vcf.setText(_translate("PAGEANT", "./personal_genome/sample.vcf.gz"))
+        self.i_vcf.setText(_translate("PAGEANT", "./personal_genome/HG001.vcf.gz"))
         self.i_vcf.setPlaceholderText(_translate("PAGEANT", "Select the genotype file"))
         self.b_analyze.setToolTip(_translate("PAGEANT", "Start analyze"))
         self.b_analyze.setText(_translate("PAGEANT", "Analyze"))
@@ -663,7 +720,7 @@ class Ui_PAGEANT(object):
         self.i_ref_qual.setText(_translate("PAGEANT", "./population_genome"))
         self.i_ref_qual.setPlaceholderText(_translate("PAGEANT", "Specify reference for qualitative traits"))
         self.s_database_qual.setText(_translate("PAGEANT", "..."))
-        self.l_ref_qual.setText(_translate("PAGEANT", "Reference Population directory"))
+        self.l_ref_qual.setText(_translate("PAGEANT", "Reference population directory"))
         self.Function.setTabText(self.Function.indexOf(self.Qualitative), _translate("PAGEANT", "Qualitative"))
         self.b_default_quan.setToolTip(_translate("PAGEANT", "Set default values"))
         self.b_default_quan.setText(_translate("PAGEANT", "Default"))
@@ -677,7 +734,15 @@ class Ui_PAGEANT(object):
         self.i_ref_quan.setText(_translate("PAGEANT", "./population_genome"))
         self.i_ref_quan.setPlaceholderText(_translate("PAGEANT", "Specify reference for quantitative traits"))
         self.s_database_quan.setText(_translate("PAGEANT", "..."))
-        self.l_ref_quan.setText(_translate("PAGEANT", "Reference Population directory"))
+        self.l_ref_quan.setText(_translate("PAGEANT", "Reference population directory"))
+        self.l_quan_pop.setText(_translate("PAGEANT", "Reference population ethnical group"))
+        self.s_quan_pop.setPlaceholderText(_translate("PAGEANT", "Select the separator of population data"))
+        self.s_quan_pop.setItemText(0, _translate("PAGEANT", "All"))
+        self.s_quan_pop.setItemText(1, _translate("PAGEANT", "EUR"))
+        self.s_quan_pop.setItemText(2, _translate("PAGEANT", "EAS"))
+        self.s_quan_pop.setItemText(3, _translate("PAGEANT", "AMR"))
+        self.s_quan_pop.setItemText(4, _translate("PAGEANT", "SAS"))
+        self.s_quan_pop.setItemText(5, _translate("PAGEANT", "AFR"))
         self.Function.setTabText(self.Function.indexOf(self.Quantitative), _translate("PAGEANT", "Quantitative"))
 
         # self.c_sample_qc.setToolTip(_translate("PAGEANT", "Activate function of sample QC"))
@@ -907,6 +972,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
     def set_default_quan(self):
         self.i_database_quan.setText("./algorithm_database/Quantitative")
         self.i_ref_quan.setText("./population_genome")
+        self.s_quan_pop.setCurrentIndex(1)
 
     def set_default_sample_qc(self):
         self.i_maf_sample.setText(default_config['maf_ref'])
@@ -977,7 +1043,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          'quan_data',  'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
                                          'concord_ref', 'population_col', 'population_file',
                                          'population_id', 'query_database', 'pharmgkb', 'clinvar', 'query_db',
-                                         'qr_code', 'qr_key', 'qr_snps', 'qr_dr', 'qr_user', 'qr_dir'],
+                                         'qr_code', 'qr_key', 'qr_snps', 'qr_dr', 'qr_user', 'qr_dir', 'quan_pop'],
                                         [self.i_name.text(), self.i_vcf.text(), self.i_config.text(),
                                          self.i_output.text(), self.i_database_qual.text(), self.i_ref_qual.text(),
                                          self.i_database_quan.text(), self.i_ref_quan.text(),
@@ -988,7 +1054,8 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          self.c_clinvar.isChecked(),
                                          self.i_otherdb.text() if self.c_otherdb.isChecked() else '',
                                          self.c_qr_code.isChecked(), self.i_key.text(), self.i_qr_snps.text(),
-                                         self.i_qr_dr.text(), self.i_qr_user.text(), self.i_qr_dir.text()
+                                         self.i_qr_dr.text(), self.i_qr_user.text(), self.i_qr_dir.text(),
+                                         self.s_quan_pop.currentText()
                                          ])))
         self.progress_value = ProgressValue()
         self.progress_now = ProgressNow(self.inter)
