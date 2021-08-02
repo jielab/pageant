@@ -29,19 +29,19 @@
 > ## Download: 
 > > ```
 > > git clone https://github.com/jielab/pageant.git
-> >  cd pageant
+> > cd pageant
 > > git pull # for getting an updated version
 > > conda env create -f environment_linux.yml 
 > > # "environment_macos.yml" for Mac-OS, "environment_win.yml" for Windows
 > > ```
 
 > ## Run:
-> **GUI version:**
+> ### GUI version:
 > > ```
 > > conda activate pageant
 > > python ./GUI.py
 > > ```
-> Command line version:
+> ### Command line version:
 > > ```
 > > conda activate pageant
 > > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
