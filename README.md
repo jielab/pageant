@@ -54,15 +54,15 @@
 
 > ## QC report displayings one's PCA and UMAP among population reference
 
-![example report for QC](./images/Fig_PC.png)
+> > ![example report for QC](./images/Fig_PC.png)
 
 > ## Quantitative traits report
 
-![example report for Quantitative traits](./images/Fig_Qt.png)
+> > ![example report for Quantitative traits](./images/Fig_Qt.png)
 
 > ## QR code report
 
-![example report for QR code](./images/Fig_QR.png)
+> > ![example report for QR code](./images/Fig_QR.png)
 
 <br/>
 
