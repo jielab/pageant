@@ -23,7 +23,7 @@
 > ## Prepare:
 > > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/), for installing python packages.
 > > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively
-> > ### *set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT/bin/config.ini file.*
+> > ##### *set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT/bin/config.ini file.*
 > > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
 > ## Download: 
