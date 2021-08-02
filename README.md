@@ -23,16 +23,15 @@
 > ## Prepare:
 > > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/), for installing python packages.
 > > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively
-> > #### *set in "PATH", or in the "plink_dir" of the PAGEANT/bin/config.ini file.*
+> >		#### *set in "PATH", or in the "plink_dir" of the PAGEANT/bin/config.ini file.*
 > > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
 > ## Download: 
-> > ### *Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
 > > ```
 > > git clone https://github.com/jielab/pageant.git
 > >  cd pageant
 > > git pull # for getting an updated version
-> > conda env create -f environment_linux.yml
+> > conda env create -f environment_linux.yml # "environment_macos.yml" for Mac-OS, "environment_win.yml" for Windows
 > > ```
 
 > ## Run:
