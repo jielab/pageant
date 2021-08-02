@@ -86,5 +86,3 @@
 
 > - ### [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
 > - ### Manuscript under review
-
->>>>>>> 3cc07b00759a0d553fac887c823437d0cfe34e08
