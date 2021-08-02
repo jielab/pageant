@@ -1,9 +1,9 @@
-<br/>
+
 # PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+
 <br/>
 
-
-# #1. Download & Run: for quick starter
+# #1. Download & Run: *for quick starter*
 
 > ## Download:
 > > - ### Download executables for [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing), [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
@@ -18,11 +18,12 @@
 <br/>
 
 
-## #2. Download & Run: for advanced users
+# #2. Download & Run: *for advanced users*
 
 ## Prepare
 > > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/), for installing python packages.
-> > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively, set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT "./bin/config.ini".
+> > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively
+> > ### *set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT/bin/config.ini file.*
 > > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
 ## Download
@@ -49,7 +50,7 @@
 <br/>
 
 
-## #3. Example reports 
+# #3. Example reports 
 
 > ## QC report displayings one's PCA and UMAP among population reference
 
@@ -66,7 +67,7 @@
 <br/>
 
 
-## #4. Customize
+# #4. Customize
 > - ### The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. 
 > - ### For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. 
 > - ### The TRAIT.snps.ref is tab separated and has no header. For qualitative trait, this file has four columns: variants' name, genotype, phenotype for corresponding genotype, phenotype for non-corresponding genotype; For quantitative trait, algorithm data need three columns: variants' name, allele, effect size for corresponding allele.
