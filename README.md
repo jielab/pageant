@@ -27,7 +27,7 @@
 > > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
 > ## Download: 
-### *Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
+> > ### *Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
 > > ```
 > > git clone https://github.com/jielab/pageant.git
 > >  cd pageant
