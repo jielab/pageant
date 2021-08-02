@@ -1,6 +1,6 @@
 <br/>
-
 # PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+<br/>
 
 
 # #1. Download & Run: for quick starter
@@ -12,7 +12,7 @@
 
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> > - ### For Mac-OS:  fullow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first, to install necessary libraries, and then double click "PAGEANT".
+> > - ### For Mac-OS:  fullow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar", to install necessary libraries, and then double click "PAGEANT".
 > > - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
 <br/>
@@ -21,30 +21,29 @@
 ## #2. Download & Run: for advanced users
 
 ## Prepare
-> > - ### [Conda](https://docs.conda.io/en/latest/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-> > - ### [Git](https://git-scm.com/)
+> > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/)
 > > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively, set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT "./bin/config.ini".
-> > - ### See instruction above, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first
+> > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
 ## Download
-*Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
+### *Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
 > > ```
-> > git clone https://github.com/jielab/pageant.git
-> > cd pageant
-> > git pull # for getting an updated version
-> > conda env create -f environment_linux.yml
+> > ### git clone https://github.com/jielab/pageant.git
+> > ### cd pageant
+> > ### git pull # for getting an updated version
+> > ### conda env create -f environment_linux.yml
 > > ```
 
 ## Run
 > **GUI version:**
 > ```
-> conda activate pageant
-> python ./GUI.py
+> ### conda activate pageant
+> ### python ./GUI.py
 > ```
 > **Command line version:**
 > ```
-> conda activate pageant
-> python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> ### conda activate pageant
+> ### python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
 > ```
 
 <br/>
