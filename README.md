@@ -1,11 +1,15 @@
-## PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+<br/>
+
+# PAGEANT: Personal Access to Genome & Analysis of Natural Traits
 
 
-## #1. Download & Run: for entry level users
+# #1. Download & Run: for quick starter
+
 > ## Download:
 > > - ### Download executables for [Windows](https://drive.google.com/file/d/147zOn5b9dqeojVbGJq_rbLKZw24NSKe_/view?usp=sharing), [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
 > > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
 > > - ### For Mac-OS:  fullow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first, to install necessary libraries, and then double click "PAGEANT".
@@ -16,22 +20,22 @@
 
 ## #2. Download & Run: for advanced users
 
-### #2.1 Prepare
-> - ##### [Conda](https://docs.conda.io/en/latest/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
-> - ##### [Git](https://git-scm.com/)
-> - ##### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively, set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT "./bin/config.ini".
-> - ##### See instruction above, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first
+## Prepare
+> > - ### [Conda](https://docs.conda.io/en/latest/) or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+> > - ### [Git](https://git-scm.com/)
+> > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively, set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT "./bin/config.ini".
+> > - ### See instruction above, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar" first
 
-### #2.1 Download
-> ```
-> git clone https://github.com/jielab/pageant.git
-> cd pageant
-> git pull # for getting an updated version
-> conda env create -f environment_linux.yml
->> ```
-Change "environment_linux.yml" in the above line to to "environment_macos.yml" or "environment_win.yml" for installation on Mac-OS and Windows.
+## Download
+*Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
+> > ```
+> > git clone https://github.com/jielab/pageant.git
+> > cd pageant
+> > git pull # for getting an updated version
+> > conda env create -f environment_linux.yml
+> > ```
 
-### #2.3 Run
+## Run
 > **GUI version:**
 > ```
 > conda activate pageant
@@ -44,6 +48,7 @@ Change "environment_linux.yml" in the above line to to "environment_macos.yml" o
 > ```
 
 <br/>
+
 
 ## #3. Example reports 
 
