@@ -1,4 +1,4 @@
-name: pageant_test
+name: pageant
 channels:
   - conda-forge
   - defaults
@@ -81,4 +81,4 @@ dependencies:
     - qrcode==7.2
     - requests==2.26.0
     - urllib3==1.26.6
-prefix: C:\Users\Sheng\Anaconda3\envs\pageant_test
+prefix: C:\Users\Sheng\Anaconda3\envs\pageant
