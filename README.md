@@ -72,7 +72,7 @@
 > - ### For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. 
 > - ### The TRAIT.snps.ref is tab separated and has no header. For qualitative trait, this file has four columns: variants' name, genotype, phenotype for corresponding genotype, phenotype for non-corresponding genotype; For quantitative trait, algorithm data need three columns: variants' name, allele, effect size for corresponding allele.
 
-![Folder Structure](./images/Fig_folder.png)
+> > ![Folder Structure](./images/Fig_folder.png)
 
 <br/>
 
