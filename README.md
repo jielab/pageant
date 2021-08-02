@@ -20,13 +20,13 @@
 
 # #2. Download & Run: *for advanced users*
 
-## Prepare
+> ## Prepare:
 > > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/), for installing python packages.
 > > - ### [PLINK1.9](http://www.cog-genomics.org/plink/1.9/) and [PLINK2.0](http://www.cog-genomics.org/plink/2.0/), named "plink" and "plink2" respectively
 > > ### *set in the "PATH" enironment variable, or in the "plink_dir" variable in PAGEANT/bin/config.ini file.*
 > > - ### For Mac-OS, install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh), and then run "[brew](https://brew.sh/) install zbar".
 
-## Download
+> ## Download: 
 ### *Change "environment_linux.yml" in the last line of the following code to "environment_macos.yml" or "environment_win.yml" for Mac-OS and Windows respectively.*
 > > ```
 > > git clone https://github.com/jielab/pageant.git
@@ -35,17 +35,17 @@
 > > conda env create -f environment_linux.yml
 > > ```
 
-## Run
+> ## Run:
 > **GUI version:**
-> ```
-> ### conda activate pageant
-> ### python ./GUI.py
-> ```
-> **Command line version:**
-> ```
-> ### conda activate pageant
-> ### python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
-> ```
+> > ```
+> > conda activate pageant
+> > python ./GUI.py
+> > ```
+> Command line version:
+> > ```
+> > conda activate pageant
+> > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> > ```
 
 <br/>
 
