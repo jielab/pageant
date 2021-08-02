@@ -31,7 +31,8 @@
 > > git clone https://github.com/jielab/pageant.git
 > >  cd pageant
 > > git pull # for getting an updated version
-> > conda env create -f environment_linux.yml # "environment_macos.yml" for Mac-OS, "environment_win.yml" for Windows
+> > conda env create -f environment_linux.yml 
+> > # "environment_macos.yml" for Mac-OS, "environment_win.yml" for Windows
 > > ```
 
 > ## Run:
