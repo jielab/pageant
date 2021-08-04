@@ -303,7 +303,7 @@ def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
     import json
     key_file = module_config['file']['qr_key']
     need_snps_list = module_config['file']['qr_snps']
-    doctor_qr_dir = module_config['file']['qr_dir']
+    doctor_qr_dir = module_config['file']['qr_dr']
     user_qr_dir = module_config['file']['qr_user']
     res_dir = module_config['file']['qr_dir']
     out_img_dir = os.path.join(output, 'genetic_report', 'html_files', 'img')
