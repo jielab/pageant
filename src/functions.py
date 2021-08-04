@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from gzip import open as gzip_open
 from math import exp
@@ -1231,3 +1232,9 @@ def get_ref_data_type() -> List[List[str]]:
         return [get_vcf_files(quan_dir)]
     else:
         raise FileNotFoundError('No reference data was found!')
+
+
+def mkdir(directories: List[str], pre_dir: str = '') -> None:
+    for directory in directories:
+        if not os.path.isdir(os.path.join(pre_dir, directory)):
+            os.mkdir(os.path.join(pre_dir, directory))

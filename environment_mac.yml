@@ -84,6 +84,9 @@ dependencies:
     - jinja2==3.0.1
     - markupsafe==2.0.1
     - matplotlib-venn==0.11.6
+    - pydes==2.0.1
     - pyqt5==5.15.1
     - pyqt5-sip==12.9.0
+    - pyzbar==0.1.8
+    - qrcode==7.2
 prefix: /Users/sheng/.conda/envs/pageant
