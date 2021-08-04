@@ -105,59 +105,59 @@
 </header>
 <nav id="nav">
     <ul>
-        {% if module['sample_qc'] or module['ref_qc'] %}
-        <li><a href="#qc">1<sup>st</sup> Q</a>
-            <ul>
-                {% if module['sample_qc'] %}
-                <li><a href="#sample_qc">Sample QC</a></li>
-                {% endif %}
-                {% if module['ref_qc'] %}
-                <li><a href="#ref_qc">Population QC</a></li>
-                {% endif %}
-            </ul>
-        </li>
-        {% endif %}
         {% if success %}
-        <li><a href="#Qual_res">2<sup>nd</sup> Q</a>
-            <ul>
-                {% for key in type.keys() %}
-                {% if type[key] == 'qual' %}
-                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </li>
-        <li><a href="#Quan_res">3<sup>rd</sup> Q</a>
-            <ul>
-                {% for key in type.keys() %}
-                {% if type[key] == 'quan' %}
-                <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
-                {% endif %}
-                {% endfor %}
-            </ul>
-        </li>
-        {% if module['query_database'] %}
-        <li><a href="#query_database">4<sup>th</sup> Q</a>
-            <ul>
-                {% if module['clinvar'] %}
-                <li><a href="#clinvar">Clinvar</a></li>
-                {% endif %}
-                {% if module['pharmgkb'] %}
-                <li><a href="#pharmgkb">PharmGKB</a></li>
-                {% endif %}
-                {% if extra_res[0][2] %}
-                <li><a href="#third_party_db">Third-party DB</a></li>
-                {% endif %}
-            </ul>
-        </li>
-        {% endif %}
-        {% if module['qr_code'] %}
-        <li><a href="#qr_code">5<sup>th</sup> Q</a>
-            <ul>
-                <li><a href="#qr_code_sub">QR Code</a></li>
-            </ul>
-        </li>
-        {% endif %}
+            {% if module['sample_qc'] or module['ref_qc'] %}
+            <li><a href="#qc">1<sup>st</sup> Q</a>
+                <ul>
+                    {% if module['sample_qc'] %}
+                    <li><a href="#sample_qc">Sample QC</a></li>
+                    {% endif %}
+                    {% if module['ref_qc'] %}
+                    <li><a href="#ref_qc">Population QC</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            <li><a href="#Qual_res">2<sup>nd</sup> Q</a>
+                <ul>
+                    {% for key in type.keys() %}
+                    {% if type[key] == 'qual' %}
+                    <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+            <li><a href="#Quan_res">3<sup>rd</sup> Q</a>
+                <ul>
+                    {% for key in type.keys() %}
+                    {% if type[key] == 'quan' %}
+                    <li><a href="#{{ key | replace(' ', '_') }}">{{key | replace('_', ' ') | title}}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                </ul>
+            </li>
+            {% if module['query_database'] %}
+            <li><a href="#query_database">4<sup>th</sup> Q</a>
+                <ul>
+                    {% if module['clinvar'] %}
+                    <li><a href="#clinvar">Clinvar</a></li>
+                    {% endif %}
+                    {% if module['pharmgkb'] %}
+                    <li><a href="#pharmgkb">PharmGKB</a></li>
+                    {% endif %}
+                    {% if extra_res[0][2] %}
+                    <li><a href="#third_party_db">Third-party DB</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+            {% endif %}
+            {% if module['qr_code'] %}
+            <li><a href="#qr_code">5<sup>th</sup> Q</a>
+                <ul>
+                    <li><a href="#qr_code_sub">QR Code</a></li>
+                </ul>
+            </li>
+            {% endif %}
         {% endif %}
         <li><a href="#Report_detail">Running Log</a></li>
     </ul>

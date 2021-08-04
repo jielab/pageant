@@ -216,7 +216,7 @@ def get_ref_freq(data_dir: List[str], vcf_files: list, output: str) -> None:
 
 
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    def_config = convert_dict(functions_config['file'], False)
+    def_config = convert_dict(load_config()['file'], False)
     sha_cal = cal_sha if mode == 'single' else \
         partial(cal_multi_sha, vcf_only=False,
                 re=def_config['need_suf'].replace('.', '\\.') + "|" +

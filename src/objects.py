@@ -8,6 +8,7 @@ from scipy.stats import gaussian_kde
 from src.decorator import *
 
 
+plink_dir = ''
 objects_config = configparser.ConfigParser()
 
 
@@ -240,9 +241,8 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
     if detect_plink(plink):
         plink_file = plink
     else:
-        plink_dir = objects_config['file']['plink_dir']
         sys_suffix = '.exe' if platform == 'Windows' else ''
-        plink_file = os.path.join(raw_dir, plink_dir, plink + sys_suffix)
+        plink_file = os.path.join(plink_dir, plink + sys_suffix)
         assert os.path.isfile(plink_file), f"Cannot find {plink}{sys_suffix} in plink directory"
     cmd = plink_file + ' ' + cmd
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -255,6 +255,11 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
             os.remove(out_file + '.log')
         except FileNotFoundError:
             raise RUNPLINKERROR("RunPlinkError:\n" + sterr.decode().strip())
+
+
+def get_plink_dir() -> None:
+    global plink_dir
+    plink_dir = os.path.abspath(objects_config['file']['plink_dir'])
 
 
 def detect_plink(plink: str = 'plink' or 'plink2'):

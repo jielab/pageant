@@ -35,6 +35,7 @@ def initial(output: str, config_file: str, kwargs: dict) -> tuple:
     type_list = get_type_list()
     ref_file_list = get_ref_data_type()
     model = set(type_list.values())
+    get_plink_dir()
     return temp_dir, type_list, ref_file_list, model, module_config
 
 
