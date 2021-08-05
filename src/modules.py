@@ -1,5 +1,7 @@
 from time import strftime
+
 from jinja2 import Environment, FileSystemLoader
+
 from src.functions import *
 
 ref_code = pd.DataFrame()
@@ -35,6 +37,7 @@ def initial(output: str, config_file: str, kwargs: dict) -> tuple:
     type_list = get_type_list()
     ref_file_list = get_ref_data_type()
     model = set(type_list.values())
+    get_plink_dir()
     return temp_dir, type_list, ref_file_list, model, module_config
 
 
@@ -46,22 +49,13 @@ def initial_res_dir(output: str) -> None:
     """
     global img_dir
     img_dir = os.path.join(output, 'genetic_report', 'html_files', 'img')
-    if not os.path.isdir(output):
-        os.mkdir(output)
-    if not os.path.isdir(os.path.join(output, 'log_files')):
-        os.mkdir(os.path.join(output, 'log_files'))
-    if not os.path.isdir(os.path.join(output, 'population_QC')):
-        os.mkdir(os.path.join(output, 'population_QC'))
-    if not os.path.isdir(os.path.join(output, 'genetic_report')):
-        os.mkdir(os.path.join(output, 'genetic_report'))
-    output = os.path.join(output, 'genetic_report', 'html_files')
-    if not os.path.isdir(output):
-        os.mkdir(output)
-    output = os.path.join(output, 'dist_plot')
-    if not os.path.isdir(output):
-        os.mkdir(output)
-    if not os.path.isdir(img_dir):
-        os.mkdir(img_dir)
+    qr_dir = os.path.join(output, 'qr_code')
+    mkdir([output])
+    mkdir(['log_files', 'population_QC', 'genetic_report', 'qr_code'], output)
+    mkdir(['doctor', 'user'], qr_dir)
+    mkdir([os.path.join(output, 'genetic_report', 'html_files')])
+    mkdir(['dist_plot', 'img'], os.path.join(output, 'genetic_report', 'html_files'))
+
 
 
 @progress_value(15)
@@ -315,7 +309,10 @@ def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
     out_img_dir = os.path.join(output, 'genetic_report', 'html_files', 'img')
     if not os.path.isdir(res_dir):
         os.mkdir(res_dir)
-
+    if not os.path.isfile(key_file):
+        crypto.generate_key(res_dir)
+        module_config['file']['qr_key'] = os.path.join(res_dir, 'key')
+        save_config(module_config)
     dr_logo = os.path.join(raw_dir, "bin", "DR_logo.png")
     save_dr_img = os.path.join(doctor_qr_dir, 'DR_QR_code.png')
     crypto.request(key_file, need_snps_list, doctor_qr_dir, dr_logo)

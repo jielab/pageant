@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from gzip import open as gzip_open
 from math import exp
@@ -216,7 +217,7 @@ def get_ref_freq(data_dir: List[str], vcf_files: list, output: str) -> None:
 
 
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    def_config = convert_dict(functions_config['file'], False)
+    def_config = convert_dict(load_config()['file'], False)
     sha_cal = cal_sha if mode == 'single' else \
         partial(cal_multi_sha, vcf_only=False,
                 re=def_config['need_suf'].replace('.', '\\.') + "|" +
@@ -307,9 +308,11 @@ def get_type_list() -> Dict[str, str]:
     quan_dir = functions_config['file']['quan_data']
     type_dict = dict()
     if qual_dir:
-        type_dict.update({os.path.join(qual_dir, directory): 'qual' for directory in os.listdir(qual_dir)})
+        type_dict.update({os.path.join(qual_dir, directory): 'qual' for directory in os.listdir(qual_dir)
+                          if directory != '.DS_Store'})
     if quan_dir:
-        type_dict.update({os.path.join(quan_dir, directory): 'quan' for directory in os.listdir(quan_dir)})
+        type_dict.update({os.path.join(quan_dir, directory): 'quan' for directory in os.listdir(quan_dir)
+                          if directory != '.DS_Store'})
     return type_dict
 
 
@@ -1231,3 +1234,9 @@ def get_ref_data_type() -> List[List[str]]:
         return [get_vcf_files(quan_dir)]
     else:
         raise FileNotFoundError('No reference data was found!')
+
+
+def mkdir(directories: List[str], pre_dir: str = '') -> None:
+    for directory in directories:
+        if not os.path.isdir(os.path.join(pre_dir, directory)):
+            os.mkdir(os.path.join(pre_dir, directory))
