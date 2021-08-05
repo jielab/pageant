@@ -308,9 +308,11 @@ def get_type_list() -> Dict[str, str]:
     quan_dir = functions_config['file']['quan_data']
     type_dict = dict()
     if qual_dir:
-        type_dict.update({os.path.join(qual_dir, directory): 'qual' for directory in os.listdir(qual_dir)})
+        type_dict.update({os.path.join(qual_dir, directory): 'qual' for directory in os.listdir(qual_dir)
+                          if directory != '.DS_Store'})
     if quan_dir:
-        type_dict.update({os.path.join(quan_dir, directory): 'quan' for directory in os.listdir(quan_dir)})
+        type_dict.update({os.path.join(quan_dir, directory): 'quan' for directory in os.listdir(quan_dir)
+                          if directory != '.DS_Store'})
     return type_dict
 
 
