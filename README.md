@@ -53,17 +53,25 @@
 
 # #3. Example reports 
 
-> ## QC report displayings one's PCA and UMAP among population reference
+> ## Q1：Displayings user's PCA and UMAP among population reference
 
-> > ![example report for QC](./images/Fig_PC.png)
+> > ![Q1](./images/Fig_Q1.png)
 
-> ## Quantitative traits report
+> ## Q2: Qualitative traits report
 
-> > ![example report for Quantitative traits](./images/Fig_Qt.png)
+> > ![Q3](./images/Fig_Q2.png)
 
-> ## QR code report
+> ## Q3: Quantitative traits report
 
-> > ![example report for QR code](./images/Fig_QR.png)
+> > ![Q3](./images/Fig_Q3.png)
+
+> ## Q4: Query ClinVAR database
+
+> > ![Q4](./images/Fig_Q4.png)
+
+> ## Q5: QR code to extract genetic data
+
+> > ![Q5](./images/Fig_Q5.png)
 
 <br/>
 
