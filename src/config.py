@@ -35,7 +35,7 @@ default_config = {
              'population_file': './personal_genome/hapmap3_samples.txt',
              'concord_ref': './personal_genome/concordance.vcf.gz',
              'ref_structure': './personal_genome/hapmap3.vcf.gz',
-             'query_db': './algorithm_database/Query_database/Phewas_Catalog.txt',
+             'query_db': './algorithm_database/Query_database/Phewas_catalog.txt',
              'description_suf': ".desc.txt", 'need_suf': '.snps.ref', 'gwas_suf': ".tsv",
              'plink_dir': './bin'
              },
