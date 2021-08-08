@@ -20,7 +20,7 @@ QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
 default_config = {value: key[value] for key in main.load_config().values() for value in key}
 default_config.update({
-    'name': 'Test',
+    'name': 'HG001',
     'input_file': './personal_genome/HG001.vcf.gz',
     'config_file': './bin/config.ini',
     'quan_data': './algorithm_database/Quantitative',
