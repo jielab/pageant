@@ -1064,8 +1064,8 @@ def umap_data(human: Human, temp_dir: str, umap_ref: str, img_dir: str) -> None:
     plt.scatter(x=own_umap[0, 0], y=own_umap[0, 1],
                 label='Me', s=66, marker='x', c='black')
     plt.legend(bbox_to_anchor=(1.05, 0.95), loc='upper left', borderaxespad=0, ncol=len(grouped) // 18 + 1)
-    plt.xlabel('UMAP1')
-    plt.ylabel('UMAP2')
+    plt.xlabel('UMAP1', fontdict={'weight': 'bold'})
+    plt.ylabel('UMAP2', fontdict={'weight': 'bold'})
     plt.savefig(os.path.join(img_dir, 'QC_UMAP.png'), bbox_inches='tight')
     plt.close()
 
@@ -1095,8 +1095,8 @@ def pca_plot(temp_dir: str, img_dir: str) -> str:
                 y=sample_pca['PC2_AVG'] / (-(pca_vec[1] ** 0.5) / 2),
                 label='Me', s=66, marker='x', c='black')
     plt.legend(bbox_to_anchor=(1.05, 0.95), loc='upper left', borderaxespad=0, ncol=len(grouped) // 18 + 1)
-    plt.xlabel('PC1')
-    plt.ylabel('PC2')
+    plt.xlabel('PC1', fontdict={'weight': 'bold'})
+    plt.ylabel('PC2', fontdict={'weight': 'bold'})
     plt.savefig(os.path.join(img_dir, 'QC_PCA.png'), bbox_inches='tight')
     plt.close()
     return 'Yes'

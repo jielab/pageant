@@ -81,7 +81,7 @@ def generate_send_qr(snp_list_txt: str, public_key: str, output: str, logo: str 
 def decode_send_qr(qr_code: str) -> Tuple[List[str], rsa.key.PublicKey]:
     img = Image.open(qr_code)
     res = decode(img)
-    assert len(res) == 1, Exception('More than one QR code were found.')
+    assert len(res) == 1, Exception('More than one QR code were found')
     secret_str, pub_key_str = res[0].data.decode().split('\n')
     pub_key_str = '\n'.join(add_return.findall(pub_key_str))
     des = pyDes.des(pub_key_str[-8:], pyDes.ECB, pub_key_str[-8:], padmode=pyDes.PAD_PKCS5)
@@ -111,12 +111,12 @@ def decode_give_qr(give_qr_code: str, send_qr_code: str, private_key: rsa.key.Pr
     i = 0
     while not res:
         if i > 5:
-            raise Exception('No QR code was found.')
+            raise Exception('No QR code was found')
         need_snp = decode_send_qr(send_qr_code)[0]
         img = Image.open(give_qr_code)
         res = decode(img)
         i += 1
-    assert len(res) == 1, Exception('More than one QR code were found.')
+    assert len(res) == 1, Exception('More than one QR code were found')
     z_str = []
     try:
         for i in res[0].data.decode().split('\n'):
