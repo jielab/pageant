@@ -7,7 +7,11 @@
 # #1. Download & Run: *for quick starter*
 
 > ## Download:
+<<<<<<< HEAD
 > > - ### Download executables for [Windows](https://drive.google.com/file/d/12z_oFj9ApGPTINvlIeScAHPJZ250DWb5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1_WUJwMuf7EAsAyW6Q4hfHeB8eE2LjLrH/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/17EO9w2A1G_qpaxBnD-YzYc-HzEbEKkz4/view?usp=sharing)
+=======
+> > - ### Download executables for [Windows](https://drive.google.com/file/d/12z_oFj9ApGPTINvlIeScAHPJZ250DWb5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1SD9m6g20j4OXL5O4RpEbxhmixz10zCV9/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1njO2AKC8Z6PcwN1Zh6s6sVN9NUi32gfc/view?usp=sharing)
+>>>>>>> 0babfafa0d5bd2dc5b40d946234dd9c1c5690471
 > > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
 
@@ -53,17 +57,25 @@
 
 # #3. Example reports 
 
-> ## QC report displayings one's PCA and UMAP among population reference
+> ## Q1：Displayings user's PCA and UMAP among population reference
 
-> > ![example report for QC](./images/Fig_PC.png)
+> > ![Q1](./images/Fig_Q1.png)
 
-> ## Quantitative traits report
+> ## Q2: Qualitative traits report
 
-> > ![example report for Quantitative traits](./images/Fig_Qt.png)
+> > ![Q3](./images/Fig_Q2.png)
 
-> ## QR code report
+> ## Q3: Quantitative traits report
 
-> > ![example report for QR code](./images/Fig_QR.png)
+> > ![Q3](./images/Fig_Q3.png)
+
+> ## Q4: Query ClinVAR database
+
+> > ![Q4](./images/Fig_Q4.png)
+
+> ## Q5: QR code to extract genetic data
+
+> > ![Q5](./images/Fig_Q5.png)
 
 <br/>
 
