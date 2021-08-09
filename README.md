@@ -14,7 +14,7 @@
 
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> > - ### For Mac-OS:  fullow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
+> > - ### For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
 > > - ### For Linux: the program could be run directly by typing "./PAGEANT".
 
 <br/>
@@ -39,6 +39,8 @@
 
 > ## Run:
 > ### GUI version:
+> > - For Windows user using Ubuntu Linux, an upgrade to Windows 11 is recommended, which supports WSL GUI.
+> > - In Windows Powershell, run "wsl --update" to get the latest version.  
 > > ```
 > > conda activate pageant
 > > python ./GUI.py
