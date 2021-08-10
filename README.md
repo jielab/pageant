@@ -7,7 +7,7 @@
 # #1. Download & Run: *for quick starter*
 
 > ## Download:
-> > - ### Download executables for [Windows](https://drive.google.com/file/d/17fHUpmECH3BNCyrQyZBBJgRBZWmlIATc/view?usp=sharing), [Linux](https://drive.google.com/file/d/1ydnShbERjvkaxIoaKWGPYwsA_-p-9Ifc/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1EBG2Lpmb5a0JaEKa5WnHATLvFDEN8DuZ/view?usp=sharing)
+> > - ### Download executables for [Windows](https://drive.google.com/file/d/1UiI1jwnp9ZMPYSoqn9LmZqrZVAEdLdNS/view?usp=sharing), [Linux](https://drive.google.com/file/d/1eWushdQkUEuSGQQeeRyVzzZmEM_2nq2t/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1bBJODXGjdUNtCQihRrzqDwW23KNqZ1Uv/view?usp=sharing)
 > > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
 > > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
 
