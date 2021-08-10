@@ -1,3 +1,6 @@
 Name: Coronary artery disease
 Chinese name: 冠状动脉疾病
 Description: "Coronary artery disease (CAD) is a leading cause of death worldwide. The major sequelae of CAD include angina, myocardial infarction (MI), arrhythmias, heart failure, and sudden cardiac death. CAD has a complex aetiology, and various environmental factors, including cigarette smoking, sedentary lifestyle, unhealthy diet and obesity, and disease predisposition. These lifestyle-related factors can lead to type 2 diabetes, hypercholesterolaemia and arterial hypertension, which are key risk factors for CAD. In addition, the influence of heritability on CAD susceptibility has been recognized for many years and accounts for 40–50% of cases. Although the inherited CAD risk is particularly evident in large families with multiple affected members, decade ago only mutations in the LDL receptor gene were reproducibly linked to the disease. However, with the emergence of genome-wide association studies (GWAS), large number of common variants displayed strongly reproducible yet small effects and substantially broadened the spectrum of genetic factors recognized as contributing to CAD aetiology. "
+Lifetime risk:
+Reference: Identification of 64 Novel Genetic Loci Provides an Expanded View on the Genetic Architecture of Coronary Artery Disease
+PMID: 29212778

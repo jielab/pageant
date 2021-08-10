@@ -1,4 +1,3 @@
-import os
 from functools import partial
 from gzip import open as gzip_open
 from math import exp

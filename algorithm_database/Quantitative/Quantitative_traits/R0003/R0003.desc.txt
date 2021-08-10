@@ -1,4 +1,6 @@
 Name: Atrial fibrillation
 Chinese name: 心房颤动
+Lifetime risk:
 Description: "Atrial fibrillation (AF) is the most common heart rhythm disorder worldwide and may have serious cardiovascular health consequences. AF is associated with increased risk of stroke, dementia, heart failure, and death. There are several known robust, clinical risk predictors for AF, such as male sex, increasing age, and hypertension; however, during the last couple of decades, a substantive genetic component has also been established. Over the last 10 years, the discovery of novel AF-related genetic variants has accelerated, increasing our understanding of mechanisms behind AF. Current studies are focusing on mapping the polygenic structure of AF, improving risk prediction, therapeutic development, and patient-specific management. Nevertheless, it is still difficult for clinicians to interpret the role of genetics in AF prediction and management. "
-Reference:
+Reference: Multi-ethnic genome-wide association study for atrial fibrillation
+PMID：29892015
