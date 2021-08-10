@@ -1021,7 +1021,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          'quan_data',  'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
                                          'concord_ref', 'population_col', 'population_file',
                                          'population_id', 'query_database', 'pharmgkb', 'clinvar', 'query_db',
-                                         'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'qr_dir', 'quan_pop'],
+                                         'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'quan_pop'],
                                         [self.i_name.text(), self.i_vcf.text(), self.i_config.text(),
                                          self.i_output.text(), self.i_database_qual.text(), self.i_ref_qual.text(),
                                          self.i_database_quan.text(), self.i_ref_quan.text(),
