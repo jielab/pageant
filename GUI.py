@@ -551,78 +551,63 @@ class Ui_PAGEANT(object):
         self.c_qr_code.setCheckable(True)
         self.c_qr_code.setObjectName("c_qr_code")
 
-        self.l_qr_user = QtWidgets.QLabel(self.c_qr_code)
-        self.l_qr_user.setGeometry(QtCore.QRect(30, 210, 281, 25))
+        self.l_qr_give = QtWidgets.QLabel(self.c_qr_code)
+        self.l_qr_give.setGeometry(QtCore.QRect(30, 180, 281, 25))
 
-        self.l_qr_user.setFont(font)
-        self.l_qr_user.setObjectName("l_qr_user")
-        self.i_qr_user = QtWidgets.QLineEdit(self.c_qr_code)
-        self.i_qr_user.setGeometry(QtCore.QRect(50, 241, 365, 25))
+        self.l_qr_give.setFont(font)
+        self.l_qr_give.setObjectName("l_qr_give")
+        self.i_qr_give = QtWidgets.QLineEdit(self.c_qr_code)
+        self.i_qr_give.setGeometry(QtCore.QRect(50, 211, 365, 25))
 
-        self.i_qr_user.setFont(font1)
-        self.i_qr_user.setObjectName("i_qr_user")
-        self.s_qr_user = QtWidgets.QToolButton(self.c_qr_code)
-        self.s_qr_user.setGeometry(QtCore.QRect(410, 240, 41, 27))
+        self.i_qr_give.setFont(font1)
+        self.i_qr_give.setObjectName("i_qr_give")
+        self.s_qr_give = QtWidgets.QToolButton(self.c_qr_code)
+        self.s_qr_give.setGeometry(QtCore.QRect(410, 210, 41, 27))
 
-        self.s_qr_user.setFont(font1)
-        self.s_qr_user.setObjectName("s_qr_user")
-        self.l_qr_dr = QtWidgets.QLabel(self.c_qr_code)
-        self.l_qr_dr.setGeometry(QtCore.QRect(30, 150, 281, 25))
-
-        self.l_qr_dr.setFont(font)
-        self.l_qr_dr.setObjectName("l_qr_dr")
-        self.i_qr_dr = QtWidgets.QLineEdit(self.c_qr_code)
-        self.i_qr_dr.setGeometry(QtCore.QRect(50, 181, 365, 25))
-
-        self.i_qr_dr.setFont(font1)
-        self.i_qr_dr.setObjectName("i_qr_dr")
-        self.s_qr_dr = QtWidgets.QToolButton(self.c_qr_code)
-        self.s_qr_dr.setGeometry(QtCore.QRect(410, 180, 41, 27))
-
-        self.s_qr_dr.setFont(font1)
-        self.s_qr_dr.setObjectName("s_qr_dr")
-        self.i_key = QtWidgets.QLineEdit(self.c_qr_code)
-        self.i_key.setGeometry(QtCore.QRect(50, 61, 361, 25))
-
-        self.i_key.setFont(font1)
-        self.i_key.setObjectName("i_key")
-        self.s_key = QtWidgets.QToolButton(self.c_qr_code)
-        self.s_key.setGeometry(QtCore.QRect(407, 60, 41, 27))
-
-        self.s_key.setFont(font1)
-        self.s_key.setObjectName("s_key")
-        self.l_key = QtWidgets.QLabel(self.c_qr_code)
-        self.l_key.setGeometry(QtCore.QRect(30, 30, 291, 25))
-
-        self.l_key.setFont(font)
-        self.l_key.setObjectName("l_key")
+        self.s_qr_give.setFont(font1)
+        self.s_qr_give.setObjectName("s_qr_give")
         self.l_qr_dir = QtWidgets.QLabel(self.c_qr_code)
-        self.l_qr_dir.setGeometry(QtCore.QRect(30, 270, 251, 25))
+        self.l_qr_dir.setGeometry(QtCore.QRect(30, 40, 281, 25))
 
         self.l_qr_dir.setFont(font)
         self.l_qr_dir.setObjectName("l_qr_dir")
         self.i_qr_dir = QtWidgets.QLineEdit(self.c_qr_code)
-        self.i_qr_dir.setGeometry(QtCore.QRect(53, 301, 361, 25))
+        self.i_qr_dir.setGeometry(QtCore.QRect(50, 71, 365, 25))
 
         self.i_qr_dir.setFont(font1)
         self.i_qr_dir.setObjectName("i_qr_dir")
         self.s_qr_dir = QtWidgets.QToolButton(self.c_qr_code)
-        self.s_qr_dir.setGeometry(QtCore.QRect(410, 300, 41, 27))
+        self.s_qr_dir.setGeometry(QtCore.QRect(410, 70, 41, 27))
 
         self.s_qr_dir.setFont(font1)
         self.s_qr_dir.setObjectName("s_qr_dir")
+        self.l_qr_user = QtWidgets.QLabel(self.c_qr_code)
+        self.l_qr_user.setGeometry(QtCore.QRect(30, 250, 251, 25))
+
+        self.l_qr_user.setFont(font)
+        self.l_qr_user.setObjectName("l_qr_user")
+        self.i_qr_user = QtWidgets.QLineEdit(self.c_qr_code)
+        self.i_qr_user.setGeometry(QtCore.QRect(50, 281, 365, 25))
+
+        self.i_qr_user.setFont(font1)
+        self.i_qr_user.setObjectName("i_qr_user")
+        self.s_qr_user = QtWidgets.QToolButton(self.c_qr_code)
+        self.s_qr_user.setGeometry(QtCore.QRect(410, 280, 41, 27))
+
+        self.s_qr_user.setFont(font1)
+        self.s_qr_user.setObjectName("s_qr_user")
         self.l_qr_snps = QtWidgets.QLabel(self.c_qr_code)
-        self.l_qr_snps.setGeometry(QtCore.QRect(30, 90, 281, 25))
+        self.l_qr_snps.setGeometry(QtCore.QRect(30, 110, 281, 25))
 
         self.l_qr_snps.setFont(font)
         self.l_qr_snps.setObjectName("l_qr_snps")
         self.i_qr_snps = QtWidgets.QLineEdit(self.c_qr_code)
-        self.i_qr_snps.setGeometry(QtCore.QRect(50, 121, 361, 25))
+        self.i_qr_snps.setGeometry(QtCore.QRect(50, 141, 365, 25))
 
         self.i_qr_snps.setFont(font1)
         self.i_qr_snps.setObjectName("i_qr_snps")
         self.s_qr_snps = QtWidgets.QToolButton(self.c_qr_code)
-        self.s_qr_snps.setGeometry(QtCore.QRect(406, 120, 41, 27))
+        self.s_qr_snps.setGeometry(QtCore.QRect(410, 140, 41, 27))
 
         self.s_qr_snps.setFont(font1)
         self.s_qr_snps.setObjectName("s_qr_snps")
@@ -700,7 +685,7 @@ class Ui_PAGEANT(object):
         self.s_output.setText(_translate("PAGEANT", "..."))
         self.l_name.setText(_translate("PAGEANT", "Name"))
         self.i_name.setToolTip(_translate("PAGEANT", "Input your name here"))
-        self.i_name.setText(_translate("PAGEANT", "test"))
+        self.i_name.setText(_translate("PAGEANT", "HG001"))
         self.l_config.setText(_translate("PAGEANT", "Configuration file"))
         self.i_config.setToolTip(_translate("PAGEANT", "Specify the configuration file"))
         self.i_config.setText(_translate("PAGEANT", "./bin/config.ini"))
@@ -807,25 +792,22 @@ class Ui_PAGEANT(object):
 
         # self.c_qr_code.setToolTip(_translate("PAGEANT", "Activate function of generating QR code"))
         self.c_qr_code.setTitle(_translate("PAGEANT", "Generate QR code"))
-        self.l_qr_user.setText(_translate("PAGEANT", "Directory for user QR code file"))
-        self.i_qr_user.setToolTip(_translate("PAGEANT", "Specify the text which include the needed SNPs list"))
-        self.i_qr_user.setText(_translate("PAGEANT", "./output/qr_code/user"))
-        self.s_qr_user.setText(_translate("PAGEANT", "..."))
-        self.l_qr_dr.setText(_translate("PAGEANT", "Directory for doctor QR code file"))
-        self.i_qr_dr.setToolTip(_translate("PAGEANT", "Specify the text which include the needed SNPs list"))
-        self.i_qr_dr.setText(_translate("PAGEANT", "./output/qr_code/doctor"))
-        self.s_qr_dr.setText(_translate("PAGEANT", "..."))
-        self.i_key.setToolTip(_translate("PAGEANT", "Specify your key file"))
-        self.i_key.setText(_translate("PAGEANT", "./output/qr_code/doctor/key"))
-        self.s_key.setText(_translate("PAGEANT", "..."))
-        self.l_key.setText(_translate("PAGEANT", "Doctor\'s public/private Key file"))
-        self.l_qr_dir.setText(_translate("PAGEANT", "Directory for decrypted user genotype"))
-        self.i_qr_dir.setToolTip(_translate("PAGEANT", "Specify directory where the result save"))
-        self.i_qr_dir.setText(_translate("PAGEANT", "./output/qr_code/doctor"))
+
+        self.l_qr_give.setText(_translate("PAGEANT", "SNP list QR code (for user to scan)"))
+        self.i_qr_give.setToolTip(_translate("PAGEANT", "Specify the path for saving SNP list QR code"))
+        self.i_qr_give.setText(_translate("PAGEANT", "./output/qr_code/snp_qr_code.png"))
+        self.s_qr_give.setText(_translate("PAGEANT", "..."))
+        self.l_qr_dir.setText(_translate("PAGEANT", "Directory"))
+        self.i_qr_dir.setToolTip(_translate("PAGEANT", "Specify the directory where needed files can be found"))
+        self.i_qr_dir.setText(_translate("PAGEANT", "./output/qr_code"))
         self.s_qr_dir.setText(_translate("PAGEANT", "..."))
-        self.l_qr_snps.setText(_translate("PAGEANT", "Doctor\'s SNP list file"))
+        self.l_qr_user.setText(_translate("PAGEANT", "User QR code (with encrypted genotype)"))
+        self.i_qr_user.setToolTip(_translate("PAGEANT", "Specify the path for saving User QR code"))
+        self.i_qr_user.setText(_translate("PAGEANT", "./output/qr_code/user_qr_code.png"))
+        self.s_qr_user.setText(_translate("PAGEANT", "..."))
+        self.l_qr_snps.setText(_translate("PAGEANT", "SNP list file"))
         self.i_qr_snps.setToolTip(_translate("PAGEANT", "Specify the text which include the needed SNPs list"))
-        self.i_qr_snps.setText(_translate("PAGEANT", "./personal_genome/fingerprint_snps.txt"))
+        self.i_qr_snps.setText(_translate("PAGEANT", "./test/fingerprint_snps.txt"))
         self.s_qr_snps.setText(_translate("PAGEANT", "..."))
 
         self.b_default_qr_code.setToolTip(_translate("PAGEANT", "Set default values"))
@@ -845,11 +827,10 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.s_database_quan.clicked.connect(main.partial(self.o_database, 'quan'))
         self.s_ref_qual.clicked.connect(main.partial(self.o_ref, 'qual'))
         self.s_ref_quan.clicked.connect(main.partial(self.o_ref, 'quan'))
-        self.s_qr_dr.clicked.connect(self.o_qr_dr)
-        self.s_qr_user.clicked.connect(self.o_qr_user)
         self.s_qr_dir.clicked.connect(self.o_qr_dir)
+        self.s_qr_user.clicked.connect(self.o_qr_user)
         self.s_qr_snps.clicked.connect(self.o_qr_snps)
-        self.s_key.clicked.connect(self.o_qr_key)
+        self.s_qr_give.clicked.connect(self.o_qr_give)
         self.s_maf_sample.clicked.connect(self.o_maf)
         self.s_ps_ref.clicked.connect(self.o_ps)
         self.s_ps_pop.clicked.connect(self.o_text)
@@ -928,31 +909,29 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.i_concord_ref.setText(get_directory_path[0])
         self.parameters['concord_ref'] = get_directory_path[0]
 
-    def o_qr_key(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the doctor's key file", os.getcwd())
-        self.i_key.setText(get_directory_path[0])
-
     def o_qr_dir(self):
-        get_dir_path = QFileDialog.getExistingDirectory(self, "Select the directory where the result saves",
+        get_dir_path = QFileDialog.getExistingDirectory(self, "Specify the directory where needed files can be found",
                                                         os.getcwd())
         self.i_qr_dir.setText(get_dir_path)
+        self.parameters['qr_dir'] = get_dir_path
 
     def o_qr_snps(self):
         get_directory_path = QFileDialog.getOpenFileName(self, "Select the text which include the needed SNPs list",
                                                          os.getcwd())
         self.i_qr_snps.setText(get_directory_path[0])
+        self.parameters['qr_snps'] = get_directory_path[0]
 
-    def o_qr_dr(self):
-        get_dir_path = QFileDialog.getExistingDirectory(self, "Select the directory for doctor QR code",
-                                                        os.getcwd())
-        self.i_qr_dr.setText(get_dir_path)
-        self.parameters['qr_dr'] = get_dir_path
+    def o_qr_give(self):
+        get_file_path = QFileDialog.getSaveFileName(self, "Specify the path for saving SNP list QR code",
+                                                    os.path.join(os.getcwd(), 'snp_qr_code.png'), 'image(*.png)')
+        self.i_qr_give.setText(get_file_path[0])
+        self.parameters['qr_give'] = get_file_path[0]
 
     def o_qr_user(self):
-        get_dir_path = QFileDialog.getExistingDirectory(self, "Select the directory for user QR code",
-                                                        os.getcwd())
-        self.i_qr_user.setText(get_dir_path)
-        self.parameters['qr_user'] = get_dir_path
+        get_file_path = QFileDialog.getSaveFileName(self, "Specify the path for saving User QR code",
+                                                    os.path.join(os.getcwd(), 'user_qr_code.png'), 'image(*.png)')
+        self.i_qr_user.setText(get_file_path[0])
+        self.parameters['qr_user'] = get_file_path[0]
 
     def o_otherdb(self):
         get_directory_path = QFileDialog.getOpenFileName(self, "Select the third-party database file", os.getcwd())
@@ -992,11 +971,10 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def set_default_qr_code(self):
         self.c_qr_code.setChecked(True)
-        self.i_key.setText('./output/qr_code/doctor/key')
         self.i_qr_snps.setText('./personal_genome/fingerprint_snps.txt')
-        self.i_qr_dir.setText('./output/qr_code/doctor')
-        self.i_qr_dr.setText("./output/qr_code/doctor")
-        self.i_qr_user.setText("./output/qr_code/user")
+        self.i_qr_give.setText('./output/qr_code/snp_qr_code.png')
+        self.i_qr_dir.setText("./output/qr_code")
+        self.i_qr_user.setText("./output/qr_code/user_qr_code.png")
 
     def timerEvent(self, a0: 'QtCore.QTimerEvent') -> None:
         if self.progress_now.value() < self.progress_value.value:
@@ -1043,7 +1021,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          'quan_data',  'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
                                          'concord_ref', 'population_col', 'population_file',
                                          'population_id', 'query_database', 'pharmgkb', 'clinvar', 'query_db',
-                                         'qr_code', 'qr_key', 'qr_snps', 'qr_dr', 'qr_user', 'qr_dir', 'quan_pop'],
+                                         'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'quan_pop'],
                                         [self.i_name.text(), self.i_vcf.text(), self.i_config.text(),
                                          self.i_output.text(), self.i_database_qual.text(), self.i_ref_qual.text(),
                                          self.i_database_quan.text(), self.i_ref_quan.text(),
@@ -1053,9 +1031,8 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          self.c_query_database.isChecked(), self.c_pharmgkb.isChecked(),
                                          self.c_clinvar.isChecked(),
                                          self.i_otherdb.text() if self.c_otherdb.isChecked() else '',
-                                         self.c_qr_code.isChecked(), self.i_key.text(), self.i_qr_snps.text(),
-                                         self.i_qr_dr.text(), self.i_qr_user.text(), self.i_qr_dir.text(),
-                                         self.s_quan_pop.currentText()
+                                         self.c_qr_code.isChecked(), self.i_qr_dir.text(), self.i_qr_snps.text(),
+                                         self.i_qr_give.text(), self.i_qr_user.text(), self.s_quan_pop.currentText()
                                          ])))
         self.progress_value = ProgressValue()
         self.progress_now = ProgressNow(self.inter)

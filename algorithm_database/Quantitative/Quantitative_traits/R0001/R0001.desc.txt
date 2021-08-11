@@ -1,3 +1,6 @@
 Name: Age related macular degeneration
 Chinese name: 老年性黄斑变性
 Description: "Age-related macular degeneration (AMD) is an eye disease that can blur the sharp, central vision one needs for activities like reading and driving. “Age-related” means that it often happens in older people. “Macular” means it affects a part of the eye called the macula. AMD is a leading cause of vision loss for people age 50 and older. AMD doesn’t cause complete blindness, but losing one’ central vision can make it harder to see faces, drive, or do close-up work like cooking or fixing things around the house. AMD happens very slowly in some people. For some people, AMD may not experience vision loss for a long time. For other people, AMD progresses faster and can lead to central vision loss in one eye or both eyes.  AMD is the very first disease that inspired genome-wide association studies (GWAS). Arguably, the best-known and most successful GWAS was on AMD, by Klein et al. in 2005, published on Science Journal."
+Lifetime risk: 
+Reference: A large genome-wide association study of age-related macular degeneration highlights contributions of rare and common variants
+PMID：26691988 

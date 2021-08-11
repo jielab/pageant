@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-08-08'
+version = '2021-08-10'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 # todo: add description for function

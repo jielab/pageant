@@ -232,8 +232,8 @@ def sample_qc(human: Human, vcf: str, temp_dir: str) -> list:
         res[0] = get_maf(human, temp_dir, maf_ref, img_dir)
     if ps_ref:
         pca_data(human, temp_dir, ps_ref)
-        umap_data(human, temp_dir, ps_ref, img_dir)
         res[1] = pca_plot(temp_dir, img_dir)
+        umap_data(human, temp_dir, ps_ref, img_dir)
     if concord_ref:
         res[2] = check_concordence(human, temp_dir, concord_ref)
     return res
@@ -301,25 +301,21 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm_da
 def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
     import src.qr_code as crypto
     import json
-    key_file = module_config['file']['qr_key']
     need_snps_list = module_config['file']['qr_snps']
-    doctor_qr_dir = module_config['file']['qr_dr']
-    user_qr_dir = module_config['file']['qr_user']
+    save_user_img = module_config['file']['qr_user']
+    save_dr_img = module_config['file']['qr_give']
     res_dir = module_config['file']['qr_dir']
+    key_file = os.path.join(res_dir, 'key')
     out_img_dir = os.path.join(output, 'genetic_report', 'html_files', 'img')
     if not os.path.isdir(res_dir):
         os.mkdir(res_dir)
     if not os.path.isfile(key_file):
         crypto.generate_key(res_dir)
-        module_config['file']['qr_key'] = os.path.join(res_dir, 'key')
-        save_config(module_config)
-    dr_logo = os.path.join(raw_dir, "bin", "DR_logo.png")
-    save_dr_img = os.path.join(doctor_qr_dir, 'DR_QR_code.png')
-    crypto.request(key_file, need_snps_list, doctor_qr_dir, dr_logo)
+    snp_logo = os.path.join(raw_dir, "bin", "SNP_logo.png")
+    crypto.request(key_file, need_snps_list, save_dr_img, snp_logo)
     copy(save_dr_img, os.path.join(out_img_dir, 'dr_qr_code.png'))
 
     logo = os.path.join(raw_dir, "bin", "logo.png")
-    save_user_img = os.path.join(user_qr_dir, 'User_QR_code.png')
     crypto.give(save_dr_img, human, save_user_img, logo)
     copy(save_user_img, os.path.join(out_img_dir, 'user_qr_code.png'))
 

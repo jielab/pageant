@@ -116,7 +116,7 @@ class Ind(object):
         if not self.ftype:
             if ftype == 'quan':
                 self.outcome = 1
-                self.distribution = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
+                self.distribution = {'Average': None, 'Plot': None, 'Status': False}
             else:
                 self.distribution = {'Plot': None, 'Status': False}
             self.ftype = ftype
@@ -420,7 +420,7 @@ def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, rep
              f'Percentage: {per:.2f}% '
              # f'\nLevel: {risk_level(per)}'
              , bbox={'facecolor': 'white', 'alpha': 0.8})
-    plt.xlabel("Standardized genetic rise score")
+    plt.xlabel("Standardized genetic risk score")
     plt.yticks([])
     plt.xlim(symmertry_range(plt.xlim()))
     plt.ylim(bottom=0, top=plt.ylim()[1] * 1.15)

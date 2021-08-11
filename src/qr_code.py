@@ -110,7 +110,7 @@ def decode_give_qr(give_qr_code: str, send_qr_code: str, private_key: rsa.key.Pr
     res = []
     i = 0
     while not res:
-        if i > 5:
+        if i > 10:
             raise Exception('No QR code was found')
         need_snp = decode_send_qr(send_qr_code)[0]
         img = Image.open(give_qr_code)
@@ -127,10 +127,10 @@ def decode_give_qr(give_qr_code: str, send_qr_code: str, private_key: rsa.key.Pr
     return {snp: genotype_text[idx * 2: (idx + 1) * 2] for idx, snp in enumerate(need_snp)}
 
 
-def request(key_file: str, need_snp_list: str, output: str, logo: str or None = None) -> None:
-    if not os.path.isdir(output):
-        os.mkdir(output)
-    save_img = os.path.join(output, 'DR_QR_code.png')
+def request(key_file: str, need_snp_list: str, save_img: str, logo: str or None = None) -> None:
+    # if not os.path.isdir(output):
+    #     os.mkdir(output)
+    # save_img = os.path.join(output, 'DR_QR_code.png')
     public_key_str = extract_pub_key(key_file)
     generate_send_qr(need_snp_list, public_key_str, save_img, logo)
 
