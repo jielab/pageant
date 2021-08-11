@@ -38,8 +38,7 @@
 
 > ## Run:
 > ### GUI version:
-> > - For Windows user using Ubuntu Linux, an upgrade to Windows 11 is recommended, which supports WSL GUI.
-> > - In Windows Powershell, run "wsl --update" to get the latest version.  
+> > - For Windows user using Ubuntu Linux, an upgrade to Windows 11 is recommended, which supports WSL GUI. In Windows Powershell, run "wsl --update" to get the latest version.  
 > > ```
 > > conda activate pageant
 > > python ./GUI.py
