@@ -55,6 +55,8 @@
 
 # #3. Example reports 
 
+A full example genetic report can be viewed [here](./genetic_report/Report.html) 
+
 > ## Q1：Displayings user's PCA and UMAP among population reference
 
 > > ![Q1](./images/Fig_Q1.png)
