@@ -55,7 +55,7 @@
 
 # #3. Example reports 
 
-## A full example genetic report can be viewed [here](https://htmlpreview.github.io/?https://github.com/jielab/pageant/blob/master/genetic_reports/Report.html) 
+## A full example genetic report can be viewed [here](https://htmlpreview.github.io/?https://github.com/jielab/pageant/blob/master/genetic_reports/Report.html). 
 
 <br/>
 
