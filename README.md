@@ -8,8 +8,7 @@
 
 > ## Download:
 > > - ### Download executables for [Windows](https://drive.google.com/file/d/14inrNM4p2cb4MlF2oYZPv0t2YkBbCxXt/view?usp=sharing), [Linux](https://drive.google.com/file/d/1eWushdQkUEuSGQQeeRyVzzZmEM_2nq2t/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1bBJODXGjdUNtCQihRrzqDwW23KNqZ1Uv/view?usp=sharing)
-> > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
-> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. The basic version of PAGEANT comes with a subset of the G1K data that includes all SNPs used in the genetic report.
 
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
