@@ -49,13 +49,12 @@ def initial_res_dir(output: str) -> None:
     """
     global img_dir
     img_dir = os.path.join(output, 'genetic_report', 'html_files', 'img')
-    qr_dir = os.path.join(output, 'qr_code')
+    # qr_dir = os.path.join(output, 'qr_code')
     mkdir([output])
     mkdir(['log_files', 'population_QC', 'genetic_report', 'qr_code'], output)
-    mkdir(['doctor', 'user'], qr_dir)
+    # mkdir(['doctor', 'user'], qr_dir)
     mkdir([os.path.join(output, 'genetic_report', 'html_files')])
     mkdir(['dist_plot', 'img'], os.path.join(output, 'genetic_report', 'html_files'))
-
 
 
 @progress_value(15)
@@ -162,6 +161,14 @@ def load_vcf(human: Human, data_snps=None):
 @progress_value(10)
 @use_time('Load indicator data')
 def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None:
+    """
+    Load and calculate the algorithm for each indicator in database
+    :param human: The object 'Human'
+    :param temp_dir: The temporary directory for the whole analysis
+    :param type_list: The information for algorithm database (Quan or Qual)
+    :param output: The output directory for the whole analysis
+    :return: The result for all indicators saving in object 'Human'
+    """
     columns, def_config = convert_dict(module_config['columns']), convert_dict(module_config['parameter'])
     columns_name = {value: key for key, value in columns['names_ind'].items()}
     try:
@@ -170,29 +177,30 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
             for ind_dir in tqdm([item for item in sorted(os.listdir('.')) if os.path.isdir(item)]):
                 os.chdir(ind_dir)
                 try:
+                    des_file = list(filter(lambda a: a.endswith(module_config['file']['description_suf']),
+                                           os.listdir()))[0]
                     info = {columns_name[key] if key in columns_name else key: value
-                            for key, value in load_txt(ind_dir + module_config['file']['description_suf'])}
+                            for key, value in load_txt(des_file)}
                     if 'sex' not in info:
                         info['sex'] = ''
                     human.set_ind(code=ind_dir, **info, ind_dir=os.getcwd(), itype=type_dir)
+                except IndexError:
+                    logging.warning(f'There is no description file in code {ind_dir}')
                 except NameError as e:
                     raise Exception(e.args[0] + f'in code {ind_dir}')
-                except FileNotFoundError:
-                    logging.warning(f'There is no description file in code {ind_dir}')
-                exist, file_type, file_name = get_cal_file(ind_dir)
+
+                exist, file_type, file_name = get_cal_file()
                 if exist:
                     if file_type:
-                        columns_num = get_columns_num(file_name, [module_config['name'][i] for i in
-                                                                  ['snp', 'ea', 'beta']])
-                        file = trans_gz(file_name, temp_dir)
+                        file = get_score_data(file_name, module_config['name'], temp_dir)
+                        save_code = os.path.basename(file_name).split('.')[0]
                         prs_fun = partial(run_plink_cmd,
                                           cmd=f"--vcf {human.vcf} "
                                               f"--read-freq {os.path.join(output, 'population_QC', 'prs.ref.afreq')} "
-                                              f"--score {file} {' '.join([str(i) for i in columns_num])} header"
-                                              f" center "
+                                              f"--score {file} 1 2 3 header center "
                                               f"--q-score-range "
                                               f"{os.path.join(output, 'population_QC', 'need_range_list')}"
-                                              f" {os.path.join(output, 'population_QC', ind_dir + '.SNP.pvalue')} "
+                                              f" {os.path.join(output, 'population_QC', save_code + '.SNP.pvalue')} "
                                               f"--out {os.path.join(temp_dir, 'result_prs')}",
                                           delete_log=False)
                         prs_fun(plink='plink2')
@@ -202,16 +210,16 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
                             result_text = f.read()
                         # detail = result_text.split('\n\n')[2].strip()
                         gwas_num = read_line_num(file, header=True)
-                        valid_num = read_line_num(os.path.join(output, 'population_QC', ind_dir + '.SNP.pvalue'), True)
+                        valid_num = read_line_num(os.path.join(output, 'population_QC', save_code + '.SNP.pvalue'), True)
                         load_num = search(pattern_load_num, result_text)[0]
                         detail = ['Using "clump" and "score" function in plink to calculate PRS.<br>&nbsp;',
                                   f'There are {gwas_num} variants for this trait in raw GWAS data.<br>&nbsp;',
                                   f'After clumping, there are {valid_num} valid variants for PRS.<br>&nbsp;',
                                   f'In this sample, there are {load_num} loaded to calculate PRS.<br>&nbsp;']
-                        # todo: What detail should be telled to the users?
+                        # todo: What detail should be told?
                         human.get_prs_data(ind_dir, res, detail)
                     else:
-                        human.cal_ind_from_txt(file_name, type_list[type_dir], ind_dir, ref_rs, columns)
+                        human.cal_ind_from_txt(file_name, type_list[type_dir], ind_dir, ref_rs, columns, header=True)
                 os.chdir('..')
             os.chdir(raw_dir)
     finally:
@@ -220,20 +228,33 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
 
 @progress_value(10, average=True)
 @use_time('Sample QC')
-def sample_qc(human: Human, vcf: str, temp_dir: str) -> list:
+def sample_qc(human: Human, output: str, temp_dir: str) -> list:
+    """
+    Sample QC functionalities:
+        Minor allele frequency analysis
+        Population stratification analysis
+        Concordance analysis
+    :param human: The object 'Human'
+    :param output: The output directory for whole analysis
+    :param temp_dir: The temporary directory for whole analysis
+    :return: The QC results
+    """
     maf_ref = module_config['file']['maf_ref']
     ps_ref = module_config['file']['ps_ref']
     concord_ref = module_config['file']['concord_ref']
     # method = module_config['Population_stratisfication']['method']
     res = [None, None, None]
-    run_plink_cmd(f'--vcf {vcf} --make-just-bim --sort-vars --out {os.path.join(temp_dir, "sample_qc")}')
+    run_plink_cmd(f'--vcf {human.vcf} --make-just-bim --sort-vars --out {os.path.join(temp_dir, "sample_qc")}')
     chr_and_vep(os.path.join(temp_dir, "sample_qc.bim"), img_dir)
     if maf_ref:
         res[0] = get_maf(human, temp_dir, maf_ref, img_dir)
     if ps_ref:
-        pca_data(human, temp_dir, ps_ref)
-        res[1] = pca_plot(temp_dir, img_dir)
-        umap_data(human, temp_dir, ps_ref, img_dir)
+        metadata = module_config['file']['population_file']
+        res[1] = ps_analyse(ps_ref, human.vcf, metadata, temp_dir, os.path.join(output, 'population_QC'), img_dir)
+        # pca_data(human, temp_dir, ps_ref)
+        # res[1] = pca_plot(temp_dir, img_dir)
+        # umap_data(human, temp_dir, ps_ref, img_dir)
+
     if concord_ref:
         res[2] = check_concordence(human, temp_dir, concord_ref)
     return res

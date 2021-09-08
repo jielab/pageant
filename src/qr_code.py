@@ -8,7 +8,7 @@ from zlib import decompress, compress
 from pyzbar.pyzbar import decode
 from PIL import Image
 from base64 import b85decode, b85encode
-from typing import Tuple, List, Dict, Set
+from typing import Tuple, List, Dict, Set, Optional
 
 
 find_key = compile(r'(?<=-\n)[\S\n]*?(?=\n-)')
@@ -51,7 +51,7 @@ def extract_pub_key(key_file: str) -> str:
     return find_key.search(public_key.save_pkcs1().decode())[0].replace('\n', '')
 
 
-def make_qr_code(data: str, output: str, logo: str or None = None):
+def make_qr_code(data: str, output: str, logo: Optional[str] = None):
     img_qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
     img_qr.add_data(data)
     img_qr.make()
@@ -63,7 +63,7 @@ def make_qr_code(data: str, output: str, logo: str or None = None):
     img.save(output)
 
 
-def generate_send_qr(snp_list_txt: str, public_key: str, output: str, logo: str or None = None) -> None:
+def generate_send_qr(snp_list_txt: str, public_key: str, output: str, logo: Optional[str] = None) -> None:
     if os.path.isfile(snp_list_txt):
         with open(snp_list_txt) as f_snp:
             qr_code_snps = f_snp.read().strip()
@@ -127,7 +127,7 @@ def decode_give_qr(give_qr_code: str, send_qr_code: str, private_key: rsa.key.Pr
     return {snp: genotype_text[idx * 2: (idx + 1) * 2] for idx, snp in enumerate(need_snp)}
 
 
-def request(key_file: str, need_snp_list: str, save_img: str, logo: str or None = None) -> None:
+def request(key_file: str, need_snp_list: str, save_img: str, logo: Optional[str] = None) -> None:
     # if not os.path.isdir(output):
     #     os.mkdir(output)
     # save_img = os.path.join(output, 'DR_QR_code.png')
@@ -135,7 +135,7 @@ def request(key_file: str, need_snp_list: str, save_img: str, logo: str or None 
     generate_send_qr(need_snp_list, public_key_str, save_img, logo)
 
 
-def give(qr_code: str, human: object, output: str, logo: str or None = None) -> None:
+def give(qr_code: str, human: object, output: str, logo: Optional[str] = None) -> None:
     snp_list, pub_key = decode_send_qr(qr_code)
     generate_give_qr(human, snp_list, pub_key, output, logo)
 

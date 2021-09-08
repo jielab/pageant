@@ -3,7 +3,7 @@ from re import search
 from shutil import copy
 import matplotlib.pyplot as plt
 import pandas as pd
-from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace
+from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
 from scipy.stats import gaussian_kde
 from src.decorator import *
 
@@ -41,26 +41,43 @@ class Human(object):
         if trans_sex(sex) is None or trans_sex(sex) == trans_sex(self.sex):
             self.ind_data[code] = Ind(code, name, sex, itype, ind_dir, **other)
 
-    def cal_ind(self, ftype: str, code: str, snp: str, *cal_col, ref_rs: pd.DataFrame):
+    def cal_ind(self, ftype: str, code: str, snp: str, *cal_col, ref_rs: pd.DataFrame, mode: str or None):
         if code in self.ind_data:
             self.ind_data[code].set_ftype(ftype)
             if snp in self.gt_data:
-                self.ind_data[code].cal(snp, self.gt_data[snp], *cal_col)
+                self.ind_data[code].cal(snp, self.gt_data[snp], *cal_col, mode=mode)
             else:
                 self.ind_data[code].mis_snp(snp, cal_col[1], ref_rs)
 
     @auto_encoding
     @auto_sep
-    def cal_ind_from_txt(self, file: str, type: str, ind_dir: str, ref_rs: pd.DataFrame, columns: dict, *,
-                         encoding: str = 'UTF-8', sep: str = '\t') -> None:
+    def cal_ind_from_txt(self, file: str, type_: str, ind_dir: str, ref_rs: pd.DataFrame, columns: dict, *,
+                         encoding: str = 'UTF-8', sep: str = '\t', header=False) -> None:
         with open(file, encoding=encoding) as f:
             for line in f:
                 line = line.strip('\n\r')
                 if line:
                     line = line.split(sep)
                     assert len(line) > 1, sep.join(line)
-                    self.cal_ind(type, ind_dir,
-                                 *select_list(line, columns['columns_' + type].values()), ref_rs=ref_rs)
+                    if header:
+                        columns_idx = get_columns_index(line, list(columns['columns_' + type_].values()))
+                        if type_ == 'qual':
+                            assert None not in columns_idx, \
+                                f"Cannot find {list(columns['columns_qual'].keys())[columns_idx.index(None)]} " \
+                                f"in the header of algorithm file ({file})."
+                        elif type_ == 'quan':
+                            assert None not in columns_idx[:-2], \
+                                f"Cannot find {list(columns['columns_quan'].keys())[columns_idx[:-2].index(None)]} " \
+                                f"in the header of algorithm file ({file})."
+                            assert any(columns_idx[-2:]), \
+                                f"Cannot find statistic (OR or Beta) in the header of algorithm file ({file})."
+                            statistic = 'OR' if columns_idx[-2] else 'Beta'
+                            columns_idx.pop(-1 if statistic == 'OR' else -2)
+                        header = False
+                    else:
+                        self.cal_ind(type_, ind_dir,
+                                     *select_list(line, columns_idx), ref_rs=ref_rs,
+                                     mode=None if type_ == 'qual' else statistic)
 
     def get_prs_data(self, code: str, res: float, detail: str):
         if code in self.ind_data:
@@ -108,7 +125,7 @@ class Ind(object):
         self.other = other
         try:
             self.picture = next(os.path.abspath(os.path.join(ind_dir, file)) for file in os.listdir(ind_dir)
-                                if search(rf'^{self.code}\.(jpeg|jpg|png|bmp)$', file))
+                                if search(rf'^.+\.(jpeg|jpg|png|bmp)$', file))
         except StopIteration:
             self.picture = None
 
@@ -128,7 +145,7 @@ class Ind(object):
         self.detail = detail
         self.status = True
 
-    def cal(self, snp: str, gt: set, ref: str, inter: str or float or int, no_inter=None):
+    def cal(self, snp: str, gt: set, ref: str, inter: str or float or int, no_inter=None, mode: str or None = None):
         lan_lib = convert_dict(objects_config['lan_lib'])
         if self.ftype == 'qual':
             if not self.decide:
@@ -160,7 +177,7 @@ class Ind(object):
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
         elif self.ftype == 'quan':
-            outcome = cal_beta(gt, ref, inter)
+            outcome = cal_effect(gt, ref, inter, mode)
             self.outcome *= outcome
             for item in self.detail:
                 if type(item) == dict:
@@ -232,6 +249,7 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
     :param delete_log:
     :param plink: plink name
     :param cmd: cmd string
+    :param plink_dir: the directory of PLINK & PLINK2
     :return: A finished subprocess with no result
     """
     if '--out' in cmd:
@@ -257,13 +275,16 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
             raise RUNPLINKERROR("RunPlinkError:\n" + sterr.decode().strip())
 
 
-def get_plink_dir() -> None:
+def get_plink_dir(dir_: Optional[str] = None) -> None:
     global plink_dir
-    plink_dir = os.path.abspath(objects_config['file']['plink_dir'])
+    plink_dir = dir_ if dir_ else os.path.abspath(objects_config['file']['plink_dir'])
 
 
 def detect_plink(plink: str = 'plink' or 'plink2'):
-    a = subprocess.Popen(f'which {plink}', shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+    a = subprocess.Popen(f'which {plink}', shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         stdin=subprocess.PIPE)
     stdout, sterr = a.communicate()
     a.wait()
     return True if stdout else False
@@ -311,10 +332,11 @@ def gene_filp(raw: str) -> str:
         return ''.join([base_dict[char] if char in base_dict.keys() else char for char in raw])
 
 
-def cal_beta(gt: set, ref: str, beta: int or float) -> float:
-    if type(beta) == str:
-        beta = float(beta)
-    return 1 if ref not in gt else beta ** 2 if len(gt) == 1 else beta
+def cal_effect(gt: set, ref: str, statistic: int or float, mode: str = 'OR' or 'Beta') -> float:
+    if type(statistic) == str:
+        statistic = float(statistic)
+    or_ = statistic if mode == 'OR' else exp(statistic)
+    return 1 if ref not in gt else or_ ** 2 if len(gt) == 1 else or_
 
 
 def trans_sex(sex: str or bool) -> bool or str:
@@ -436,3 +458,25 @@ def symmertry_range(limit: Tuple[float, float], center: float = 0) -> Tuple[floa
         return limit[0], 2 * center - limit[0]
     else:
         return 2 * center - limit[1], limit[1]
+
+
+def get_ind(pos: List[int], pos_length: List[int]) -> List[int or None]:
+    idx_rev = []
+    for p in pos:
+        if p is None:
+            idx_rev.append(None)
+        else:
+            i = 0
+            while p >= pos_length[i]:
+                p -= pos_length[i]
+                i += 1
+            idx_rev.append(i)
+    return [idx_rev.index(i) if i in idx_rev else None for i in range(len(pos_length))]
+
+
+def get_columns_index(col_names: List[str], need_cols: List[List[str]]) -> List[int or None]:
+    col_names = [name.upper().replace(' ', '_') for name in col_names]
+    needs = [need for need_col in need_cols for need in need_col]
+    need_pos = [len(need_col) for need_col in need_cols]
+    need_idx = [needs.index(name) if name in needs else None for name in col_names]
+    return get_ind(need_idx, need_pos)

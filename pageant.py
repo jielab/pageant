@@ -1,12 +1,14 @@
 import getopt
+import warnings
 from sys import exit as sys_exit
 from src.log import *
 from src.modules import *
 
 
-version = '2021-08-10'
+version = '2021-09-07'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
+warnings.filterwarnings('ignore')
 # todo: add description for function
 
 # stream log start
@@ -83,7 +85,7 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
         recode_and_sex_impute(human, input_file, temp_dir)
         if module['sample_qc']:
             human.sample_qc(temp_dir)
-            extra_res.append(sample_qc(human, human.vcf, temp_dir))
+            extra_res.append(sample_qc(human, output, temp_dir))
         else:
             extra_res.append([None, None, None])
 

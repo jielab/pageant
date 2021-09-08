@@ -14,6 +14,7 @@ import pageant as main
 main.plt.switch_backend('Agg')
 if main.platform == 'Darwin':
     os.chdir(main.raw_dir)
+default_font_size = 10 if main.platform == 'Linux' else 11
 y_offset = 0 if main.platform == 'Windows' else 10
 QtGui.QGuiApplication.addLibraryPath(os.path.join(os.path.dirname(qt_file), 'Qt', 'plugins', 'platforms'))
 QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
@@ -36,6 +37,11 @@ default_config.update({
 
 def index_to_sep(ind: int) -> str:
     return {0: '\t', 1: ',', 2: ' '}[ind]
+
+
+def umap(*args, **kwargs):
+    main.get_plink_dir(os.path.join(os.getcwd(), 'bin'))
+    main.ps_analyse(*args, **kwargs)
 
 
 class GUIHandler(logging.Handler):
@@ -75,6 +81,29 @@ class MyThread(QtCore.QThread):
             main.gui_log_remove(self.handler)
 
 
+class API_Thread(QtCore.QThread):
+    def __init__(self, func: main.Callable, *args, **kwargs):
+        super().__init__()
+        self.statue = False
+        self.res = 'Analysis failed to start.'
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        self.setStackSize(10240000)
+
+    def run(self):
+        sleep(0.5)
+        try:
+            self.func(*self.args, **self.kwargs)
+        except Exception as e:
+            self.res = str(e).capitalize()
+        else:
+            self.statue = True
+            self.res = 'Finish! Result has been saved in the working directory.'
+        finally:
+            self.quit()
+
+
 class ProgressValue:
     def __init__(self):
         self.value = 0
@@ -112,25 +141,25 @@ class Ui_PAGEANT(object):
 
         font = QtGui.QFont()
         font.setFamily("Calibri")
-        font.setPointSize(11)
+        font.setPointSize(default_font_size)
         font.setBold(True)
         font1 = QtGui.QFont()
         font1.setFamily("Calibri")
-        font1.setPointSize(10)
+        font1.setPointSize(default_font_size - 1)
         font1.setBold(False)
         font2 = QtGui.QFont()
         font2.setFamily("Calibri")
-        font2.setPointSize(11)
+        font2.setPointSize(default_font_size)
         font2.setBold(False)
         font2.setKerning(True)
         font2.setStyleStrategy(QtGui.QFont.PreferDefault)
         font3 = QtGui.QFont()
         font3.setFamily("Calibri")
-        font3.setPointSize(11)
+        font3.setPointSize(default_font_size)
         font3.setBold(False)
         font4 = QtGui.QFont()
         font4.setFamily("Calibri")
-        font4.setPointSize(11)
+        font4.setPointSize(default_font_size)
         font4.setBold(True)
         font4.setKerning(True)
         font4.setStyleStrategy(QtGui.QFont.PreferDefault)
@@ -618,6 +647,147 @@ class Ui_PAGEANT(object):
         self.b_default_qr_code.setFont(font)
         self.b_default_qr_code.setObjectName("b_default_qr_code")
         self.Function.addTab(self.QR_code, "")
+
+        self.API = QtWidgets.QWidget()
+        self.API.setObjectName("API")
+        self.UMAP = QtWidgets.QGroupBox(self.API)
+        self.UMAP.setEnabled(True)
+        self.UMAP.setGeometry(QtCore.QRect(30, 10, 501, 161))
+
+        self.UMAP.setFont(font)
+        self.UMAP.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.UMAP.setObjectName("UMAP")
+        self.l_umap_ref = QtWidgets.QLabel(self.UMAP)
+        self.l_umap_ref.setGeometry(QtCore.QRect(30, 31, 131, 25))
+
+        self.l_umap_ref.setFont(font2)
+        self.l_umap_ref.setObjectName("l_umap_ref")
+        self.i_umap_ref = QtWidgets.QLineEdit(self.UMAP)
+        self.i_umap_ref.setGeometry(QtCore.QRect(164, 32, 248, 25))
+
+        self.i_umap_ref.setFont(font1)
+        self.i_umap_ref.setObjectName("i_umap_ref")
+        self.s_umap_ref = QtWidgets.QToolButton(self.UMAP)
+        self.s_umap_ref.setGeometry(QtCore.QRect(410, 31, 41, 27))
+
+        self.s_umap_ref.setFont(font1)
+        self.s_umap_ref.setObjectName("s_umap_ref")
+        self.l_umap_sample = QtWidgets.QLabel(self.UMAP)
+        self.l_umap_sample.setGeometry(QtCore.QRect(30, 61, 131, 25))
+
+        self.l_umap_sample.setFont(font2)
+        self.l_umap_sample.setObjectName("l_umap_sample")
+        self.i_umap_sample = QtWidgets.QLineEdit(self.UMAP)
+        self.i_umap_sample.setGeometry(QtCore.QRect(164, 62, 248, 25))
+
+        self.i_umap_sample.setFont(font1)
+        self.i_umap_sample.setObjectName("i_umap_sample")
+        self.s_umap_sample = QtWidgets.QToolButton(self.UMAP)
+        self.s_umap_sample.setGeometry(QtCore.QRect(410, 61, 41, 27))
+
+        self.s_umap_sample.setFont(font1)
+        self.s_umap_sample.setObjectName("s_umap_sample")
+        self.l_umap_metadata = QtWidgets.QLabel(self.UMAP)
+        self.l_umap_metadata.setGeometry(QtCore.QRect(30, 90, 131, 25))
+
+        self.l_umap_metadata.setFont(font2)
+        self.l_umap_metadata.setObjectName("l_umap_metadata")
+        self.s_umap_metadata = QtWidgets.QToolButton(self.UMAP)
+        self.s_umap_metadata.setGeometry(QtCore.QRect(410, 90, 41, 27))
+
+        self.s_umap_metadata.setFont(font1)
+        self.s_umap_metadata.setObjectName("s_umap_metadata")
+        self.i_umap_metadata = QtWidgets.QLineEdit(self.UMAP)
+        self.i_umap_metadata.setGeometry(QtCore.QRect(164, 91, 248, 25))
+
+        self.i_umap_metadata.setFont(font1)
+        self.i_umap_metadata.setObjectName("i_umap_metadata")
+        self.b_run_umap = QtWidgets.QPushButton(self.UMAP)
+        self.b_run_umap.setGeometry(QtCore.QRect(170, 120, 181, 31))
+
+        self.b_run_umap.setFont(font)
+        self.b_run_umap.setObjectName("b_run_umap")
+        self.add_rsid = QtWidgets.QGroupBox(self.API)
+        self.add_rsid.setEnabled(True)
+        self.add_rsid.setGeometry(QtCore.QRect(30, 180, 501, 111))
+
+        self.add_rsid.setFont(font)
+        self.add_rsid.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.add_rsid.setObjectName("add_rsid")
+        self.l_add_rsid_file = QtWidgets.QLabel(self.add_rsid)
+        self.l_add_rsid_file.setGeometry(QtCore.QRect(30, 31, 131, 25))
+
+        self.l_add_rsid_file.setFont(font2)
+        self.l_add_rsid_file.setObjectName("l_add_rsid_file")
+        self.i_add_rs_id_file = QtWidgets.QLineEdit(self.add_rsid)
+        self.i_add_rs_id_file.setGeometry(QtCore.QRect(121, 32, 221, 25))
+
+        self.i_add_rs_id_file.setFont(font1)
+        self.i_add_rs_id_file.setObjectName("i_add_rs_id_file")
+        self.s_add_rsid_file = QtWidgets.QToolButton(self.add_rsid)
+        self.s_add_rsid_file.setGeometry(QtCore.QRect(340, 31, 41, 27))
+
+        self.s_add_rsid_file.setFont(font1)
+        self.s_add_rsid_file.setObjectName("s_add_rsid_file")
+        self.l_add_rsid_format = QtWidgets.QLabel(self.add_rsid)
+        self.l_add_rsid_format.setGeometry(QtCore.QRect(30, 70, 131, 25))
+
+        self.l_add_rsid_format.setFont(font2)
+        self.l_add_rsid_format.setObjectName("l_add_rsid_format")
+        self.i_add_rsid_format = QtWidgets.QLineEdit(self.add_rsid)
+        self.i_add_rsid_format.setGeometry(QtCore.QRect(121, 70, 121, 25))
+
+        self.i_add_rsid_format.setFont(font1)
+        self.i_add_rsid_format.setObjectName("i_add_rsid_format")
+        self.b_run_add_rsid = QtWidgets.QPushButton(self.add_rsid)
+        self.b_run_add_rsid.setGeometry(QtCore.QRect(390, 33, 101, 61))
+
+        self.b_run_add_rsid.setFont(font)
+        self.b_run_add_rsid.setObjectName("b_run_add_rsid")
+        self.qr_code = QtWidgets.QGroupBox(self.API)
+        self.qr_code.setEnabled(True)
+        self.qr_code.setGeometry(QtCore.QRect(30, 300, 501, 111))
+
+        self.qr_code.setFont(font)
+        self.qr_code.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.qr_code.setObjectName("qr_code")
+        self.l_qr_code_snp = QtWidgets.QLabel(self.qr_code)
+        self.l_qr_code_snp.setGeometry(QtCore.QRect(30, 31, 121, 25))
+
+        self.l_qr_code_snp.setFont(font2)
+        self.l_qr_code_snp.setObjectName("l_qr_code_snp")
+        self.i_qr_code_snp = QtWidgets.QLineEdit(self.qr_code)
+        self.i_qr_code_snp.setGeometry(QtCore.QRect(121, 32, 221, 25))
+
+        self.i_qr_code_snp.setFont(font1)
+        self.i_qr_code_snp.setObjectName("i_qr_code_snp")
+        self.s_qr_code_snp = QtWidgets.QToolButton(self.qr_code)
+        self.s_qr_code_snp.setGeometry(QtCore.QRect(340, 31, 41, 27))
+
+        self.s_qr_code_snp.setFont(font1)
+        self.s_qr_code_snp.setObjectName("s_qr_code_snp")
+        self.b_run_qr_code = QtWidgets.QPushButton(self.qr_code)
+        self.b_run_qr_code.setGeometry(QtCore.QRect(390, 33, 101, 61))
+
+        self.b_run_qr_code.setFont(font)
+        self.b_run_qr_code.setObjectName("b_run_qr_code")
+        self.s_qr_code_key = QtWidgets.QToolButton(self.qr_code)
+        self.s_qr_code_key.setGeometry(QtCore.QRect(340, 70, 41, 27))
+
+        self.s_qr_code_key.setFont(font1)
+        self.s_qr_code_key.setObjectName("s_qr_code_key")
+        self.l_qr_code_key = QtWidgets.QLabel(self.qr_code)
+        self.l_qr_code_key.setGeometry(QtCore.QRect(30, 70, 121, 25))
+
+        self.l_qr_code_key.setFont(font2)
+        self.l_qr_code_key.setObjectName("l_qr_code_key")
+        self.i_qr_code_key = QtWidgets.QLineEdit(self.qr_code)
+        self.i_qr_code_key.setGeometry(QtCore.QRect(121, 71, 221, 25))
+
+        self.i_qr_code_key.setFont(font1)
+        self.i_qr_code_key.setObjectName("i_qr_code_key")
+        self.Function.addTab(self.API, "")
+
         PAGEANT.setCentralWidget(self.MainWindow)
 
         self.retranslateUi(PAGEANT)
@@ -807,41 +977,145 @@ class Ui_PAGEANT(object):
         self.s_qr_user.setText(_translate("PAGEANT", "..."))
         self.l_qr_snps.setText(_translate("PAGEANT", "SNP list file"))
         self.i_qr_snps.setToolTip(_translate("PAGEANT", "Specify the text which include the needed SNPs list"))
-        self.i_qr_snps.setText(_translate("PAGEANT", "./test/fingerprint_snps.txt"))
+        self.i_qr_snps.setText(_translate("PAGEANT", "./personal_genome/fingerprint_snps.txt"))
         self.s_qr_snps.setText(_translate("PAGEANT", "..."))
 
         self.b_default_qr_code.setToolTip(_translate("PAGEANT", "Set default values"))
         self.b_default_qr_code.setText(_translate("PAGEANT", "Default"))
         self.Function.setTabText(self.Function.indexOf(self.QR_code), _translate("PAGEANT", "QR code"))
 
+        self.UMAP.setTitle(_translate("PAGEANT", "The API to generate UMAP and PCA plot"))
+        self.l_umap_ref.setText(_translate("PAGEANT", "Reference genome"))
+        self.i_umap_ref.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_ref.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
+        self.i_umap_ref.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.s_umap_ref.setText(_translate("PAGEANT", "..."))
+        self.l_umap_sample.setText(_translate("PAGEANT", "Sample genome"))
+        self.i_umap_sample.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_sample.setText(_translate("PAGEANT", "./personal_genome/HG001.vcf.gz"))
+        self.i_umap_sample.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.s_umap_sample.setText(_translate("PAGEANT", "..."))
+        self.l_umap_metadata.setText(_translate("PAGEANT", "Metadata"))
+        self.s_umap_metadata.setText(_translate("PAGEANT", "..."))
+        self.i_umap_metadata.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_metadata.setText(_translate("PAGEANT", "./personal_genome/hapmap3_samples.txt"))
+        self.i_umap_metadata.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.b_run_umap.setToolTip(_translate("PAGEANT", "Start analyze"))
+        self.b_run_umap.setText(_translate("PAGEANT", "RUN PCA and UMAP"))
+        self.add_rsid.setTitle(_translate("PAGEANT", "The API for add rsID to GWAS"))
+        self.l_add_rsid_file.setText(_translate("PAGEANT", "GWAS file"))
+        self.i_add_rs_id_file.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_add_rs_id_file.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
+        self.i_add_rs_id_file.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.s_add_rsid_file.setText(_translate("PAGEANT", "..."))
+        self.l_add_rsid_format.setText(_translate("PAGEANT", "SNP format"))
+        self.i_add_rsid_format.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_add_rsid_format.setText(_translate("PAGEANT", "CHR:POS:REF:ALT"))
+        self.i_add_rsid_format.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.b_run_add_rsid.setToolTip(_translate("PAGEANT", "Start analyze"))
+        self.b_run_add_rsid.setText(_translate("PAGEANT", "Add rsID \n"
+                                                          "to GWAS file"))
+        self.qr_code.setTitle(_translate("PAGEANT", "The API for generating SNP QR code:"))
+        self.l_qr_code_snp.setText(_translate("PAGEANT", "SNP list"))
+        self.i_qr_code_snp.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_qr_code_snp.setText(_translate("PAGEANT", "./personal_genome/fingerprint_snps.txt"))
+        self.i_qr_code_snp.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.s_qr_code_snp.setText(_translate("PAGEANT", "..."))
+        self.b_run_qr_code.setToolTip(_translate("PAGEANT", "Start analyze"))
+        self.b_run_qr_code.setText(_translate("PAGEANT", "Create \n"
+                                                         "QR Code"))
+        self.s_qr_code_key.setText(_translate("PAGEANT", "..."))
+        self.l_qr_code_key.setText(_translate("PAGEANT", "Public key"))
+        self.i_qr_code_key.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_qr_code_key.setText(_translate("PAGEANT", "./bin/key"))
+        self.i_qr_code_key.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.Function.setTabText(self.Function.indexOf(self.API), _translate("PAGEANT", "API"))
+
 
 class MyMainForm(QMainWindow, Ui_PAGEANT):
     def __init__(self, parent=None):
         super(MyMainForm, self).__init__(parent)
         self.setupUi(self)
-
-        self.s_vcf.clicked.connect(self.o_vcf)
-        self.s_config.clicked.connect(self.o_config)
-        self.s_output.clicked.connect(self.o_output)
+        self.s_vcf.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_vcf, 'input_file',  "Select the input file", os.getcwd(),
+                       filter='All file formats supported (*.vcf *.vcf.gz *.bed *.txt);;'
+                              ' vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; PLINK 1 binary (*.bed)'))
+        self.s_config.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_config, 'config_file',
+                       "Select the configuration file", os.getcwd()))
+        self.s_output.clicked.connect(
+            self.open_(QFileDialog.getExistingDirectory, self.i_output, 'output',
+                       "Select the output directory", os.getcwd()))
         self.s_database_qual.clicked.connect(main.partial(self.o_database, 'qual'))
         self.s_database_quan.clicked.connect(main.partial(self.o_database, 'quan'))
         self.s_ref_qual.clicked.connect(main.partial(self.o_ref, 'qual'))
         self.s_ref_quan.clicked.connect(main.partial(self.o_ref, 'quan'))
-        self.s_qr_dir.clicked.connect(self.o_qr_dir)
-        self.s_qr_user.clicked.connect(self.o_qr_user)
-        self.s_qr_snps.clicked.connect(self.o_qr_snps)
-        self.s_qr_give.clicked.connect(self.o_qr_give)
-        self.s_maf_sample.clicked.connect(self.o_maf)
-        self.s_ps_ref.clicked.connect(self.o_ps)
-        self.s_ps_pop.clicked.connect(self.o_text)
-        self.s_concord_ref.clicked.connect(self.o_concord)
-        self.s_otherdb.clicked.connect(self.o_otherdb)
+        self.s_qr_dir.clicked.connect(
+            self.open_(QFileDialog.getExistingDirectory, self.i_qr_dir, 'qr_dir',
+                       "Specify the directory where needed files can be found", os.getcwd()))
+        self.s_qr_user.clicked.connect(
+            self.open_(QFileDialog.getSaveFileName, self.i_qr_user, 'qr_user',
+                       "Specify the path for saving User QR code",
+                       os.path.join(os.getcwd(), 'user_qr_code.png'), 'image(*.png)'))
+        self.s_qr_snps.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_qr_snps, 'qr_snps',
+                       "Select the text which include the needed SNPs list", os.getcwd()))
+        self.s_qr_give.clicked.connect(
+            self.open_(QFileDialog.getSaveFileName, self.i_qr_give, 'qr_give',
+                       "Specify the path for saving SNP list QR code",
+                       os.path.join(os.getcwd(), 'snp_qr_code.png'), 'image(*.png)'))
+        self.s_maf_sample.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_maf_sample, 'maf_ref',
+                       "Select the MAF reference file", os.getcwd(),
+                       filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; PLINK 2 binary (*.pgen)'))
+        self.s_ps_ref.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_ps_ref, 'ps_ref',
+                       "Select the reference file for population stratification analysis", os.getcwd(),
+                       filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; PLINK 2 binary (*.pgen)'))
+        self.s_ps_pop.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_ps_pop, 'population_file',
+                       "Select the population file for population stratification analysis", os.getcwd()))
+        self.s_concord_ref.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_concord_ref, 'concord_ref',
+                       "Select the concordance analysis reference file", os.getcwd(),
+                       filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; PLINK 2 binary (*.pgen)'))
+        self.s_otherdb.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_otherdb, 'query_db',
+                       "Select the third-party database file", os.getcwd()))
+        self.s_umap_ref.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_umap_ref, None,
+                       "Select the reference file for PCA & UMAP plot", os.getcwd(),
+                       filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; PLINK 2 binary (*.pgen)'))
+        self.s_umap_sample.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_umap_sample, None, "Select the sample file", os.getcwd(),
+                       filter='All file formats supported (*.vcf *.vcf.gz *.bed *.txt);;'
+                              ' vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; PLINK 1 binary (*.bed)'))
+        self.s_umap_metadata.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_umap_metadata, None,
+                       "Select the metadata for reference genotype data", os.getcwd(),
+                       filter='All file formats supported (*.vcf *.vcf.gz *.bed *.txt);;'
+                              ' vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; PLINK 1 binary (*.bed)'))
+        self.s_add_rsid_file.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_add_rs_id_file, None,
+                       "Select the GWAS file", os.getcwd()))
+        self.s_qr_code_snp.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_qr_code_snp, None,
+                       "Select the text which include the needed SNPs list", os.getcwd()))
+        self.s_qr_code_key.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_qr_code_key, None,
+                       "Select the file which contains public key", os.getcwd())
+        )
+
         self.b_analyze.clicked.connect(self.run)
         self.b_default_qual.clicked.connect(self.set_default_qual)
         self.b_default_quan.clicked.connect(self.set_default_quan)
         self.b_default_sample_qc.clicked.connect(self.set_default_sample_qc)
         self.b_default_query_db.clicked.connect(self.set_default_query_db)
         self.b_default_qr_code.clicked.connect(self.set_default_qr_code)
+        # todo
+        self.b_run_umap.clicked.connect(self.run_umap)
+        self.b_run_add_rsid.clicked.connect(self.run_add_rsid)
+        self.b_run_qr_code.clicked.connect(self.run_qr_code)
 
         self.timer = QtCore.QBasicTimer()
 
@@ -851,25 +1125,6 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
         # progress config dict
         self.parameters = default_config
-
-    def o_vcf(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the input file", os.getcwd(),
-                                                         filter='All file formats supported '
-                                                                '(*.vcf *.vcf.gz *.bed *.txt);; '
-                                                                'vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; '
-                                                                'PLINK 1 binary (*.bed)')
-        self.i_vcf.setText(get_directory_path[0])
-        self.parameters['input_file'] = get_directory_path[0]
-
-    def o_config(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the configuration file", os.getcwd())
-        self.i_config.setText(get_directory_path[0])
-        self.parameters['config_file'] = get_directory_path[0]
-
-    def o_output(self):
-        get_dir_path = QFileDialog.getExistingDirectory(self, "Select the output directory", os.getcwd())
-        self.i_output.setText(get_dir_path)
-        self.parameters['output'] = get_dir_path
 
     def o_database(self, otype: str = 'qual' or 'quan'):
         get_dir_path = QFileDialog.getExistingDirectory(self, "Select the database directory", os.getcwd())
@@ -887,62 +1142,17 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
             self.i_ref_qual.setText(get_dir_path)
         self.parameters[f'{otype}_ref'] = get_dir_path
 
-    def o_maf(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the MAF reference file", os.getcwd(),
-                                                         filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; '
-                                                                'PLINK 2 binary (*.pgen)')
-        self.i_maf_sample.setText(get_directory_path[0])
-        self.parameters['maf_ref'] = get_directory_path[0]
+    def open_raw(self, open_func: main.Callable, dest_obj: QtWidgets.QLineEdit, dest: main.Optional[str] = None,
+                 title: main.Optional[str] = 'Open', default: main.Optional[str] = None,
+                 filter: main.Optional[str] = None, *args, **kwargs) -> None:
+        get_directory_path = open_func(self, title, default, filter)
+        get_path = get_directory_path if type(get_directory_path) == 'str' else get_directory_path[0]
+        dest_obj.setText(get_path)
+        if dest:
+            self.parameters[dest] = get_path
 
-    def o_ps(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the reference file for "
-                                                               "population stratification analysis", os.getcwd(),
-                                                         filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; '
-                                                                'PLINK 2 binary (*.pgen)')
-        self.i_ps_ref.setText(get_directory_path[0])
-        self.parameters['ps_ref'] = get_directory_path[0]
-
-    def o_concord(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the concordance analysis reference file", os.getcwd(),
-                                                         filter='vcf (*.vcf *.vcf.gz);; PLINK 1 binary (*.bed);; '
-                                                                'PLINK 2 binary (*.pgen)')
-        self.i_concord_ref.setText(get_directory_path[0])
-        self.parameters['concord_ref'] = get_directory_path[0]
-
-    def o_qr_dir(self):
-        get_dir_path = QFileDialog.getExistingDirectory(self, "Specify the directory where needed files can be found",
-                                                        os.getcwd())
-        self.i_qr_dir.setText(get_dir_path)
-        self.parameters['qr_dir'] = get_dir_path
-
-    def o_qr_snps(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the text which include the needed SNPs list",
-                                                         os.getcwd())
-        self.i_qr_snps.setText(get_directory_path[0])
-        self.parameters['qr_snps'] = get_directory_path[0]
-
-    def o_qr_give(self):
-        get_file_path = QFileDialog.getSaveFileName(self, "Specify the path for saving SNP list QR code",
-                                                    os.path.join(os.getcwd(), 'snp_qr_code.png'), 'image(*.png)')
-        self.i_qr_give.setText(get_file_path[0])
-        self.parameters['qr_give'] = get_file_path[0]
-
-    def o_qr_user(self):
-        get_file_path = QFileDialog.getSaveFileName(self, "Specify the path for saving User QR code",
-                                                    os.path.join(os.getcwd(), 'user_qr_code.png'), 'image(*.png)')
-        self.i_qr_user.setText(get_file_path[0])
-        self.parameters['qr_user'] = get_file_path[0]
-
-    def o_otherdb(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the third-party database file", os.getcwd())
-        self.i_otherdb.setText(get_directory_path[0])
-        self.parameters['query_db'] = get_directory_path[0]
-
-    def o_text(self):
-        get_directory_path = QFileDialog.getOpenFileName(self, "Select the population file for "
-                                                               "population stratification analysis", os.getcwd())
-        self.i_ps_pop.setText(get_directory_path[0])
-        self.parameters['population_file'] = get_directory_path[0]
+    def open_(self, *args, **kargs) -> main.Callable:
+        return main.partial(self.open_raw, *args, **kargs)
 
     def set_default_qual(self):
         self.i_database_qual.setText("./algorithm_database/Qualitative")
@@ -985,8 +1195,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
             self.progress.setValue(self.progress_now.value())
 
     def cancel_failed(self):
-        QtWidgets.QMessageBox.critical(self, 'Error', 'Cancel function disable!',
-                                       QtWidgets.QMessageBox.Close)
+        QtWidgets.QMessageBox.critical(self, 'Error', 'Cancel function disable!', QtWidgets.QMessageBox.Close)
 
     def report(self):
         self.b_analyze.setEnabled(True)
@@ -1053,6 +1262,30 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.timer.start(self.inter, self)
         self.thread.start()
         self.thread.finished.connect(self.report)
+
+    def run_umap(self):
+        temp_dir = main.mkdtemp(suffix='umap')
+        self.thread = API_Thread(umap, self.i_umap_ref.text(), self.i_umap_sample.text(),
+                                 self.i_umap_metadata.text(), temp_dir, temp_dir, os.getcwd(),
+                                 prune=True, pop_col='population', pop_id='IID')
+        self.thread.start()
+        self.thread.finished.connect(main.partial(self.api_finish, temp_dir))
+
+    def api_finish(self, temp_dir: main.Optional[str] = None):
+        QtWidgets.QMessageBox.information(self, 'Finish', self.thread.res)
+        if temp_dir:
+            main.rm_dir(temp_dir)
+
+    def run_add_rsid(self):
+        sleep(0.5)
+        QtWidgets.QMessageBox.information(self, 'Sorry', 'Function is going to be added in the future.')
+
+    def run_qr_code(self):
+        import src.qr_code as crypto
+        self.thread = API_Thread(crypto.request, self.i_qr_code_key.text(), self.i_qr_code_snp.text(),
+                                 os.path.join(os.getcwd(), 'SNP_QR_CODE.png'), None)
+        self.thread.start()
+        self.thread.finished.connect(self.api_finish)
 
 
 if __name__ == "__main__":

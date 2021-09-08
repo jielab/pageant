@@ -1,7 +1,7 @@
 import configparser
 import os
 import sys
-from typing import List, Dict, Set, Tuple, Generator, Iterable
+from typing import List, Dict, Set, Tuple, Generator, Iterable, Optional, Callable
 from typing.io import IO, TextIO, BinaryIO
 from collections import OrderedDict
 from platform import system as platform_check
@@ -35,25 +35,28 @@ default_config = {
              'population_file': './personal_genome/hapmap3_samples.txt',
              'concord_ref': './personal_genome/concordance.vcf.gz',
              'ref_structure': './personal_genome/hapmap3.vcf.gz',
-             'query_db': './algorithm_database/Query_database/Phewas_catalog.txt',
+             'query_db': './algorithm_database/Query_database/Phewas_Catalog.txt',
              'description_suf': ".desc.txt", 'need_suf': '.snps.ref', 'gwas_suf': ".tsv",
              'plink_dir': './bin'
              },
-    'name': {'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA',
+    'name': {'SNP': 'SNP', 'EA': 'EA', 'P': 'P', 'BETA': 'BETA', 'OR': 'OR',
              'population_col': 'population', 'population_id': 'IID',
              'database_SNP': 'snp', 'quan_pop': 'EUR'
              },
     'parameter': {'p_threshold': 1e-5, 'clump-p1': 1, 'clump-r2': 0.1, 'clump-kb': 250, 'clump-p2': 0.01,
                   'show_code': True, 'qc_maf': 0.01, 'qc_vmiss': 0.02, 'qc_smiss': 0.02, 'qc_hardy': 50,
                   'qc_het': 3, 'qc_male_F': 0.4, 'qc_female_F': 0.6, 'qc_pihat': 0.2, 'use_qc_ref': False,
+                  'ps_prune': True
                   },
     'module': {'sample_qc': True, 'ref_dist': True, 'ref_qc': True, 'vep': False,
                'query_database': True, 'pharmgkb': True, 'clinvar': True, 'qr_code': True
                },
-    'columns': {'columns_ind': OrderedDict({'code': 0, 'name': 1, 'sex': 3, 'Disease_description': 5}),
-                'columns_quan': OrderedDict({'snp': 0, 'reference': 1, 'beta': 2}),
+    'columns': {'columns_quan': OrderedDict({'SNP': ['SNP', 'RS_ID'], 'EA': ['EA', 'EFFECT_ALLELE'],
+                                             'OR': ['OR', 'ODDS_RATIO'],
+                                             'BETA': ['BETA', 'EFFECT_SIZE', 'EFFECT']}),
                 'columns_qual': OrderedDict(
-                    {'snp': 0, 'reference': 1, 'interpretation': 2, 'reverse-inter': 3}),
+                    {'SNP': ['SNP', 'RS_ID'], 'GENOTYPE': ['GENOTYPE', 'GENO', 'GT'],
+                     'MATCHED': ['MATCHED'], 'UNMATCHED': ['UNMATCHED']}),
                 'names_ind': {'name': 'Name', 'Description': 'Description', 'sex': 'Sex'}
                 },
     'lan_lib': {'male': ['male', 'Male', '男', '男性', '1', 1],
@@ -62,7 +65,6 @@ default_config = {
                 'if': ['条件', 'if', 'IF'],
                 'and': ['并列', 'and', 'AND', '&', 'And']
                 },
-    'Population_stratisfication':  {'method': 'UMAP'}
 }
 config = configparser.ConfigParser()
 
