@@ -7,14 +7,13 @@
 # #1. Download & Run: *for quick starter*
 
 > ## Download:
-> > - ### Download executables for [Windows](https://drive.google.com/file/d/1UiI1jwnp9ZMPYSoqn9LmZqrZVAEdLdNS/view?usp=sharing), [Linux](https://drive.google.com/file/d/1eWushdQkUEuSGQQeeRyVzzZmEM_2nq2t/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1bBJODXGjdUNtCQihRrzqDwW23KNqZ1Uv/view?usp=sharing)
-> > - ### Download [HapMap3 genotype](https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3), as population reference by default. LifeOver is not needed, because only SNP rsID is used by PAGEANT.
-> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. This is only needed when the user genotype data is based on G1K imputation.
+> > - ### Download executables for [Windows](https://drive.google.com/file/d/14inrNM4p2cb4MlF2oYZPv0t2YkBbCxXt/view?usp=sharing), [Linux](https://drive.google.com/file/d/1eWushdQkUEuSGQQeeRyVzzZmEM_2nq2t/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1bBJODXGjdUNtCQihRrzqDwW23KNqZ1Uv/view?usp=sharing)
+> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. The basic version of PAGEANT comes with a subset of the G1K data that includes all SNPs used in the genetic report.
 
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
 > > - ### For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
-> > - ### For Linux: the program could be run directly by typing "./PAGEANT".
+> > - ### For Linux: run "sudo apt-get install libzbar0" to install packages, then run PAGEANT by typing "./PAGEANT".
 
 <br/>
 
@@ -38,8 +37,7 @@
 
 > ## Run:
 > ### GUI version:
-> > - For Windows user using Ubuntu Linux, an upgrade to Windows 11 is recommended, which supports WSL GUI.
-> > - In Windows Powershell, run "wsl --update" to get the latest version.  
+> > - For Windows user using Ubuntu Linux, an upgrade to Windows 11 is recommended, which supports WSL GUI. In Windows Powershell, run "wsl --update" to get the latest version.  
 > > ```
 > > conda activate pageant
 > > python ./GUI.py
@@ -54,6 +52,10 @@
 
 
 # #3. Example reports 
+
+## A full example genetic report can be viewed [here](https://htmlpreview.github.io/?https://github.com/jielab/pageant/blob/master/genetic_reports/Report.html). 
+
+<br/>
 
 > ## Q1：Displayings user's PCA and UMAP among population reference
 
@@ -81,7 +83,7 @@
 # #4. Customize
 > - ### The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. 
 > - ### For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. 
-> - ### The TRAIT.snps.ref is tab separated and has no header. For qualitative trait, this file has four columns: variants' name, genotype, phenotype for corresponding genotype, phenotype for non-corresponding genotype; For quantitative trait, algorithm data need three columns: variants' name, allele, effect size for corresponding allele.
+> - ### For qualitative traits, the TRAIT.snps.ref has four columns: SNP, genotype, matched, unmatched; For quantitative trait, the TRAIT.snps.ref file requires three columns: SNP, EA (effect allele), BETA or OR (effect size).
 
 > > ![Folder Structure](./images/Fig_folder.png)
 
@@ -89,7 +91,7 @@
 
 
 ## License
-> - ### This project is licensed under GNU GPL v3.
+> - ### This project is licensed under the MIT License.
 
 <br/>
 
