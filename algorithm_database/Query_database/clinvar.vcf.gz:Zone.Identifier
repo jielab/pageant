@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/
+HostUrl=https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar_20210208.vcf.gz

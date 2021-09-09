@@ -1,5 +1,0 @@
-Name: Folic Acid metabolism
-Chinese name: 叶酸代谢
-Description: "The methylenetetrahydrofolate reductase gene, more commonly known as MTHFR, is the most asked-about gene by DTC customers. Some websites and products have made bold claims that common genetic variants in MTHFR can cause a wide array of health conditions, ranging from blood clots and cancer to autism and migraines. The MTHFR gene contains instructions for making an enzyme that’s important for metabolizing folate (also called folic acid or vitamin B9). MTHFR also helps our cells recycle homocysteine, a chemical in the blood, into methionine, a building block for proteins. there are two common naturally occurring variants in the MTHFR gene, called C677T (rs1801133) and A1298C. When the MTHFR gene has either of these two variants, the resulting MTHFR enzyme is slightly less active, and this can lead to decreased levels of folate and increased levels of homocysteine in the blood. Homozygous rs1801133(T;T) individuals have ~30% of the expected MTHFR enzyme activity, and rs1801133(C;T) heterozygotes have ~65% activity, compared to the most common genotype, rs1801133(C;C)."
-Reference: PMID: 8789576
-

@@ -1,4 +1,0 @@
-Name: COVID-19 susceptibility
-Chinese name: 新冠易感性
-Description: While environmental, clinical and social factors play a role in exposure to SARS-CoV-2 and COVID-19 disease severity1,2, host genetics may also be important. Identifying host-specific genetic factors may reveal biological mechanisms of therapeutic relevance and clarify causal relationships of modifiable environmental risk factors for SARS-CoV-2 infection and outcomes. 
-Reference: PMID：34237774
