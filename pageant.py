@@ -1,11 +1,12 @@
 import getopt
+import argparse
 import warnings
 from sys import exit as sys_exit
 from src.log import *
 from src.modules import *
 
 
-version = '2021-09-07'
+version = '2021-09-10'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
@@ -16,9 +17,11 @@ if __name__ == '__main__':
     stream_log_start()
 
 
-def get_kwargs(kwargs_str: str) -> dict:
-    pairs = kwargs_str.split(' ')
-    return dict([pair.split('=') for pair in pairs])
+def get_kwargs(kwargs_list: Optional[List[str]]) -> dict:
+    if kwargs_list:
+        return dict([kwarg.split('=') for kwarg in kwargs_list])
+    else:
+        return {}
 
 
 def arg(args: list) -> Tuple[List, Dict]:
@@ -118,5 +121,72 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
 
 
 if __name__ == '__main__':
-    paras = arg(sys.argv[1:])
-    main(*paras[0], **paras[1])
+    # paras = arg(sys.argv[1:])
+    parser = argparse.ArgumentParser(prog='PAGEANT', description=f'PAGEANT ({version})')
+    parser.add_argument('-v', '--version', action='version', version=version)
+    sub_parser = parser.add_subparsers(dest='fun', help='The functions in PAGEANT')
+    pageant = sub_parser.add_parser('main', help='RUN the whole analysis of PAGEANT')
+    pageant.add_argument('-n', '--name', help="User's name", required=True)
+    pageant.add_argument('-i', '--input', help="Input genotype file", required=True)
+    pageant.add_argument('-o', '--output', help="Output directory", required=True)
+    pageant.add_argument('-c', '--config', help="PATH of config file", default='./bin/config.ini')
+    pageant.add_argument('-s', '--set-config', dest='kwargs', nargs='+', help="KEY=VALUE Set the specific config")
+
+    umap = sub_parser.add_parser('umap', help='RUN the UMAP and PCA plot analysis')
+    umap.add_argument('-s', '--sample', default=None,
+                      help='The sample genotype data (VCF (*.vcf *.vcf.gz); 23andme (*.txt); '
+                      'PLINK 1 binary (*.bed)); PLINK 2 binary (*.pgen)')
+    umap.add_argument('-p', '--population', required=True, dest='population',
+                      help='The population genotype data (vcf (*.vcf *.vcf.gz); '
+                      'PLINK 1 binary (*.bed); PLINK 2 binary (*.pgen))')
+    umap.add_argument('-m', '--metadata', default=None, help='The metadata for population file')
+    umap.add_argument('-o', '--output', default='.', help='The directory where the images save')
+    umap.add_argument('-t', '--temp', default=None, help='The temporary directory')
+    umap.add_argument('--plink-dir', default=None, dest='plink',
+                      help='The directory for storing PLINK executable files')
+    umap.add_argument('-w', '--workpath', default=None, help='The working path of analysis')
+    umap.add_argument('--pop-col', default='population', dest='pop',
+                      help="The name of the column that describe population infomation")
+    umap.add_argument('--id-col', default='IID', dest='iid',
+                      help="The name of the column that describe individual id")
+    umap.add_argument('--prune', dest='prune', action='store_true')
+    umap.add_argument('--no-prune', dest='prune', action='store_false')
+    umap.set_defaults(prune=True)
+
+    add_rsid = sub_parser.add_parser('add_rsid', help='Add rsID in the GWAS file')
+    add_rsid.add_argument('-i', '--input', help="Input GWAS file", required=True)
+    add_rsid.add_argument('-w', '--workpath', default='./add_rsid', help="The working path of analysis")
+    add_rsid.add_argument('-g', '--genome', default='19', help="The build version of genome")
+    add_rsid.add_argument('-d', '--dbsnp', default='150', help="The version of dbSNP")
+    add_rsid.add_argument('-o', '--output', default='sites-rsids.tsv', help="The output name of file")
+
+    qr_code = sub_parser.add_parser('qr_code', help='Generate the SNP QR CODE')
+    qr_code.add_argument('-s', '--snp-list', dest='snp', help='SNP list')
+    qr_code.add_argument('-k', '--key', help='The file which contains public key')
+    qr_code.add_argument('-o', '--output', default='./SNP_QR_CODE.png', help='The QR CODE file path')
+    qr_code.add_argument('-l', '--logo', default='./bin/SNP_logo.png', help='The logo of the QR CODE')
+
+    args = parser.parse_args()
+    if args.fun == 'main':
+        main(args.name, args.input, args.output, config_file=args.config, **get_kwargs(args.kwargs))
+    elif args.fun == 'umap':
+        if not args.temp:
+            args.temp = mkdtemp(suffix='pageant')
+        if not args.workpath:
+            args.workpath = args.temp
+        if not args.plink:
+            args.plink = os.path.abspath('./bin')
+        get_plink_dir(args.plink)
+        ps_analyse(args.population, args.sample, args.metadata, args.temp, args.workpath, args.output, prune=args.prune,
+                   pop_id=args.iid, pop_col=args.pop)
+    elif args.fun == 'qr_code':
+        import src.qr_code as crypto
+        crypto.request(args.key, args.snp, args.output, args.logo)
+    elif args.fun == 'add_rsid':
+        import src.add_rsid as rsid
+        rsid.output_name = args.output
+        rsid.data_dir = args.workpath
+        rsid.dbsnp_version = args.dbsnp
+        rsid.genes_version = args.genome
+        rsid.run(args.input)
+    print('Finish!')

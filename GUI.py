@@ -82,13 +82,15 @@ class MyThread(QtCore.QThread):
 
 
 class API_Thread(QtCore.QThread):
-    def __init__(self, func: main.Callable, *args, **kwargs):
+    def __init__(self, func: main.Callable, *args,
+                 end_: str = 'Finish! Result has been saved in the working directory.', **kwargs):
         super().__init__()
         self.statue = False
         self.res = 'Analysis failed to start.'
         self.func = func
         self.args = args
         self.kwargs = kwargs
+        self.end = end_
         self.setStackSize(10240000)
 
     def run(self):
@@ -99,7 +101,7 @@ class API_Thread(QtCore.QThread):
             self.res = str(e).capitalize()
         else:
             self.statue = True
-            self.res = 'Finish! Result has been saved in the working directory.'
+            self.res = self.end
         finally:
             self.quit()
 
@@ -715,30 +717,30 @@ class Ui_PAGEANT(object):
         self.add_rsid.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.add_rsid.setObjectName("add_rsid")
         self.l_add_rsid_file = QtWidgets.QLabel(self.add_rsid)
-        self.l_add_rsid_file.setGeometry(QtCore.QRect(30, 31, 131, 25))
+        self.l_add_rsid_file.setGeometry(QtCore.QRect(30, 51, 131, 25))
 
         self.l_add_rsid_file.setFont(font2)
         self.l_add_rsid_file.setObjectName("l_add_rsid_file")
-        self.i_add_rs_id_file = QtWidgets.QLineEdit(self.add_rsid)
-        self.i_add_rs_id_file.setGeometry(QtCore.QRect(121, 32, 221, 25))
+        self.i_add_rsid_file = QtWidgets.QLineEdit(self.add_rsid)
+        self.i_add_rsid_file.setGeometry(QtCore.QRect(121, 52, 221, 25))
 
-        self.i_add_rs_id_file.setFont(font1)
-        self.i_add_rs_id_file.setObjectName("i_add_rs_id_file")
+        self.i_add_rsid_file.setFont(font1)
+        self.i_add_rsid_file.setObjectName("i_add_rsid_file")
         self.s_add_rsid_file = QtWidgets.QToolButton(self.add_rsid)
-        self.s_add_rsid_file.setGeometry(QtCore.QRect(340, 31, 41, 27))
+        self.s_add_rsid_file.setGeometry(QtCore.QRect(340, 51, 41, 27))
 
         self.s_add_rsid_file.setFont(font1)
         self.s_add_rsid_file.setObjectName("s_add_rsid_file")
-        self.l_add_rsid_format = QtWidgets.QLabel(self.add_rsid)
-        self.l_add_rsid_format.setGeometry(QtCore.QRect(30, 70, 131, 25))
-
-        self.l_add_rsid_format.setFont(font2)
-        self.l_add_rsid_format.setObjectName("l_add_rsid_format")
-        self.i_add_rsid_format = QtWidgets.QLineEdit(self.add_rsid)
-        self.i_add_rsid_format.setGeometry(QtCore.QRect(121, 70, 121, 25))
-
-        self.i_add_rsid_format.setFont(font1)
-        self.i_add_rsid_format.setObjectName("i_add_rsid_format")
+        # self.l_add_rsid_format = QtWidgets.QLabel(self.add_rsid)
+        # self.l_add_rsid_format.setGeometry(QtCore.QRect(30, 70, 131, 25))
+        #
+        # self.l_add_rsid_format.setFont(font2)
+        # self.l_add_rsid_format.setObjectName("l_add_rsid_format")
+        # self.i_add_rsid_format = QtWidgets.QLineEdit(self.add_rsid)
+        # self.i_add_rsid_format.setGeometry(QtCore.QRect(121, 70, 121, 25))
+        #
+        # self.i_add_rsid_format.setFont(font1)
+        # self.i_add_rsid_format.setObjectName("i_add_rsid_format")
         self.b_run_add_rsid = QtWidgets.QPushButton(self.add_rsid)
         self.b_run_add_rsid.setGeometry(QtCore.QRect(390, 33, 101, 61))
 
@@ -986,44 +988,42 @@ class Ui_PAGEANT(object):
 
         self.UMAP.setTitle(_translate("PAGEANT", "The API to generate UMAP and PCA plot"))
         self.l_umap_ref.setText(_translate("PAGEANT", "Reference genome"))
-        self.i_umap_ref.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_ref.setToolTip(_translate("PAGEANT", "Select the reference file for PCA & UMAP plot"))
         self.i_umap_ref.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
-        self.i_umap_ref.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.i_umap_ref.setPlaceholderText(_translate("PAGEANT", "Select reference genome"))
         self.s_umap_ref.setText(_translate("PAGEANT", "..."))
         self.l_umap_sample.setText(_translate("PAGEANT", "Sample genome"))
-        self.i_umap_sample.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_sample.setToolTip(_translate("PAGEANT", "Select the sample file"))
         self.i_umap_sample.setText(_translate("PAGEANT", "./personal_genome/HG001.vcf.gz"))
-        self.i_umap_sample.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.i_umap_sample.setPlaceholderText(_translate("PAGEANT", "Select sample genome"))
         self.s_umap_sample.setText(_translate("PAGEANT", "..."))
         self.l_umap_metadata.setText(_translate("PAGEANT", "Metadata"))
         self.s_umap_metadata.setText(_translate("PAGEANT", "..."))
-        self.i_umap_metadata.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_umap_metadata.setToolTip(_translate("PAGEANT", "Select the metadata for reference genotype data"))
         self.i_umap_metadata.setText(_translate("PAGEANT", "./personal_genome/hapmap3_samples.txt"))
-        self.i_umap_metadata.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
-        self.b_run_umap.setToolTip(_translate("PAGEANT", "Start analyze"))
+        self.i_umap_metadata.setPlaceholderText(_translate("PAGEANT", "Select metadata"))
+        self.b_run_umap.setToolTip(_translate("PAGEANT", "RUN PCA and UMAP plot"))
         self.b_run_umap.setText(_translate("PAGEANT", "RUN PCA and UMAP"))
         self.add_rsid.setTitle(_translate("PAGEANT", "The API for add rsID to GWAS"))
         self.l_add_rsid_file.setText(_translate("PAGEANT", "GWAS file"))
-        self.i_add_rs_id_file.setToolTip(_translate("PAGEANT", "Specify directory of database"))
-        self.i_add_rs_id_file.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
-        self.i_add_rs_id_file.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.i_add_rsid_file.setToolTip(_translate("PAGEANT", "Select the GWAS file"))
+        self.i_add_rsid_file.setText(_translate("PAGEANT", "./add_rsid/test.tsv"))
+        self.i_add_rsid_file.setPlaceholderText(_translate("PAGEANT", "Specific the format"))
         self.s_add_rsid_file.setText(_translate("PAGEANT", "..."))
-        self.l_add_rsid_format.setText(_translate("PAGEANT", "SNP format"))
-        self.i_add_rsid_format.setToolTip(_translate("PAGEANT", "Specify directory of database"))
-        self.i_add_rsid_format.setText(_translate("PAGEANT", "CHR:POS:REF:ALT"))
-        self.i_add_rsid_format.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        # self.l_add_rsid_format.setText(_translate("PAGEANT", "SNP format"))
+        # self.i_add_rsid_format.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        # self.i_add_rsid_format.setText(_translate("PAGEANT", "CHR:POS:REF:ALT"))
+        # self.i_add_rsid_format.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
         self.b_run_add_rsid.setToolTip(_translate("PAGEANT", "Start analyze"))
-        self.b_run_add_rsid.setText(_translate("PAGEANT", "Add rsID \n"
-                                                          "to GWAS file"))
-        self.qr_code.setTitle(_translate("PAGEANT", "The API for generating SNP QR code:"))
+        self.b_run_add_rsid.setText(_translate("PAGEANT", "Add rsID \nto GWAS file"))
+        self.qr_code.setTitle(_translate("PAGEANT", "The API for generating SNP QR code"))
         self.l_qr_code_snp.setText(_translate("PAGEANT", "SNP list"))
-        self.i_qr_code_snp.setToolTip(_translate("PAGEANT", "Specify directory of database"))
+        self.i_qr_code_snp.setToolTip(_translate("PAGEANT", "Select the text which include the needed SNPs list"))
         self.i_qr_code_snp.setText(_translate("PAGEANT", "./personal_genome/fingerprint_snps.txt"))
-        self.i_qr_code_snp.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.i_qr_code_snp.setPlaceholderText(_translate("PAGEANT", "Select the file which contains public key"))
         self.s_qr_code_snp.setText(_translate("PAGEANT", "..."))
-        self.b_run_qr_code.setToolTip(_translate("PAGEANT", "Start analyze"))
-        self.b_run_qr_code.setText(_translate("PAGEANT", "Create \n"
-                                                         "QR Code"))
+        self.b_run_qr_code.setToolTip(_translate("PAGEANT", "Generate SNP QR CODE"))
+        self.b_run_qr_code.setText(_translate("PAGEANT", "Create \nQR Code"))
         self.s_qr_code_key.setText(_translate("PAGEANT", "..."))
         self.l_qr_code_key.setText(_translate("PAGEANT", "Public key"))
         self.i_qr_code_key.setToolTip(_translate("PAGEANT", "Specify directory of database"))
@@ -1096,7 +1096,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                        filter='All file formats supported (*.vcf *.vcf.gz *.bed *.txt);;'
                               ' vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; PLINK 1 binary (*.bed)'))
         self.s_add_rsid_file.clicked.connect(
-            self.open_(QFileDialog.getOpenFileName, self.i_add_rs_id_file, None,
+            self.open_(QFileDialog.getOpenFileName, self.i_add_rsid_file, None,
                        "Select the GWAS file", os.getcwd()))
         self.s_qr_code_snp.clicked.connect(
             self.open_(QFileDialog.getOpenFileName, self.i_qr_code_snp, None,
@@ -1277,8 +1277,11 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
             main.rm_dir(temp_dir)
 
     def run_add_rsid(self):
-        sleep(0.5)
-        QtWidgets.QMessageBox.information(self, 'Sorry', 'Function is going to be added in the future.')
+        import src.add_rsid as add_rsid
+        self.thread = API_Thread(add_rsid.run, self.i_add_rsid_file.text(),
+                                 end_='Result has been saved as "sites-rsids.tsv.gz" in "add_rsid" folder')
+        self.thread.start()
+        self.thread.finished.connect(self.api_finish)
 
     def run_qr_code(self):
         import src.qr_code as crypto
