@@ -89,4 +89,6 @@ dependencies:
     - pyqt5-sip==12.9.0
     - pyzbar==0.1.8
     - qrcode==7.2
+    - wget==3.2
+    - boltons==21.0.0
 prefix: /Users/sheng/.conda/envs/pageant

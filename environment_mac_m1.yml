@@ -84,4 +84,6 @@ dependencies:
     - shellescape==3.8.1
     - tqdm==4.60.0
     - umap-learn==0.5.1
+    - wget==3.2
+    - boltons==21.0.0
 prefix: /Users/sheng/.conda/envs/pageant

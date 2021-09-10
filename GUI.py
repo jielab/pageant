@@ -957,7 +957,7 @@ class Ui_PAGEANT(object):
         self.c_otherdb.setTitle(_translate("PAGEANT", "Query third-party database"))
         self.l_otherdb.setText(_translate("PAGEANT", "Third-party database"))
         self.i_otherdb.setToolTip(_translate("PAGEANT", "Specify the third-party database file"))
-        self.i_otherdb.setText(_translate("PAGEANT", "./algorithm_database/Query_database/Phewas_catalog_part.tsv"))
+        self.i_otherdb.setText(_translate("PAGEANT", "./algorithm_database/Query_database/Phewas_Catalog_part.tsv"))
         self.i_otherdb.setPlaceholderText(_translate("PAGEANT", "Select third-party database file"))
         self.s_otherdb.setText(_translate("PAGEANT", "..."))
         self.Function.setTabText(self.Function.indexOf(self.Query_database), _translate("PAGEANT", "Query DB"))
@@ -1177,7 +1177,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.c_clinvar.setChecked(True)
         self.c_pharmgkb.setChecked(True)
         self.c_otherdb.setChecked(True)
-        self.i_otherdb.setText('./algorithm_database/Query_database/Phewas_catalog_part.tsv')
+        self.i_otherdb.setText('./algorithm_database/Query_database/Phewas_Catalog_part.tsv')
 
     def set_default_qr_code(self):
         self.c_qr_code.setChecked(True)
