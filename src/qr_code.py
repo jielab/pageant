@@ -5,7 +5,7 @@ import pyDes
 import qrcode
 from re import compile
 from zlib import decompress, compress
-from pyzbar.pyzbar import decode
+from pyzbar.pyzbar import decode, ZBarSymbol
 from PIL import Image
 from base64 import b85decode, b85encode
 from typing import Tuple, List, Dict, Set, Optional
@@ -51,13 +51,15 @@ def extract_pub_key(key_file: str) -> str:
     return find_key.search(public_key.save_pkcs1().decode())[0].replace('\n', '')
 
 
-def make_qr_code(data: str, output: str, logo: Optional[str] = None):
-    img_qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+def make_qr_code(data: str, output: str, logo: Optional[str] = None, scale: int = 1):
+    img_qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=12)
     img_qr.add_data(data)
     img_qr.make()
     img = img_qr.make_image().convert('RGB')
     if logo:
         logo = Image.open(logo)
+        if scale != 1:
+            logo.resize((logo.size[0] // scale, logo.size[1] // scale))
         pos = ((img.size[0] - logo.size[0]) // 2, (img.size[1] - logo.size[1]) // 2)
         img.paste(logo, pos)
     img.save(output)
@@ -79,9 +81,16 @@ def generate_send_qr(snp_list_txt: str, public_key: str, output: str, logo: Opti
 
 
 def decode_send_qr(qr_code: str) -> Tuple[List[str], rsa.key.PublicKey]:
-    img = Image.open(qr_code)
-    res = decode(img)
-    assert len(res) == 1, Exception('More than one QR code were found')
+    res = []
+    i = 0
+    while not res:
+        if i > 10:
+            raise Exception('No QR code was found')
+        img = Image.open(qr_code)
+        res = decode(img, symbols=[ZBarSymbol(64)])
+        i += 1
+    if len(res) > 1:
+        print('More than one QR code were found')
     secret_str, pub_key_str = res[0].data.decode().split('\n')
     pub_key_str = '\n'.join(add_return.findall(pub_key_str))
     des = pyDes.des(pub_key_str[-8:], pyDes.ECB, pub_key_str[-8:], padmode=pyDes.PAD_PKCS5)
@@ -103,20 +112,21 @@ def generate_give_qr(human: object, snp_list: List[str], pub_key: rsa.key.Public
     secret_str = []
     for i in range(0, len(z_str), limit_len):
         secret_str.append(b85encode(rsa.encrypt(z_str, pub_key)).decode())
-    make_qr_code('\n'.join(secret_str), output, logo)
+    make_qr_code('\n'.join(secret_str), output, logo, scale=3)
 
 
 def decode_give_qr(give_qr_code: str, send_qr_code: str, private_key: rsa.key.PrivateKey) -> Dict[str, str]:
     res = []
     i = 0
+    need_snp = decode_send_qr(send_qr_code)[0]
     while not res:
         if i > 10:
             raise Exception('No QR code was found')
-        need_snp = decode_send_qr(send_qr_code)[0]
         img = Image.open(give_qr_code)
-        res = decode(img)
+        res = decode(img, symbols=[ZBarSymbol(64)])
         i += 1
-    assert len(res) == 1, Exception('More than one QR code were found')
+    if len(res) > 1:
+        print('More than one QR code were found')
     z_str = []
     try:
         for i in res[0].data.decode().split('\n'):

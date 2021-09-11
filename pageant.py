@@ -1,7 +1,5 @@
-import getopt
 import argparse
 import warnings
-from sys import exit as sys_exit
 from src.log import *
 from src.modules import *
 
@@ -22,44 +20,6 @@ def get_kwargs(kwargs_list: Optional[List[str]]) -> dict:
         return dict([kwarg.split('=') for kwarg in kwargs_list])
     else:
         return {}
-
-
-def arg(args: list) -> Tuple[List, Dict]:
-    """
-    Parses command line options and parameter list.
-    :param args: Argument list to be parsed, without the leading reference to the running program.
-    :return: Parameters needed for running pageant.
-    """
-    try:
-        opts, temp = getopt.getopt(args, "hn:i:o:c:s:v:",
-                                   ['help', 'name=', 'input=', 'output=', 'config=', 'set-config=', 'version'])
-    except getopt.GetoptError:
-        print(description)
-        sys_exit(2)
-    else:
-        for opt, arg in opts:
-            kwargs = {}
-            fconfig = './bin/config.ini'
-            if opt in ('-h', '--help'):
-                print(description)
-                sys_exit()
-            elif opt in ('-v', '--version'):
-                print(version)
-                sys_exit()
-            elif opt in ('-n', '--name'):
-                name = arg
-            elif opt in ('-i', '--input'):
-                finput = arg
-            elif opt in ('-o', '--output'):
-                output = arg
-            elif opt in ('-c', '--config'):
-                fconfig = arg
-            elif opt in ('-s', '--set-config'):
-                kwargs = get_kwargs(arg)
-        try:
-            return [name, finput, output, fconfig], kwargs
-        except NameError:
-            raise Exception('Not complete arguments!')
 
 
 @use_time('Whole process')
@@ -121,7 +81,6 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
 
 
 if __name__ == '__main__':
-    # paras = arg(sys.argv[1:])
     parser = argparse.ArgumentParser(prog='PAGEANT', description=f'PAGEANT ({version})')
     parser.add_argument('-v', '--version', action='version', version=version)
     sub_parser = parser.add_subparsers(dest='fun', help='The functions in PAGEANT')
