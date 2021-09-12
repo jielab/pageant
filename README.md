@@ -50,8 +50,9 @@
 ```
 > ### 3 APIs:
 > > ```
-> > conda activate pageant
-> > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> > python pageant.py umap -s .\personal_genome\HG001.vcf.gz -p .\personal_genome\hapmap3.vcf.gz -m .\personal_genome\hapmap3_samples.txt
+> > python pageant.py add_rsid -i ./add_rsid/test.tsv
+> > python pageant.py qr_code -s .\personal_genome\fingerprint_snps.txt -k .\bin\key
 > > 
 ```
 <br/>
