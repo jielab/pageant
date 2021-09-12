@@ -46,8 +46,14 @@
 > > ```
 > > conda activate pageant
 > > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> > 
+```
+> ### 3 APIs:
 > > ```
-
+> > conda activate pageant
+> > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> > 
+```
 <br/>
 
 
