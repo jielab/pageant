@@ -24,13 +24,13 @@ default_config.update({
     'name': 'HG001',
     'input_file': './personal_genome/HG001.vcf.gz',
     'config_file': './bin/config.ini',
-    'quan_data': './algorithm_database/Quantitative',
-    'qual_data': './algorithm_database/Qualitative',
+    'quan_data': './algorithm/Quantitative',
+    'qual_data': './algorithm/Qualitative',
     'quan_ref': './population_genome',
     'qual_ref': './population_genome',
     # 'qr_snps_txt': './personal_genome/fingerprint_snps.txt',
-    'maf_ref': './personal_genome/hapmap3.vcf.gz',
-    'ps_ref': './personal_genome/hapmap3.vcf.gz',
+    'maf_ref': './personal_genome/g1k.vcf.gz',
+    'ps_ref': './personal_genome/g1k.vcf.gz',
     'concord_ref': './personal_genome/concordance.vcf.gz'
 })
 
@@ -717,30 +717,35 @@ class Ui_PAGEANT(object):
         self.add_rsid.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
         self.add_rsid.setObjectName("add_rsid")
         self.l_add_rsid_file = QtWidgets.QLabel(self.add_rsid)
-        self.l_add_rsid_file.setGeometry(QtCore.QRect(30, 51, 131, 25))
+        self.l_add_rsid_file.setGeometry(QtCore.QRect(30, 31, 131, 25))
 
         self.l_add_rsid_file.setFont(font2)
         self.l_add_rsid_file.setObjectName("l_add_rsid_file")
         self.i_add_rsid_file = QtWidgets.QLineEdit(self.add_rsid)
-        self.i_add_rsid_file.setGeometry(QtCore.QRect(121, 52, 221, 25))
+        self.i_add_rsid_file.setGeometry(QtCore.QRect(121, 32, 221, 25))
 
         self.i_add_rsid_file.setFont(font1)
         self.i_add_rsid_file.setObjectName("i_add_rsid_file")
         self.s_add_rsid_file = QtWidgets.QToolButton(self.add_rsid)
-        self.s_add_rsid_file.setGeometry(QtCore.QRect(340, 51, 41, 27))
+        self.s_add_rsid_file.setGeometry(QtCore.QRect(340, 31, 41, 27))
 
         self.s_add_rsid_file.setFont(font1)
         self.s_add_rsid_file.setObjectName("s_add_rsid_file")
-        # self.l_add_rsid_format = QtWidgets.QLabel(self.add_rsid)
-        # self.l_add_rsid_format.setGeometry(QtCore.QRect(30, 70, 131, 25))
-        #
-        # self.l_add_rsid_format.setFont(font2)
-        # self.l_add_rsid_format.setObjectName("l_add_rsid_format")
-        # self.i_add_rsid_format = QtWidgets.QLineEdit(self.add_rsid)
-        # self.i_add_rsid_format.setGeometry(QtCore.QRect(121, 70, 121, 25))
-        #
-        # self.i_add_rsid_format.setFont(font1)
-        # self.i_add_rsid_format.setObjectName("i_add_rsid_format")
+        self.l_add_rsid_db = QtWidgets.QLabel(self.add_rsid)
+        self.l_add_rsid_db.setGeometry(QtCore.QRect(30, 70, 131, 25))
+
+        self.l_add_rsid_db.setFont(font2)
+        self.l_add_rsid_db.setObjectName("l_add_rsid_db")
+        self.i_add_rsid_db = QtWidgets.QLineEdit(self.add_rsid)
+        self.i_add_rsid_db.setGeometry(QtCore.QRect(121, 71, 221, 25))
+        self.s_add_rsid_db = QtWidgets.QToolButton(self.add_rsid)
+        self.s_add_rsid_db.setGeometry(QtCore.QRect(340, 70, 41, 27))
+
+        self.s_add_rsid_db.setFont(font1)
+        self.s_add_rsid_db.setObjectName("s_add_rsid_db")
+
+        self.i_add_rsid_db.setFont(font1)
+        self.i_add_rsid_db.setObjectName("i_add_rsid_db")
         self.b_run_add_rsid = QtWidgets.QPushButton(self.add_rsid)
         self.b_run_add_rsid.setGeometry(QtCore.QRect(390, 33, 101, 61))
 
@@ -871,7 +876,7 @@ class Ui_PAGEANT(object):
         self.l_database_qual.setText(_translate("PAGEANT", "Database directory"))
         self.s_ref_qual.setText(_translate("PAGEANT", "..."))
         self.i_database_qual.setToolTip(_translate("PAGEANT", "Specify directory of database for qualitative traits"))
-        self.i_database_qual.setText(_translate("PAGEANT", "./algorithm_database/Qualitative"))
+        self.i_database_qual.setText(_translate("PAGEANT", "./algorithm/Qualitative"))
         self.i_database_qual.setPlaceholderText(_translate("PAGEANT", "Specify database for qualitative traits"))
         self.i_ref_qual.setToolTip(_translate("PAGEANT", "Specify directory of reference for qualitative traits"))
         self.i_ref_qual.setText(_translate("PAGEANT", "./population_genome"))
@@ -885,7 +890,7 @@ class Ui_PAGEANT(object):
         self.l_database_quan.setText(_translate("PAGEANT", "Database directory"))
         self.s_ref_quan.setText(_translate("PAGEANT", "..."))
         self.i_database_quan.setToolTip(_translate("PAGEANT", "Specify directory of database for quantitative traits"))
-        self.i_database_quan.setText(_translate("PAGEANT", "./algorithm_database/Quantitative"))
+        self.i_database_quan.setText(_translate("PAGEANT", "./algorithm/Quantitative"))
         self.i_database_quan.setPlaceholderText(_translate("PAGEANT", "Specify database for quantitative traits"))
         self.i_ref_quan.setToolTip(_translate("PAGEANT", "Specify directory of reference for quantitative traits"))
         self.i_ref_quan.setText(_translate("PAGEANT", "./population_genome"))
@@ -909,7 +914,7 @@ class Ui_PAGEANT(object):
         self.PS.setTitle(_translate("PAGEANT", "Population stratification analysis"))
         self.l_ps_ref.setText(_translate("PAGEANT", "Reference data"))
         self.i_ps_ref.setToolTip(_translate("PAGEANT", "Specify the reference data for ps"))
-        self.i_ps_ref.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
+        self.i_ps_ref.setText(_translate("PAGEANT", "./personal_genome/g1k.vcf.gz"))
         self.i_ps_ref.setPlaceholderText(_translate("PAGEANT", "Select principal component analysis reference data"))
         self.s_ps_ref.setText(_translate("PAGEANT", "..."))
         self.l_ps_pop.setText(_translate("PAGEANT", "Reference population data"))
@@ -921,7 +926,7 @@ class Ui_PAGEANT(object):
         self.s_ps_pop.setText(_translate("PAGEANT", "..."))
         self.i_ps_pop.setToolTip(_translate("PAGEANT", "Specify the reference population data for "
                                                        "population stratification analysis"))
-        self.i_ps_pop.setText(_translate("PAGEANT", "./personal_genome/hapmap3_samples.txt"))
+        self.i_ps_pop.setText(_translate("PAGEANT", "./personal_genome/g1k_samples.txt"))
         self.i_ps_pop.setPlaceholderText(_translate("PAGEANT", "Select principal component analysis population data"))
         self.i_pop_id.setToolTip(_translate("PAGEANT", "Separator in *.snps.ref"))
         self.i_pop_id.setText(_translate("PAGEANT", "IID"))
@@ -934,7 +939,7 @@ class Ui_PAGEANT(object):
         self.MAF.setTitle(_translate("PAGEANT", "MAF plot"))
         self.l_maf_sample.setText(_translate("PAGEANT", "MAF reference data"))
         self.i_maf_sample.setToolTip(_translate("PAGEANT", "Specify the reference data for MAF QC"))
-        self.i_maf_sample.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
+        self.i_maf_sample.setText(_translate("PAGEANT", "./personal_genome/g1k.vcf.gz"))
         self.i_maf_sample.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
         self.s_maf_sample.setText(_translate("PAGEANT", "..."))
         self.Concordance.setTitle(_translate("PAGEANT", "Concordance"))
@@ -957,7 +962,7 @@ class Ui_PAGEANT(object):
         self.c_otherdb.setTitle(_translate("PAGEANT", "Query third-party database"))
         self.l_otherdb.setText(_translate("PAGEANT", "Third-party database"))
         self.i_otherdb.setToolTip(_translate("PAGEANT", "Specify the third-party database file"))
-        self.i_otherdb.setText(_translate("PAGEANT", "./algorithm_database/Query_database/Phewas_Catalog_part.tsv"))
+        self.i_otherdb.setText(_translate("PAGEANT", "./algorithm/Query_db/Phewas_Catalog_part.tsv"))
         self.i_otherdb.setPlaceholderText(_translate("PAGEANT", "Select third-party database file"))
         self.s_otherdb.setText(_translate("PAGEANT", "..."))
         self.Function.setTabText(self.Function.indexOf(self.Query_database), _translate("PAGEANT", "Query DB"))
@@ -989,7 +994,7 @@ class Ui_PAGEANT(object):
         self.UMAP.setTitle(_translate("PAGEANT", "The API to generate UMAP and PCA plot"))
         self.l_umap_ref.setText(_translate("PAGEANT", "Reference genome"))
         self.i_umap_ref.setToolTip(_translate("PAGEANT", "Select the reference file for PCA & UMAP plot"))
-        self.i_umap_ref.setText(_translate("PAGEANT", "./personal_genome/hapmap3.vcf.gz"))
+        self.i_umap_ref.setText(_translate("PAGEANT", "./personal_genome/g1k.vcf.gz"))
         self.i_umap_ref.setPlaceholderText(_translate("PAGEANT", "Select reference genome"))
         self.s_umap_ref.setText(_translate("PAGEANT", "..."))
         self.l_umap_sample.setText(_translate("PAGEANT", "Sample genome"))
@@ -1000,7 +1005,7 @@ class Ui_PAGEANT(object):
         self.l_umap_metadata.setText(_translate("PAGEANT", "Metadata"))
         self.s_umap_metadata.setText(_translate("PAGEANT", "..."))
         self.i_umap_metadata.setToolTip(_translate("PAGEANT", "Select the metadata for reference genotype data"))
-        self.i_umap_metadata.setText(_translate("PAGEANT", "./personal_genome/hapmap3_samples.txt"))
+        self.i_umap_metadata.setText(_translate("PAGEANT", "./personal_genome/g1k_samples.txt"))
         self.i_umap_metadata.setPlaceholderText(_translate("PAGEANT", "Select metadata"))
         self.b_run_umap.setToolTip(_translate("PAGEANT", "RUN PCA and UMAP plot"))
         self.b_run_umap.setText(_translate("PAGEANT", "RUN PCA and UMAP"))
@@ -1010,10 +1015,11 @@ class Ui_PAGEANT(object):
         self.i_add_rsid_file.setText(_translate("PAGEANT", "./add_rsid/test.tsv"))
         self.i_add_rsid_file.setPlaceholderText(_translate("PAGEANT", "Specific the format"))
         self.s_add_rsid_file.setText(_translate("PAGEANT", "..."))
-        # self.l_add_rsid_format.setText(_translate("PAGEANT", "SNP format"))
-        # self.i_add_rsid_format.setToolTip(_translate("PAGEANT", "Specify directory of database"))
-        # self.i_add_rsid_format.setText(_translate("PAGEANT", "CHR:POS:REF:ALT"))
-        # self.i_add_rsid_format.setPlaceholderText(_translate("PAGEANT", "Select MAF reference data"))
+        self.l_add_rsid_db.setText(_translate("PAGEANT", "dbSNP file"))
+        self.i_add_rsid_db.setToolTip(_translate("PAGEANT", "Specify the path of dbSNP file"))
+        self.i_add_rsid_db.setText(_translate("PAGEANT", "./add_rsid/rsids-v150-hg19.tsv.gz"))
+        self.i_add_rsid_db.setPlaceholderText(_translate("PAGEANT", "Specify the path of dbSNP file"))
+        self.s_add_rsid_db.setText(_translate("PAGEANT", "..."))
         self.b_run_add_rsid.setToolTip(_translate("PAGEANT", "Start analyze"))
         self.b_run_add_rsid.setText(_translate("PAGEANT", "Add rsID \nto GWAS file"))
         self.qr_code.setTitle(_translate("PAGEANT", "The API for generating SNP QR code"))
@@ -1098,6 +1104,9 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.s_add_rsid_file.clicked.connect(
             self.open_(QFileDialog.getOpenFileName, self.i_add_rsid_file, None,
                        "Select the GWAS file", os.getcwd()))
+        self.s_add_rsid_db.clicked.connect(
+            self.open_(QFileDialog.getOpenFileName, self.i_add_rsid_db, None,
+                       "Select the dbSNP file", os.getcwd()))
         self.s_qr_code_snp.clicked.connect(
             self.open_(QFileDialog.getOpenFileName, self.i_qr_code_snp, None,
                        "Select the text which include the needed SNPs list", os.getcwd()))
@@ -1143,10 +1152,12 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.parameters[f'{otype}_ref'] = get_dir_path
 
     def open_raw(self, open_func: main.Callable, dest_obj: QtWidgets.QLineEdit, dest: main.Optional[str] = None,
-                 title: main.Optional[str] = 'Open', default: main.Optional[str] = None,
-                 filter: main.Optional[str] = None, *args, **kwargs) -> None:
-        get_directory_path = open_func(self, title, default, filter)
-        get_path = get_directory_path if type(get_directory_path) == 'str' else get_directory_path[0]
+                 title: main.Optional[str] = 'Open', default: str = '', *args, filter_: str = '', **kwargs) -> None:
+        if open_func != QFileDialog.getExistingDirectory:
+            get_directory_path = open_func(self, title, default, filter_)
+        else:
+            get_directory_path = open_func(self, title, default)
+        get_path = get_directory_path if type(get_directory_path) == str else get_directory_path[0]
         dest_obj.setText(get_path)
         if dest:
             self.parameters[dest] = get_path
@@ -1155,11 +1166,11 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         return main.partial(self.open_raw, *args, **kargs)
 
     def set_default_qual(self):
-        self.i_database_qual.setText("./algorithm_database/Qualitative")
+        self.i_database_qual.setText("./algorithm/Qualitative")
         self.i_ref_qual.setText("./population_genome")
 
     def set_default_quan(self):
-        self.i_database_quan.setText("./algorithm_database/Quantitative")
+        self.i_database_quan.setText("./algorithm/Quantitative")
         self.i_ref_quan.setText("./population_genome")
         self.s_quan_pop.setCurrentIndex(1)
 
@@ -1177,7 +1188,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.c_clinvar.setChecked(True)
         self.c_pharmgkb.setChecked(True)
         self.c_otherdb.setChecked(True)
-        self.i_otherdb.setText('./algorithm_database/Query_database/Phewas_Catalog_part.tsv')
+        self.i_otherdb.setText('./algorithm/Query_db/Phewas_Catalog_part.tsv')
 
     def set_default_qr_code(self):
         self.c_qr_code.setChecked(True)
@@ -1268,18 +1279,22 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.thread = API_Thread(umap, self.i_umap_ref.text(), self.i_umap_sample.text(),
                                  self.i_umap_metadata.text(), temp_dir, temp_dir, os.getcwd(),
                                  prune=True, pop_col='population', pop_id='IID')
+        self.setEnabled(False)
         self.thread.start()
         self.thread.finished.connect(main.partial(self.api_finish, temp_dir))
 
     def api_finish(self, temp_dir: main.Optional[str] = None):
+        self.setEnabled(True)
         QtWidgets.QMessageBox.information(self, 'Finish', self.thread.res)
         if temp_dir:
             main.rm_dir(temp_dir)
 
     def run_add_rsid(self):
         import src.add_rsid as add_rsid
-        self.thread = API_Thread(add_rsid.run, self.i_add_rsid_file.text(),
-                                 end_='Result has been saved as "sites-rsids.tsv.gz" in "add_rsid" folder')
+        self.thread = API_Thread(add_rsid.run, self.i_add_rsid_file.text(), self.i_add_rsid_db.text(),
+                                 os.path.join(os.getcwd(), 'annotated.tsv.gz'),
+                                 end_='Finish! Result (annotated.tsv.gz) has been saved in the working directory.')
+        self.setEnabled(False)
         self.thread.start()
         self.thread.finished.connect(self.api_finish)
 
@@ -1287,6 +1302,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         import src.qr_code as crypto
         self.thread = API_Thread(crypto.request, self.i_qr_code_key.text(), self.i_qr_code_snp.text(),
                                  os.path.join(os.getcwd(), 'SNP_QR_CODE.png'), None)
+        self.setEnabled(False)
         self.thread.start()
         self.thread.finished.connect(self.api_finish)
 

@@ -7,7 +7,7 @@
 # #1. Download & Run: *for quick starter*
 
 > ## Download:
-> > - ### Download executables for [Windows](https://drive.google.com/file/d/1bALq5JRHLFtHZoZcZz2YDiOHf3RlL6Y_/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
+> > - ### Download executables for [Windows](https://drive.google.com/file/d/1TNveoYnBDrDldC42HjCEqOzuLSffLNy8/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
 > > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. The basic version of PAGEANT comes with a subset of the G1K data that includes all SNPs used in the genetic report.
 
 > ## Run:
