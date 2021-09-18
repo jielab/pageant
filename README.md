@@ -13,7 +13,7 @@
 > ## Run:
 > > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
 > > - ### For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
-> > - ### For Linux: run "sudo apt-get install libzbar0" to install packages, then run PAGEANT by typing "./PAGEANT".
+> > - ### For Linux: run "sudo apt-get install libzbar0 python3-pyqt5" to install packages, then run PAGEANT by typing "./PAGEANT".
 
 <br/>
 
@@ -46,6 +46,13 @@
 > > ```
 > > conda activate pageant
 > > python ./pageant.py -n test -i ./personal_genome/HG001.vcf.gz -o output
+> > 
+> >```
+> ### For 3 APIs:
+> > ```
+> > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
+> > - python pageant.py add_rsid -i ./add_rsid/test.tsv
+> > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
 > > ```
 
 <br/>
