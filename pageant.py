@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-09-10'
+version = '2021-09-19'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
@@ -114,10 +114,16 @@ if __name__ == '__main__':
 
     add_rsid = sub_parser.add_parser('add_rsid', help='Add rsID in the GWAS file')
     add_rsid.add_argument('-i', '--input', help="Input GWAS file", required=True)
-    add_rsid.add_argument('-w', '--workpath', default='./add_rsid', help="The working path of analysis")
-    add_rsid.add_argument('-g', '--genome', default='19', help="The build version of genome")
-    add_rsid.add_argument('-d', '--dbsnp', default='150', help="The version of dbSNP")
-    add_rsid.add_argument('-o', '--output', default='sites-rsids.tsv', help="The output name of file")
+    add_rsid.add_argument('-d', '--database', help="The dbSNP file", required=True)
+    add_rsid.add_argument('-s', '--sep', default='\t', help="The delimiter of input file")
+    add_rsid.add_argument('-c', '--core', default=None, help="The number of processors used in analysis")
+    add_rsid.add_argument('--na', default='NA', help="The string of NA value")
+    add_rsid.add_argument('--rsid', default='RS_ID', help="The name of annotated column")
+    add_rsid.add_argument('--alt', default='ALT', help="The column's name of reference allele")
+    add_rsid.add_argument('--ref', default='REF', help="The column's name of alternative allele")
+    add_rsid.add_argument('--pos', default='POS', help="The column's name of allele position")
+    add_rsid.add_argument('--chr', default='CHR', help="The column's name of chromosome")
+    add_rsid.add_argument('-o', '--output', default='./annotated.tsv.gz', help="The output name of file", required=True)
 
     qr_code = sub_parser.add_parser('qr_code', help='Generate the SNP QR CODE')
     qr_code.add_argument('-s', '--snp-list', dest='snp', help='SNP list')
@@ -138,14 +144,12 @@ if __name__ == '__main__':
         get_plink_dir(args.plink)
         ps_analyse(args.population, args.sample, args.metadata, args.temp, args.workpath, args.output, prune=args.prune,
                    pop_id=args.iid, pop_col=args.pop)
+        print('Finish!')
     elif args.fun == 'qr_code':
         import src.qr_code as crypto
         crypto.request(args.key, args.snp, args.output, args.logo)
+        print('Finish!')
     elif args.fun == 'add_rsid':
         import src.add_rsid as rsid
-        rsid.output_name = args.output
-        rsid.data_dir = args.workpath
-        rsid.dbsnp_version = args.dbsnp
-        rsid.genes_version = args.genome
-        rsid.run(args.input)
-    print('Finish!')
+        rsid.run(args.input, args.database, args.output, args.core, args.sep, args.chr,
+                 args.pos, args.ref, args.alt, args.rsid, args.na)

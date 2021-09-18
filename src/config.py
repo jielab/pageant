@@ -21,21 +21,21 @@ else:
     raw_dir = os.getcwd()
 
 default_config = {
-    'file': {'quan_data': './algorithm_database/Quan',
-             'qual_data': './algorithm_database/Qual',
+    'file': {'quan_data': './algorithm/Quan',
+             'qual_data': './algorithm/Qual',
              'quan_ref': './population_genome',
              'qual_ref': './population_genome',
-             'maf_ref': './personal_genome/hapmap3.vcf.gz',
-             'pc_ref': './personal_genome/hapmap3.vcf.gz',
+             'maf_ref': './personal_genome/g1k.vcf.gz',
+             'pc_ref': './personal_genome/g1k.vcf.gz',
              'qr_key': './output/qr_code/doctor/key',
              'qr_snps': './personal_genome/fingerprint_snps.txt',
              'qr_dr': './output/qr_code/doctor',
              'qr_user': './output/qr_code/user',
              'qr_dir': './output/qr_code/doctor',
-             'population_file': './personal_genome/hapmap3_samples.txt',
+             'population_file': './personal_genome/g1k_samples.txt',
              'concord_ref': './personal_genome/concordance.vcf.gz',
-             'ref_structure': './personal_genome/hapmap3.vcf.gz',
-             'query_db': './algorithm_database/Query_database/Phewas_Catalog.txt',
+             'ref_structure': './personal_genome/g1k.vcf.gz',
+             'query_db': './algorithm/Query_db/Phewas_Catalog.txt',
              'description_suf': ".desc.txt", 'need_suf': '.snps.ref', 'gwas_suf': ".tsv",
              'plink_dir': './bin'
              },

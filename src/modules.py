@@ -279,8 +279,8 @@ def ref_qc(temp_dir: str, ref_file_list: List[List[str]]):
 
 
 @use_time('Query database')
-def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm_database')) -> tuple:
-    query_database_path = os.path.join(data_dir, 'Query_database')
+def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm')) -> tuple:
+    query_database_path = os.path.join(data_dir, 'Query_db')
     if not os.path.isdir(query_database_path):
         os.mkdir(query_database_path)
 
