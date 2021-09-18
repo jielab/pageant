@@ -49,9 +49,10 @@
 > > 
 > >```
 > ### For 3 APIs:
+For the add_rsID API, first download the dbSNP rsID to CHR:POS link file, for [GRCh37](https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151_GRCh37p13/VCF/All_20180423.vcf.gz) and for [GRCh38](https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151_GRCh38p7/VCF/All_20180418.vcf.gz) based on user's GWAS data. These two files are ~15GB each.  
 > > ```
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
-> > - python pageant.py add_rsid -i ./add_rsid/test.tsv
+> > - python pageant add_rsid -i add_rsid/test.tsv -d rsids-v150-hg19.tsv.gz -o add_rsid/annotated.tsv.gz
 > > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
 > > ```
 
