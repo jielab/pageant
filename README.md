@@ -49,7 +49,7 @@
 > > 
 > >```
 > ### For 3 APIs:
-> > - For the add_rsID API, first download the rsids-v*-hg*.tsv.gz file towards the end of [pheweb resource page](https://resources.pheweb.org)
+> > - For the add_rsID API, first download the ### rsids-v*-hg*.tsv.gz ### file towards the end of [pheweb resource page](https://resources.pheweb.org)
 > > ```
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
