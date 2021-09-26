@@ -50,12 +50,12 @@
 > >```
 > ### For 3 APIs:
 > > - For the add_rsID API, first download the rsids-v*-hg*.tsv.gz file towards the end of [pheweb resource page](https://resources.pheweb.org)
-> > - For help, type: python pageant.py add_rsid --help
 > > ```
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
 > > - python pageant add_rsid -i add_rsid/test.tsv -d rsids-v150-hg19.tsv.gz -o add_rsid/annotated.tsv.gz
 > > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
+> > - for help: python pageant.py add_rsid --help # change the API name accordingly
 > > ```
 
 <br/>
