@@ -1,0 +1,7 @@
+Name: Breast cancer
+Chinese name: 乳腺癌
+Sex: female
+Description: Breast cancer risk is influenced by rare coding variants in susceptibility genes, such as BRCA1, and many common, mostly non-coding variants. However, much of the genetic contribution to breast cancer risk remains unknown. 
+Lifetime risk: 12.9% (NIH)
+Reference: Association analysis identifies 65 new breast cancer risk loci
+PMID: 29059683
