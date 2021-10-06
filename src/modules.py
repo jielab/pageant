@@ -334,7 +334,7 @@ def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
         crypto.generate_key(res_dir)
     snp_logo = os.path.join(raw_dir, "bin", "SNP_logo.png")
     crypto.request(key_file, need_snps_list, save_dr_img, snp_logo)
-    copy(save_dr_img, os.path.join(out_img_dir, 'dr_qr_code.png'))
+    copy(save_dr_img, os.path.join(out_img_dir, 'snplist_qr_code.png'))
 
     logo = os.path.join(raw_dir, "bin", "logo.png")
     crypto.give(save_dr_img, human, save_user_img, logo)

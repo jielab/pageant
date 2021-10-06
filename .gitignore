@@ -11,3 +11,6 @@ PAGEANT.exe
 /temp/
 /src/__pycache__/
 /bin/plink*
+.DS_Store
+._*
+Thumbs.db

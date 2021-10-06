@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
+import logging
 import os
 import sys
 import webbrowser
-import logging
+from multiprocessing import freeze_support
+from time import sleep
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import __file__ as qt_file
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
-from multiprocessing import freeze_support
-from time import sleep
-import pageant as main
 
+import pageant as main
 
 main.plt.switch_backend('Agg')
 if main.platform == 'Darwin':
@@ -1043,7 +1044,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         super(MyMainForm, self).__init__(parent)
         self.setupUi(self)
         self.s_vcf.clicked.connect(
-            self.open_(QFileDialog.getOpenFileName, self.i_vcf, 'input_file',  "Select the input file", os.getcwd(),
+            self.open_(QFileDialog.getOpenFileName, self.i_vcf, 'input_file', "Select the input file", os.getcwd(),
                        filter='All file formats supported (*.vcf *.vcf.gz *.bed *.txt);;'
                               ' vcf (*.vcf *.vcf.gz);; 23andme (*.txt);; PLINK 1 binary (*.bed)'))
         self.s_config.clicked.connect(
@@ -1238,14 +1239,14 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def run(self):
         self.parameters.update(dict(zip(['name', 'input_file', 'config_file', 'output', 'qual_data', 'qual_ref',
-                                         'quan_data',  'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
+                                         'quan_data', 'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
                                          'concord_ref', 'population_col', 'population_file',
                                          'population_id', 'query_database', 'pharmgkb', 'clinvar', 'query_db',
                                          'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'quan_pop'],
                                         [self.i_name.text(), self.i_vcf.text(), self.i_config.text(),
                                          self.i_output.text(), self.i_database_qual.text(), self.i_ref_qual.text(),
                                          self.i_database_quan.text(), self.i_ref_quan.text(),
-                                         self.c_sample_qc.isChecked(),  self.c_vep.isChecked(),
+                                         self.c_sample_qc.isChecked(), self.c_vep.isChecked(),
                                          self.i_maf_sample.text(), self.i_ps_ref.text(), self.i_concord_ref.text(),
                                          self.i_pop.text(), self.i_ps_pop.text(), self.i_pop_id.text(),
                                          self.c_query_database.isChecked(), self.c_pharmgkb.isChecked(),

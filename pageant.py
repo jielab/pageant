@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-09-19'
+version = '2021-10-06'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
@@ -62,6 +62,9 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
         if module['query_database']:
             extra_res.append(query_database(human))
         if module['qr_code']:
+            with open(main_config['file']['qr_snps']) as f:
+                snp_list = set(f.read().strip().split('\n'))
+            load_vcf(human, snp_list)
             extra_res.append(produce_qr_code(human, output))
         basic_res_dict = human.export_res(output=output)
     except Exception as e:

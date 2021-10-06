@@ -227,9 +227,10 @@ class Ind(object):
 
     def report(self, output):
         if self.picture:
-            copy(self.picture,
-                 os.path.join(output, 'genetic_report', 'html_files', 'img', os.path.basename(self.picture)))
-            self.picture = os.path.join('html_files', 'img', os.path.basename(self.picture))
+            dest_ = os.path.join(output, 'genetic_report', 'html_files', 'img',
+                                 f'{self.name.replace(" ", "_")}.{os.path.basename(self.picture).split(".")[-1]}')
+            copy(self.picture, dest_)
+            self.picture = dest_
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
         if self.status:
@@ -262,7 +263,7 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
         sys_suffix = '.exe' if platform == 'Windows' else ''
         plink_file = os.path.join(plink_dir, plink + sys_suffix)
         assert os.path.isfile(plink_file), f"Cannot find {plink}{sys_suffix} in plink directory"
-    cmd = plink_file + ' ' + cmd
+    cmd = f'"{plink_file}" {cmd}'
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, sterr = a.communicate()
     a.wait()
