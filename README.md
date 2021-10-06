@@ -53,7 +53,7 @@
 > > ```
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
-> > - python pageant.py add_rsid -i add_rsid/test.tsv -d rsids-v150-hg19.tsv.gz -o rsid_added.tsv.gz
+> > - python pageant.py add_rsid -i add_rsid/test.tsv -d rsids-v154-hg19.tsv.gz -o rsid_added.tsv.gz
 > > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
 > > - for help: python pageant.py add_rsid --help # change the API name accordingly
 > > ```
