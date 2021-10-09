@@ -50,6 +50,7 @@
 > >```
 > ### For 3 APIs:
 > > - For the add_rsID API, first download the rsids-v*-hg*.tsv.gz file towards the end of [pheweb resource page](https://resources.pheweb.org)
+> > - The chromosome and positions in the input GWAS file must be sorted first, by using sort -k 1,1n -k 2,2n.
 > > ```
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
