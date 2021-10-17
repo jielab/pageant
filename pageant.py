@@ -111,8 +111,10 @@ if __name__ == '__main__':
                       help="The name of the column that describe population infomation")
     umap.add_argument('--id-col', default='IID', dest='iid',
                       help="The name of the column that describe individual id")
-    umap.add_argument('--prune', dest='prune', action='store_true')
-    umap.add_argument('--no-prune', dest='prune', action='store_false')
+    umap.add_argument('--prune', dest='prune', action='store_true',
+                      help='Using "prune" function before analysis')
+    umap.add_argument('--no-prune', dest='prune', action='store_false',
+                      help='Not using "prune" function before analysis')
     umap.set_defaults(prune=True)
 
     add_rsid = sub_parser.add_parser('add_rsid', help='Add rsID in the GWAS file')
@@ -134,6 +136,21 @@ if __name__ == '__main__':
     qr_code.add_argument('-o', '--output', default='./SNP_QR_CODE.png', help='The QR CODE file path')
     qr_code.add_argument('-l', '--logo', default='./bin/SNP_logo.png', help='The logo of the QR CODE')
 
+    liftover = sub_parser.add_parser('liftover', help='Convert genome coordinates between different assemblies')
+    liftover.add_argument('-i', '--input', help="Input GWAS file", required=True)
+    liftover.add_argument('-c', '--chain-file', dest='chain_file', help="The chain file", required=True)
+    liftover.add_argument('-s', '--sep', default='\t', help="The delimiter of input file")
+    liftover.add_argument('-p', '--processor', default=None, help="The number of processors used in analysis")
+    liftover.add_argument('--pos', default='POS', help="The column's name of allele position")
+    liftover.add_argument('--chr', default='CHR', help="The column's name of chromosome")
+    liftover.add_argument('--new-column', dest='new_column', action='store_true',
+                          help='Store new genome coordinates in new columns')
+    liftover.add_argument('--no-new-column', dest='new_column', action='store_false',
+                          help='Replace old genome coordinates into new coordinates')
+    liftover.set_defaults(new_column=True)
+    liftover.add_argument('--chr-prefix', default='', help="The prefix of chromosome string")
+    liftover.add_argument('-o', '--output', default='./liftover.tsv.gz', help="The output name of file", required=True)
+
     args = parser.parse_args()
     if args.fun == 'main':
         main(args.name, args.input, args.output, config_file=args.config, **get_kwargs(args.kwargs))
@@ -152,7 +169,11 @@ if __name__ == '__main__':
         import src.qr_code as crypto
         crypto.request(args.key, args.snp, args.output, args.logo)
         print('Finish!')
-    elif args.fun == 'add_rsid':
-        import src.add_rsid as rsid
-        rsid.run(args.input, args.database, args.output, args.core, args.sep, args.chr,
-                 args.pos, args.ref, args.alt, args.rsid, args.na)
+    elif args.fun == 'add_risd':
+        import src.add_rsid as add_rsid
+        add_rsid.addrsid_run(args.input, args.database, args.output, args.core, args.sep, args.chr,
+                             args.pos, args.ref, args.alt, args.rsid, args.na)
+    elif args.fun == 'liftover':
+        import src.liftover as liftover
+        liftover.liftover_run(args.input, args.chain_file, args.output, args.processor, args.sep, args.chr, args.pos,
+                              args.new_column, args.chr_prefix)

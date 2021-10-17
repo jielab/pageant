@@ -308,9 +308,9 @@ def get_rsid(raw_file: str, db_file: str, output_file: str, processes: Optional[
     print(f'Finish! Used time: {time() - time0:.0f}s')
 
 
-def run(raw_file: str, db_file: str, output_file: str, processes: Optional[int] = None,
-        sep: str = '\t', chr: str = 'CHR', pos: str = 'BP', ref: str = 'REF', alt: str = 'ALT',
-        rs_id: str = 'RS_ID', na: str = 'NA') -> None:
+def addrsid_run(raw_file: str, db_file: str, output_file: str, processes: Optional[int] = None,
+                sep: str = '\t', chr: str = 'CHR', pos: str = 'BP', ref: str = 'REF', alt: str = 'ALT',
+                rs_id: str = 'RS_ID', na: str = 'NA') -> None:
     global columns_name, sep_str, NA_str, rs_id_str
     columns_name['CHR'].append(chr)
     columns_name['BP'].append(pos)
