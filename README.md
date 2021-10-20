@@ -49,15 +49,16 @@
 > > 
 > >```
 > ### For 3 APIs:
-> > - For the add_rsID API, first download the rsids-v*-hg*.tsv.gz file towards the end of [pheweb resource page](https://resources.pheweb.org). The chromosome and positions in the input GWAS file must be sorted first, by using sort -k 1,1n -k 2,2n.
+> > - For the add_rsID API, first download the rsids-v*-hg*.tsv.gz file towards the end of [pheweb resource page](https://resources.pheweb.org). Make sure that the chromosome and positions in the input GWAS file is sorted first, by using sort -k 1,1n -k 2,2n.
+> > - For liftOver, first download the chain files, for [hg19](http://hgdownload.cse.ucsc.edu/gbdb/hg19/liftOver/) and/or for [hg38](http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver).
 > > ```
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
-> > - python pageant.py add_rsid -i add_rsid/test.tsv -d rsids-v154-hg19.tsv.gz -o rsid_added.tsv.gz
+> > - python pageant.py add_rsid -i test.gwas.gz --chr chr --pos pos -d rsids-v154-hg19.tsv.gz -o new.gwas.gz
+> > - python pageant.py liftover -i test.gwas.gz --chr chr --pos pos -c hg38ToHg19.over.chain.gz -o new.GWAS.gz
 > > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
-> > - for help: python pageant.py add_rsid --help # change the API name accordingly
 > > ```
-
+> > - for help: python pageant.py [API-NAME] --help
 <br/>
 
 
