@@ -57,7 +57,7 @@
 > > - python pageant.py umap -s HG001.vcf.gz -p g1k.vcf.gz -m g1k_samples.txt
 > > - python pageant.py add_rsid -i test.gwas.gz --chr chr --pos pos -d rsids-v154-hg19.tsv.gz -o new.gwas.gz
 > > - python pageant.py liftOver -i test.gwas.gz --chr chr --pos pos -c hg38ToHg19.over.chain.gz -o new.GWAS.gz
-> > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
+> > - python pageant.py qr_code -s fingerprint_snps.txt -k key
 > > ```
 <br/>
 
