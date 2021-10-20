@@ -55,7 +55,7 @@
 > > - conda activate pageant
 > > - python pageant.py umap -s ./personal_genome/HG001.vcf.gz -p ./personal_genome/hapmap3.vcf.gz -m ./personal_genome/hapmap3_samples.txt
 > > - python pageant.py add_rsid -i test.gwas.gz --chr chr --pos pos -d rsids-v154-hg19.tsv.gz -o new.gwas.gz
-> > - python pageant.py liftover -i test.gwas.gz --chr chr --pos pos -c hg38ToHg19.over.chain.gz -o new.GWAS.gz
+> > - python pageant.py liftOver -i test.gwas.gz --chr chr --pos pos -c hg38ToHg19.over.chain.gz -o new.GWAS.gz
 > > - python pageant.py qr_code -s ./personal_genome/fingerprint_snps.txt -k ./bin/key
 > > ```
 > > - for help: python pageant.py [API-NAME] --help
