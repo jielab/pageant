@@ -99,18 +99,16 @@ def read_file_part(file: str, start: int, end: Optional[int] = None) -> Iterable
 
 
 def format_chrome(raw: str, chr_prefix: str = '') -> str:
-    if chr_prefix:
-        body = raw.lstrip(chr_prefix)
-        try:
-            body = int(body)
-        except ValueError:
+    body = raw.lstrip(chr_prefix) if chr_prefix else raw
+    try:
+        body = int(body)
+    except ValueError:
+        return f'chr{body}'
+    else:
+        if body <= 22:
             return f'chr{body}'
         else:
-            if body <= 22:
-                return f'chr{body}'
-            else:
-                return f'chr{chrom_aliases[str(body)]}'
-    return f'chr{raw}'
+            return f'chr{chrom_aliases[str(body)]}'
 
 
 def reformat_chrom(raw: str, chr_prefix: str = '') -> str:
@@ -134,8 +132,13 @@ class Seq:
         self.alignments = Alignment(tuple(tuple(int(i) for i in alignment.split('\t')) for alignment in raw[1:]))
         if self.ref_strand == -1:
             self.alignments.__reversed__()
-            self.ref_start, self.ref_end = self.ref_size - self.ref_end, self.ref_size - self.ref_start
-            self.query_start, self.query_end = self.query_size - self.query_end, self.query_size - self.query_start
+            self.ref_start, self.ref_end = self.ref_size - self.ref_end - 1, self.ref_size - self.ref_start - 1
+            self.query_start, self.query_end = self.query_size - self.query_start + self.query_strand,\
+                                               self.query_size - self.query_end + self.query_strand
+            self.query_strand *= -1
+        if self.query_strand == -1:
+            self.query_start, self.query_end = self.query_size - self.query_start - 1, \
+                                               self.query_size - self.query_end - 1
 
     @property
     def range(self):
@@ -231,24 +234,28 @@ class Trans:
 
     def get_trans(self, chrome: str, pos: int):
         if (chrome, pos) in self.seqs[self.seq_idx]:
-            return self.get_trans_alignment(pos)
+            res_ = self.get_trans_alignment(pos)
+            if res_:
+                return res_
         for seq_idx in self.get_seq_iter():
             self.get_chain_info(seq_idx)
             if (chrome, pos) in self.seqs[self.seq_idx]:
-                return self.get_trans_alignment(pos)
+                res_ = self.get_trans_alignment(pos)
+                if res_:
+                    return res_
         return 'Fail', 'Fail'
 
     def __call__(self, chrom: str, pos: int):
         return self.get_trans(chrom, pos)
 
-    def get_trans_alignment(self, pos: int):
+    def get_trans_alignment(self, pos: int) -> Tuple[str, int] or None:
         for _ in range(self.align_len):
             if self.align_range[0] <= pos <= self.align_range[1]:
                 offset = pos - self.ref_pos
                 return self.query_chrome, self.query_pos + offset * self.query_strand
             else:
                 self.next_alignment()
-        return self.query_chrome, 'Fail'
+        return None
 
     def get_chain_info(self, idx: int):
         seq = self.seqs[idx]
@@ -355,10 +362,3 @@ def liftover_run(raw_file: str, chain_file: str, output_file: str, processes: Op
     sep_str_l = sep
     new_columns = new_column
     liftover(raw_file, chain_file, output_file, processes, chr_prefix)
-
-
-if __name__ == '__main__':
-    raw_file = '../add_rsid/test.tsv'
-    output_file = '../add_rsid/test.tsv.gz'
-    test_file = r'E:\Data\Database\LiftOver\hg19ToHg38.over.chain.gz'
-    liftover_run(raw_file, test_file, output_file, processes=9, sep=' ', new_column=True, chr_prefix='CHR')
