@@ -477,42 +477,42 @@ class Ui_PAGEANT(object):
         self.g_quan.setGeometry(QtCore.QRect(20, 20, 521, 351))
         self.g_quan.setObjectName("g_quan")
         self.l_database_quan = QtWidgets.QLabel(self.g_quan)
-        self.l_database_quan.setGeometry(QtCore.QRect(30, 50, 201, 25))
+        self.l_database_quan.setGeometry(QtCore.QRect(30, 30, 201, 25))
 
         self.l_database_quan.setFont(font)
         self.l_database_quan.setObjectName("l_database_quan")
         self.s_ref_quan = QtWidgets.QToolButton(self.g_quan)
-        self.s_ref_quan.setGeometry(QtCore.QRect(430, 170, 41, 27))
+        self.s_ref_quan.setGeometry(QtCore.QRect(430, 130, 41, 27))
 
         self.s_ref_quan.setFont(font1)
         self.s_ref_quan.setObjectName("s_ref_quan")
         self.i_database_quan = QtWidgets.QLineEdit(self.g_quan)
-        self.i_database_quan.setGeometry(QtCore.QRect(69, 81, 365, 25))
+        self.i_database_quan.setGeometry(QtCore.QRect(69, 61, 365, 25))
 
         self.i_database_quan.setFont(font1)
         self.i_database_quan.setObjectName("i_database_quan")
         self.i_ref_quan = QtWidgets.QLineEdit(self.g_quan)
-        self.i_ref_quan.setGeometry(QtCore.QRect(69, 171, 365, 25))
+        self.i_ref_quan.setGeometry(QtCore.QRect(69, 131, 365, 25))
 
         self.i_ref_quan.setFont(font1)
         self.i_ref_quan.setObjectName("i_ref_quan")
         self.s_database_quan = QtWidgets.QToolButton(self.g_quan)
-        self.s_database_quan.setGeometry(QtCore.QRect(430, 80, 41, 27))
+        self.s_database_quan.setGeometry(QtCore.QRect(430, 60, 41, 27))
 
         self.s_database_quan.setFont(font1)
         self.s_database_quan.setObjectName("s_database_quan")
         self.l_ref_quan = QtWidgets.QLabel(self.g_quan)
-        self.l_ref_quan.setGeometry(QtCore.QRect(30, 140, 201, 25))
+        self.l_ref_quan.setGeometry(QtCore.QRect(30, 100, 201, 25))
 
         self.l_ref_quan.setFont(font)
         self.l_ref_quan.setObjectName("l_ref_quan")
         self.l_quan_pop = QtWidgets.QLabel(self.g_quan)
-        self.l_quan_pop.setGeometry(QtCore.QRect(30, 230, 371, 25))
+        self.l_quan_pop.setGeometry(QtCore.QRect(30, 170, 371, 25))
 
         self.l_quan_pop.setFont(font)
         self.l_quan_pop.setObjectName("l_quan_pop")
         self.s_quan_pop = QtWidgets.QComboBox(self.g_quan)
-        self.s_quan_pop.setGeometry(QtCore.QRect(70, 260, 401, 25))
+        self.s_quan_pop.setGeometry(QtCore.QRect(70, 200, 401, 25))
 
         self.s_quan_pop.setFont(font1)
         self.s_quan_pop.setObjectName("s_quan_pop")
@@ -522,7 +522,58 @@ class Ui_PAGEANT(object):
         self.s_quan_pop.addItem("")
         self.s_quan_pop.addItem("")
         self.s_quan_pop.addItem("")
+
+        self.PRS = QtWidgets.QGroupBox(self.g_quan)
+        self.PRS.setEnabled(True)
+        self.PRS.setGeometry(QtCore.QRect(30, 240, 461, 101))
+
+        self.PRS.setFont(font)
+        self.PRS.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.PRS.setObjectName("PRS")
+        self.l_p1 = QtWidgets.QLabel(self.PRS)
+        self.l_p1.setGeometry(QtCore.QRect(30, 30, 50, 25))
+
+        self.l_p1.setFont(font3)
+        self.l_p1.setObjectName("l_p1")
+        self.i_p1 = QtWidgets.QLineEdit(self.PRS)
+        self.i_p1.setGeometry(QtCore.QRect(80, 30, 121, 25))
+
+        self.i_p1.setFont(font1)
+        self.i_p1.setAccessibleDescription("")
+        self.i_p1.setObjectName("i_p1")
+        self.l_r2 = QtWidgets.QLabel(self.PRS)
+        self.l_r2.setGeometry(QtCore.QRect(260, 30, 50, 25))
+
+        self.l_r2.setFont(font3)
+        self.l_r2.setObjectName("l_r2")
+        self.i_r2 = QtWidgets.QLineEdit(self.PRS)
+        self.i_r2.setGeometry(QtCore.QRect(320, 30, 121, 25))
+
+        self.i_r2.setFont(font1)
+        self.i_r2.setObjectName("i_r2")
+        self.l_kb = QtWidgets.QLabel(self.PRS)
+        self.l_kb.setGeometry(QtCore.QRect(30, 60, 50, 25))
+
+        self.l_kb.setFont(font3)
+        self.l_kb.setObjectName("l_kb")
+        self.i_kb = QtWidgets.QLineEdit(self.PRS)
+        self.i_kb.setGeometry(QtCore.QRect(80, 60, 121, 25))
+
+        self.i_kb.setFont(font1)
+        self.i_kb.setObjectName("i_kb")
+        self.i_p_threshold = QtWidgets.QLineEdit(self.PRS)
+        self.i_p_threshold.setGeometry(QtCore.QRect(320, 60, 121, 25))
+
+        self.i_p_threshold.setFont(font1)
+        self.i_p_threshold.setObjectName("i_p_threshold")
+        self.l_p_threshold = QtWidgets.QLabel(self.PRS)
+        self.l_p_threshold.setGeometry(QtCore.QRect(230, 60, 101, 25))
+
+        self.l_p_threshold.setFont(font3)
+        self.l_p_threshold.setObjectName("l_p_threshold")
+        self.PRS.raise_()
         self.Function.addTab(self.Quantitative, "")
+
 
         self.Query_database = QtWidgets.QWidget()
 
@@ -906,6 +957,26 @@ class Ui_PAGEANT(object):
         self.s_quan_pop.setItemText(3, _translate("PAGEANT", "AMR"))
         self.s_quan_pop.setItemText(4, _translate("PAGEANT", "SAS"))
         self.s_quan_pop.setItemText(5, _translate("PAGEANT", "AFR"))
+        self.PRS.setTitle(_translate("PAGEANT", "PRS methods"))
+        self.l_p1.setToolTip(_translate("PAGEANT", "Index variant p-value threshold"))
+        self.l_p1.setText(_translate("PAGEANT", "p1"))
+        self.i_p1.setToolTip(_translate("PAGEANT", "Index variant p-value threshold"))
+        self.i_p1.setText(_translate("PAGEANT", "1"))
+        self.l_r2.setToolTip(_translate("PAGEANT", "r^2 threshold"))
+        self.l_r2.setText(_translate("PAGEANT", "r2"))
+        self.i_r2.setToolTip(_translate("PAGEANT", "<html><head/><body><p>r<span style=\" vertical-align:super;\">"
+                                                   "2</span> threshold</p></body></html>"))
+        self.i_r2.setText(_translate("PAGEANT", "0.1"))
+        self.l_kb.setToolTip(_translate("PAGEANT", "Clump kb radius"))
+        self.l_kb.setText(_translate("PAGEANT", "kb"))
+        self.i_kb.setToolTip(_translate("PAGEANT", "Clump kb radius"))
+        self.i_kb.setText(_translate("PAGEANT", "250"))
+        self.i_kb.setPlaceholderText(_translate("PAGEANT", "Clump kb radius"))
+        self.i_p_threshold.setToolTip(_translate("PAGEANT", "P threshold for PRS"))
+        self.i_p_threshold.setText(_translate("PAGEANT", "1e-5"))
+        self.i_p_threshold.setPlaceholderText(_translate("PAGEANT", "P threshold for PRS"))
+        self.l_p_threshold.setToolTip(_translate("PAGEANT", "P threshold"))
+        self.l_p_threshold.setText(_translate("PAGEANT", "P threshold"))
         self.Function.setTabText(self.Function.indexOf(self.Quantitative), _translate("PAGEANT", "Quantitative"))
 
         # self.c_sample_qc.setToolTip(_translate("PAGEANT", "Activate function of sample QC"))
@@ -1174,6 +1245,10 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
         self.i_database_quan.setText("./algorithm/Quantitative")
         self.i_ref_quan.setText("./population_genome")
         self.s_quan_pop.setCurrentIndex(1)
+        self.i_p_threshold.setText("1e-5")
+        self.i_kb.setText("250")
+        self.i_r2.setText("0.1")
+        self.i_p1.setText("1")
 
     def set_default_sample_qc(self):
         self.i_maf_sample.setText(default_config['maf_ref'])
@@ -1242,7 +1317,8 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          'quan_data', 'quan_ref', 'sample_qc', 'vep', 'maf_ref', 'ps_ref',
                                          'concord_ref', 'population_col', 'population_file',
                                          'population_id', 'query_database', 'pharmgkb', 'clinvar', 'query_db',
-                                         'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'quan_pop'],
+                                         'qr_code', 'qr_dir', 'qr_snps', 'qr_give', 'qr_user', 'quan_pop',
+                                         'p_threshold', 'clump-p1', 'clump-kb', 'clump-r2'],
                                         [self.i_name.text(), self.i_vcf.text(), self.i_config.text(),
                                          self.i_output.text(), self.i_database_qual.text(), self.i_ref_qual.text(),
                                          self.i_database_quan.text(), self.i_ref_quan.text(),
@@ -1253,7 +1329,9 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
                                          self.c_clinvar.isChecked(),
                                          self.i_otherdb.text() if self.c_otherdb.isChecked() else '',
                                          self.c_qr_code.isChecked(), self.i_qr_dir.text(), self.i_qr_snps.text(),
-                                         self.i_qr_give.text(), self.i_qr_user.text(), self.s_quan_pop.currentText()
+                                         self.i_qr_give.text(), self.i_qr_user.text(), self.s_quan_pop.currentText(),
+                                         float(self.i_p_threshold.text()), float(self.i_p1.text()),
+                                         float(self.i_kb.text()), float(self.i_r2.text())
                                          ])))
         self.progress_value = ProgressValue()
         self.progress_now = ProgressNow(self.inter)
@@ -1292,7 +1370,7 @@ class MyMainForm(QMainWindow, Ui_PAGEANT):
 
     def run_add_rsid(self):
         import src.add_rsid as add_rsid
-        self.thread = API_Thread(add_rsid.run, self.i_add_rsid_file.text(), self.i_add_rsid_db.text(),
+        self.thread = API_Thread(add_rsid.addrsid_run, self.i_add_rsid_file.text(), self.i_add_rsid_db.text(),
                                  os.path.join(os.getcwd(), 'annotated.tsv.gz'),
                                  end_='Finish! Result (annotated.tsv.gz) has been saved in the working directory.')
         self.setEnabled(False)

@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-10-06'
+version = '2021-11-10'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
@@ -76,9 +76,10 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
         res_str += f'Analysis runs successfully! '
         logging.info(res_str)
     finally:
+        header = add_header(basic_res_dict)
         export_html(human, {os.path.basename(itype): type_list[itype] for itype in type_list}, locals(),
                     log_name, output, basic_res=basic_res_dict, module=module, extra_res=extra_res,
-                    one=len(ref_file_list) == 1, success=success)
+                    one=len(ref_file_list) == 1, success=success, header=header)
         rm_dir(temp_dir)
         return res_str + ' Report has saved in output directory.'
 

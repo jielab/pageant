@@ -376,3 +376,10 @@ header div {
     line-height: 1.5;
     margin-left: 18px;
 }
+
+.note_text {
+    font-size: 16px;
+    text-indent: 0em;
+    line-height: 1.05;
+    margin-left: 25px;
+}

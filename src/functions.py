@@ -540,11 +540,11 @@ def qc_het(failed_samples: set, file_path: str, report_dir, suffix: str = '') ->
     plt.hist(data.F, bins=50)
     plt.text(assign_pos(het_mean - het_sd * het_threshold, plt.axis(), right_offset=0.02, left_offset=0.285),
              plt.axis()[3] * 0.816,
-             f'Heterozygosity rate\nthreshold: mean ±{het_threshold} sd',
+             f'F threshold:\n mean ±{het_threshold} sd',
              bbox={'facecolor': 'white', 'alpha': 0.8})
     plt.axvline(het_mean + het_sd * het_threshold, c='r', lw=1.5, ls='--')
     plt.axvline(het_mean - het_sd * het_threshold, c='r', lw=1.5, ls='--')
-    plt.xlabel("Heterozygosity rate")
+    plt.xlabel("F value")
     plt.ylabel("Number of individuals")
     plt.xlim(*xlim_adjust(het_mean, plt.xlim()))
     plt.savefig(os.path.join(report_dir, f'QC_het{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
@@ -1386,3 +1386,14 @@ def get_score_data(file: str, def_config, temp_dir: str, sep: str = '\t') -> str
                     beta = beta if mode == 'beta' else str(log(float(beta.decode()))).encode()
                     fw.write(b'\t' + beta + b'\n')
     return score_file
+
+
+def add_header(result: dict) -> str or None:
+    high_risk_items = []
+    for item in result['Quantitative_traits']:
+        if item['Distribution']['Low_p'] > 75:
+            high_risk_items.append(item['Name'])
+    if high_risk_items:
+        res = '<b>High risk disease:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;' + '<br>&nbsp;&nbsp;&nbsp;&nbsp;'.join(high_risk_items)
+        return res
+    return None

@@ -165,7 +165,13 @@
 <main id="main">
     <div id="main_top"></div>
     {% if success %}
-        {% if module['ref_qc'] or module['sample_qc'] %}
+    {% if header %}
+        <div id="head" class="section">
+            <h2>Results of Concern</h2>
+            <p style="text-indent: 0em; font-size: 20px; line-height: 1.25; margin-left: 25px;">{{ header }}</p>
+        </div>
+    {% endif %}
+    {% if module['ref_qc'] or module['sample_qc'] %}
     <div id="qc" class="section">
         <h2>1<sup>st</sup> Q</h2>
             <p class="section_text">This section reports quality control (QC) statistics for the personal genotype data,
@@ -200,6 +206,19 @@
                     <h3 style="text-align: center">UMAP</h3>
                     <img src="./html_files/img/QC_UMAP.png" alt="UMAP result of Sample based on reference"
                          width="100%">
+                    <p class="note_text"><b>Note:</b><br>&nbsp;
+                        <b>ASW</b>: African Ancestry in Southwest US;<br>&nbsp;
+                        <b>CEU</b>: Utah residents (CEPH) with Northern and Western European ancestry;<br>&nbsp;
+                        <b>CHB</b>: Han Chinese in Beijing, China;<br>&nbsp;
+                        <b>CHD</b>: Chinese in Denver, Colorado;<br>&nbsp;
+                        <b>GIH</b>: Gujarati Indian in Houston, TX;<br>&nbsp;
+                        <b>JPT</b>: Japanese in Tokyo, Japan;<br>&nbsp;
+                        <b>LWK</b>: Luhya in Webuye, Kenya;<br>&nbsp;
+                        <b>MEX</b>: Mexican ancestry;<br>&nbsp;
+                        <b>MKK</b>: Maasai in Kinyawa, Kenya;<br>&nbsp;
+                        <b>TSI</b>: Toscans in Italy;<br>&nbsp;
+                        <b>YRI</b>: Yoruba in Ibadan, Nigeria;
+                    </p>
                 </div>
             {% endif %}
             {% if extra_res[0][2] %}
@@ -245,13 +264,21 @@
                 <h3>Sex discrepancy:</h3>
                 <img src="./html_files/img/QC_sex{{ '_' + i if i else ''}}.png" alt="F value (X chromosome homozygosity estimate) of each sample"
                      width="86%">
+                <p class="note_text"><b>Note:</b><br>&nbsp;</b><b>F</b>: Inbreeding coefficient, considering only X chromosome.</p>
                 <h3>Cryptic relatedness:</h3>
                 <img src="./html_files/img/QC_relatedness{{ '_' + i if i else ''}}.png" alt="Pihat value of each sample-sample pair" width="86%">
+                <p class="note_text"><b>Note:</b><br>&nbsp;
+                    <b>Pihat</b>: Proportion IBD, i.e. P(IBD=2) + 0.5*P(IBD=1)<br>&nbsp;
+                    <b>IBD</b>: Identity by descent</p>
                 <h3>Hardy-Weinberg equilibrium:</h3>
                 <img src="./html_files/img/QC_hardy{{ '_' + i if i else ''}}.png" alt="Hardy-Weinberg equilibrium p-value in each variant"
                      width="86%">
+                <p class="note_text"><b>Note:</b><br>&nbsp;
+                    <b>HWE</b>: Hardy-Weinberg equilibrium</p>
                 <h3>Heterozygosity rate:</h3>
                 <img src="./html_files/img/QC_het{{ '_' + i if i else ''}}.png" alt="Heterozygosity rate in each sample" width="86%">
+                <p class="note_text"><b>Note:</b><br>&nbsp;
+                    <b>F</b>: Method-of-moments F coefficient estimate (i.e. (&lt;observed hom. count&gt; - &lt;expected count&gt;) / (&lt;total observations&gt; - &lt;expected count&gt;))</p>
             </div>
             {% endfor %}
         </div>

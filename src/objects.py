@@ -230,7 +230,9 @@ class Ind(object):
             dest_ = os.path.join(output, 'genetic_report', 'html_files', 'img',
                                  f'{self.name.replace(" ", "_")}.{os.path.basename(self.picture).split(".")[-1]}')
             copy(self.picture, dest_)
-            self.picture = dest_
+            self.picture = os.path.join('html_files', 'img',
+                                        f'{self.name.replace(" ", "_")}.'
+                                        f'{os.path.basename(self.picture).split(".")[-1]}')
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
         if self.status:
@@ -291,7 +293,7 @@ def detect_plink(plink: str = 'plink' or 'plink2'):
     return True if stdout else False
 
 
-def select_list(ob_list: list, index) -> list:
+def select_list(ob_list: list, index: List[int]) -> list:
     return [ob_list[i] if i < len(ob_list) else None for i in index]
 
 
