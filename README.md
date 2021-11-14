@@ -92,16 +92,6 @@
 <br/>
 
 
-# #4. Customize
-> - ### The folder structures of PAGEANT is shown below. Advanced users could also follow this structure to customize the genetic report. 
-> - ### For example, under "algorithm database" folder, there are 3 files for each trait folder: TRAIT.desc.txt for description text, TRAIT.jpg for a representative picture, TRAIT.snps.ref for a list of SNPs used and the relevant calculation rules. 
-> - ### For qualitative traits, the TRAIT.snps.ref has four columns: SNP, genotype, matched, unmatched; For quantitative trait, the TRAIT.snps.ref file requires three columns: SNP, EA (effect allele), BETA or OR (effect size).
-
-> > ![Folder Structure](./images/Fig_folder.png)
-
-<br/>
-
-
 ## License
 > - ### This project is licensed under the MIT License.
 
