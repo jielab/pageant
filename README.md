@@ -73,7 +73,6 @@
 > 4. output location for the genetic report and log file
 
 ![Q1](./images/Fig_GUI.png)
-aa
 
 <br/>
 
