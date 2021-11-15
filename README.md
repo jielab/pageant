@@ -1,10 +1,10 @@
 <br/>
 
-# PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+## PAGEANT: Personal Access to Genome & Analysis of Natural Traits
 
 <br/>
 
-# #1. Download & Run: *for quick starter*
+## #1. Download & Run: *for quick starter*
 
 > ## Download:
 > > - ### Download executables for [Windows](https://drive.google.com/file/d/1_mvYskEgSITqRBTBKbffBkdud0DCaXo5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
@@ -18,7 +18,7 @@
 <br/>
 
 
-# #2. Download & Run: *for advanced users*
+## #2. Download & Run: *for advanced users*
 
 > ## Prepare:
 > > - ### [Conda](https://docs.conda.io/en/latest/) (or [Miniconda](https://docs.conda.io/en/latest/miniconda.html)), [Git](https://git-scm.com/), for installing python packages.
@@ -63,7 +63,20 @@
 <br/>
 
 
-# #3. Example reports 
+## #3. Example test-run 
+
+### Once the GUI window is displayed, a user simply needs to click the “Analyze” button to do a “test-drive” without doing anything else.
+### Once a user gets familiar with the test-drive, he/she could change all parameters in the GUI interface:
+> 1. sample name
+> 2. genotype data (in VCF format)
+> 3. configuration file
+> 4. output location for the genetic report and log file
+
+![Q1](./images/Fig_GUI.png)
+
+<br/>
+
+## #4. Example report 
 
 ## A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
 
@@ -89,11 +102,6 @@
 
 > > ![Q5](./images/Fig_Q5.png)
 
-<br/>
-
-
-## License
-> - ### This project is licensed under the MIT License.
 
 <br/>
 
