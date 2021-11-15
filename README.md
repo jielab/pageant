@@ -90,7 +90,7 @@
 
 > > ![Q3](./images/Fig_Q2.png)
 
-> ## Q3: Quantitative traits report
+> ## Q3: Quantitative traits reportaa
 
 > > ![Q3](./images/Fig_Q3.png)
 
