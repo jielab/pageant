@@ -74,7 +74,7 @@
 
 ![Q1](./images/Fig_GUI.png)
 
-<br/>aaa
+<br/>
 
 ## #4. Example report 
 
