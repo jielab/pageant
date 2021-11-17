@@ -5,7 +5,7 @@ from time import time
 from chardet.universaldetector import UniversalDetector
 from detect_delimiter import detect
 
-from src.config import *
+from config import *
 
 progress_bar = 0
 

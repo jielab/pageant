@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
 from scipy.stats import gaussian_kde
-from src.decorator import *
+from decorator import *
 
 
 plink_dir = ''

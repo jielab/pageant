@@ -1,3 +1,5 @@
+import os.path
+
 import umap
 from functools import partial
 from gzip import open as gzip_open
@@ -10,7 +12,7 @@ from zipfile import ZipFile
 import matplotlib.cm as cm
 import numpy as np
 from tqdm import tqdm
-from src.objects import *
+from objects import *
 
 pattern = compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
 pat_header1 = compile(rb'^##')
@@ -19,6 +21,7 @@ pattern_clinvar = compile(r'(?<=CLNSIG=)\w+(?=[,;])')
 pattern_clinvar_rs = compile(r'(?<=RS=)\d+')
 split_str = compile(r'\w{1,28}')
 pattern_load_num = compile(r'\d+(?= variants processed\.)')
+sample_file_pat = compile(r'\.samples$')
 functions_config = configparser.ConfigParser()
 
 
@@ -792,6 +795,42 @@ def get_ref_cal(ref_file_list: List[str], type_list: dict, failed_snps: set, fai
     return outcomes_rs, outcomes_code
 
 
+@progress_value(5)
+@use_time()
+def recode_and_sex_impute(human: Human, file: str, temp_dir: str):
+    """
+    recode the sample, determine the sex of the sample
+    :param human: Objects Human
+    :param file: the sample path
+    :param temp_dir: the temp temporary directory path
+    :return: a converted sample file in the temporary directory and a sex result
+    """
+    file_type, file_name = file_recognize(file)
+    try:
+        run_plink_cmd(f"--{file_type} {file_name} "
+                      "--impute-sex y-only "  # Should be reconsider
+                      "--recode vcf "
+                      f"--out {os.path.join(temp_dir, 'temp')}",
+                      plink='plink')
+        data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
+    except Exception as e:
+        logging.warning('Sex impute failed:\n' + f'{e.args}')
+        run_plink_cmd(f"--{file_type} {file_name} "
+                      "--recode vcf "
+                      f"--out {os.path.join(temp_dir, 'temp')}",
+                      plink='plink')
+        human.vcf = os.path.join(temp_dir, 'temp.vcf')
+    else:
+        run_plink_cmd(f"--vcf {os.path.join(temp_dir, 'temp.vcf')} "
+                      "--recode vcf "
+                      "--rm-dup force-first "
+                      f"--out {os.path.join(temp_dir, 'temp')}")
+        if file_type == 'vcf':
+            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
+        else:
+            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.PEDSEX[0] == 1 else 'Female'
+
+
 @use_time('Get population prs result')
 def get_ref_prs(prs_data: str, vcf_files: list, qc_ref: bool, output: str) -> pd.DataFrame:
     """
@@ -866,8 +905,10 @@ def read_line_num(gwas_file: str, header: bool = False) -> int:
     return line_num
 
 
-def chr_and_vep(bim_file: str, img_dir: str) -> None:
-    data = pd.read_csv(bim_file, '\t', skipinitialspace=True, header=None, dtype={0: str})
+def chromo_info(human: Human, temp_dir: str, img_dir: str) -> None:
+    run_plink_cmd(f'--vcf {human.vcf} --make-just-bim --sort-vars --out {os.path.join(temp_dir, "sample_qc")}')
+    data = pd.read_csv(os.path.join(temp_dir, "sample_qc.bim"),
+                       '\t', skipinitialspace=True, header=None, dtype={0: str})
     data.columns = ['Chromosome', 'ID', 'Unknown', 'Position', 'Ref', 'ALT']
 
     pos_count = data.Chromosome.value_counts(sort=False)
@@ -881,19 +922,19 @@ def chr_and_vep(bim_file: str, img_dir: str) -> None:
     plt.savefig(os.path.join(img_dir, f'chromosome_count.png'))
     plt.close()
 
-    if convert_dict(functions_config['module'])['vep']:
-        vep_res = vep_multiprocess(list(data.ID))
-        vep_res = {res: queue[res] for queue in vep_res for res in queue}
-        vep_res = pd.DataFrame(vep_res).T
-        vep_result = pd.merge(data.loc[:, 'ID'], vep_res, right_index=True, left_on='ID', how='left')
-        vep_class_result = vep_result['Variant class'].fillna('Unknown').value_counts()
-        vep_type_result = vep_result['Variant type'].fillna('Unknown').value_counts()
-        arrow_class = False if vep_result['Variant class'].value_counts(normalize=True)[0] > 0.80 else True
-        arrow_type = False if vep_result['Variant type'].value_counts(normalize=True)[0] > 0.80 else True
-        pie_plot(vep_class_result, vep_class_result.index, os.path.join(img_dir, './vep_class_res.png'),
-                 arrow=arrow_class)
-        pie_plot(vep_type_result, vep_type_result.index, os.path.join(img_dir, './vep_type_res.png'), arrow=arrow_type,
-                 legend_ratio=2)
+    # if convert_dict(functions_config['module'])['vep']:
+    #     vep_res = vep_multiprocess(list(data.ID))
+    #     vep_res = {res: queue[res] for queue in vep_res for res in queue}
+    #     vep_res = pd.DataFrame(vep_res).T
+    #     vep_result = pd.merge(data.loc[:, 'ID'], vep_res, right_index=True, left_on='ID', how='left')
+    #     vep_class_result = vep_result['Variant class'].fillna('Unknown').value_counts()
+    #     vep_type_result = vep_result['Variant type'].fillna('Unknown').value_counts()
+    #     arrow_class = False if vep_result['Variant class'].value_counts(normalize=True)[0] > 0.80 else True
+    #     arrow_type = False if vep_result['Variant type'].value_counts(normalize=True)[0] > 0.80 else True
+    #     pie_plot(vep_class_result, vep_class_result.index, os.path.join(img_dir, './vep_class_res.png'),
+    #              arrow=arrow_class)
+    #     pie_plot(vep_type_result, vep_type_result.index, os.path.join(img_dir, './vep_type_res.png'), arrow=arrow_type,
+    #              legend_ratio=2)
 
 
 def file_recognize(file: str) -> Tuple[str, str]:
@@ -1308,7 +1349,7 @@ def load_prs_txt(f: BinaryIO, snp_list: List[str] or Set[str], def_config: dict,
 
 
 @auto_encoding
-def load_database(database: str, human: Human) -> pd.DataFrame:
+def load_other_database(database: str, human: Human) -> pd.DataFrame:
     with open(database) as f:
         sep = detect(f.readline(10), whitelist=['\t', ',', ' '], default='\t')
     data = pd.read_csv(database, sep=sep, dtype=object, error_bad_lines=False)
@@ -1330,6 +1371,11 @@ def ref_data_qc(temp_dir: str, vcf_list: list, img_dir: str, failed_snps: set, f
     qc_hardy(failed_snps, temp_dir, img_dir, suffix=suffix)
     qc_sex(failed_samples, temp_dir, img_dir, suffix=suffix)
     qc_relatedness(failed_samples, temp_dir, img_dir, suffix=suffix)
+
+
+# TODO: Add merge function
+def merge_ref():
+    pass
 
 
 def get_vcf_files(directory: str) -> List[str]:
@@ -1397,3 +1443,10 @@ def add_header(result: dict) -> str or None:
         res = '<b>High risk disease:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;' + '<br>&nbsp;&nbsp;&nbsp;&nbsp;'.join(high_risk_items)
         return res
     return None
+
+
+def find_samples_file(dir_: str) -> str:
+    for file in os.listdir(dir_):
+        if sample_file_pat.search(file):
+            return os.path.join(dir_, file)
+    return ''

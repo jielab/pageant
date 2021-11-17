@@ -2,7 +2,7 @@ from time import strftime
 
 from jinja2 import Environment, FileSystemLoader
 
-from src.functions import *
+from functions import *
 
 ref_code = pd.DataFrame()
 ref_rs = pd.DataFrame()
@@ -72,15 +72,20 @@ def initial_ref_data(ref_file_list: List[List[str]], type_list: dict, output: st
     global ref_rs, ref_code, ref_rs_qual, ref_code_qual, ref_rs_quan, ref_code_quan
     assert ref_file_list[0], 'There is no vcf file in population reference directory.'
     quan_pop = module_config['name']['quan_pop']
+    qual_pop = module_config['name']['qual_pop']
+    quan_ref = module_config['file']['quan_ref']
+    qual_ref = module_config['file']['qual_ref']
     quan_num = 1
     if len(ref_file_list) == 1:
         ref_rs, ref_code = get_ref_cal(ref_file_list[0], type_list, failed_snps, failed_samples, output)
         if quan_pop != 'All':
-            ref_data = pd.read_csv(os.path.join('bin', '1KGP_sample.info'), sep='\t')
+            ref_data = pd.read_csv(find_samples_file(quan_ref), sep='\t')
             ref_rs_quan, ref_code_quan = ref_rs.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :], \
                                          ref_code.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :]
-        else:
-            ref_rs, ref_code = get_ref_cal(ref_file_list[0], type_list, failed_snps, failed_samples, output)
+        if qual_pop != 'All':
+            ref_data = pd.read_csv(find_samples_file(qual_ref), sep='\t')
+            ref_rs_qual, ref_code_qual = ref_rs.loc[ref_data.loc[ref_data['Pop'] == qual_pop, 'IID'], :], \
+                                         ref_code.loc[ref_data.loc[ref_data['Pop'] == qual_pop, 'IID'], :]
         if 'quan' in model:
             quan_num = 0
     elif len(ref_file_list) == 2:
@@ -90,49 +95,17 @@ def initial_ref_data(ref_file_list: List[List[str]], type_list: dict, output: st
         ref_rs_quan, ref_code_quan = get_ref_cal(ref_file_list[1], get_subtype_list(type_list, 'quan'),
                                                  failed_snps_quan, failed_samples_quan, output, 'quan')
         if quan_pop != 'All':
-            ref_data = pd.read_csv(os.path.join('bin', '1KGP_sample.info'), sep='\t')
+            ref_data = pd.read_csv(find_samples_file(quan_ref), sep='\t')
             ref_rs_quan, ref_code_quan = ref_rs_quan.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :], \
                                          ref_code_quan.loc[ref_data.loc[ref_data['Pop'] == quan_pop, 'IID'], :]
+        if qual_pop != 'All':
+            ref_data = pd.read_csv(find_samples_file(qual_ref), sep='\t')
+            ref_rs_qual, ref_code_qual = ref_rs_qual.loc[ref_data.loc[ref_data['Pop'] == qual_pop, 'IID'], :], \
+                                         ref_code_qual.loc[ref_data.loc[ref_data['Pop'] == qual_pop, 'IID'], :]
     else:
         raise Exception()  # todo: test
     if 'quan' in model:
         get_ref_freq(list(get_subtype_list(type_list, 'quan')), ref_file_list[quan_num], output)
-
-
-@progress_value(5)
-@use_time()
-def recode_and_sex_impute(human: Human, file: str, temp_dir: str):
-    """
-    recode the sample, determine the sex of the sample
-    :param human: Objects Human
-    :param file: the sample path
-    :param temp_dir: the temp temporary directory path
-    :return: a converted sample file in the temporary directory and a sex result
-    """
-    file_type, file_name = file_recognize(file)
-    try:
-        run_plink_cmd(f"--{file_type} {file_name} "
-                      "--impute-sex y-only "  # Should be reconsider
-                      "--recode vcf "
-                      f"--out {os.path.join(temp_dir, 'temp')}",
-                      plink='plink')
-        data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
-    except Exception as e:
-        logging.warning('Sex impute failed:\n' + f'{e.args}')
-        run_plink_cmd(f"--{file_type} {file_name} "
-                      "--recode vcf "
-                      f"--out {os.path.join(temp_dir, 'temp')}",
-                      plink='plink')
-        human.vcf = os.path.join(temp_dir, 'temp.vcf')
-    else:
-        run_plink_cmd(f"--vcf {os.path.join(temp_dir, 'temp.vcf')} "
-                      "--recode vcf "
-                      "--rm-dup force-first "
-                      f"--out {os.path.join(temp_dir, 'temp')}")
-        if file_type == 'vcf':
-            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
-        else:
-            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.PEDSEX[0] == 1 else 'Female'
 
 
 @progress_value(10)
@@ -160,7 +133,7 @@ def load_vcf(human: Human, data_snps=None):
 
 @progress_value(10)
 @use_time('Load indicator data')
-def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None:
+def load_database(human: Human, temp_dir: str, type_list: dict, output: str) -> None:
     """
     Load and calculate the algorithm for each indicator in database
     :param human: The object 'Human'
@@ -192,18 +165,17 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
                 exist, file_type, file_name = get_cal_file()
                 if exist:
                     if file_type:
+                        # Get PRS result from PLINK
                         file = get_score_data(file_name, module_config['name'], temp_dir)
                         save_code = os.path.basename(file_name).split('.')[0]
-                        prs_fun = partial(run_plink_cmd,
-                                          cmd=f"--vcf {human.vcf} "
-                                              f"--read-freq {os.path.join(output, 'population_QC', 'prs.ref.afreq')} "
-                                              f"--score {file} 1 2 3 header center "
-                                              f"--q-score-range "
-                                              f"{os.path.join(output, 'population_QC', 'need_range_list')}"
-                                              f" {os.path.join(output, 'population_QC', save_code + '.SNP.pvalue')} "
-                                              f"--out {os.path.join(temp_dir, 'result_prs')}",
-                                          delete_log=False)
-                        prs_fun(plink='plink2')
+                        run_plink_cmd(cmd=f"--vcf {human.vcf} "
+                                          f"--read-freq {os.path.join(output, 'population_QC', 'prs.ref.afreq')} "
+                                          f"--score {file} 1 2 3 header center "
+                                          f"--q-score-range "
+                                          f"{os.path.join(output, 'population_QC', 'need_range_list')}"
+                                          f" {os.path.join(output, 'population_QC', save_code + '.SNP.pvalue')} "
+                                          f"--out {os.path.join(temp_dir, 'result_prs')}",
+                                      delete_log=False, plink='plink2')
                         res = get_prs_res(
                             os.path.join(temp_dir, "result_prs." + str(def_config["p_threshold"]) + ".sscore"))
                         with open(os.path.join(temp_dir, 'result_prs.log'), 'r') as f:
@@ -219,6 +191,7 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
                         # todo: What detail should be told?
                         human.get_prs_data(ind_dir, res, detail)
                     else:
+                        # Get PRS result from algorithm database
                         human.cal_ind_from_txt(file_name, type_list[type_dir], ind_dir, ref_rs, columns, header=True)
                 os.chdir('..')
             os.chdir(raw_dir)
@@ -228,9 +201,11 @@ def load_data(human: Human, temp_dir: str, type_list: dict, output: str) -> None
 
 @progress_value(10, average=True)
 @use_time('Sample QC')
-def sample_qc(human: Human, output: str, temp_dir: str) -> list:
+def sample_qc(human: Human, input: str, output: str, temp_dir: str) -> list:
     """
+    Recode the sample into VCF and determine the sex of the sample firstly
     Sample QC functionalities:
+        Recode & sex imputation
         Minor allele frequency analysis
         Population stratification analysis
         Concordance analysis
@@ -239,24 +214,21 @@ def sample_qc(human: Human, output: str, temp_dir: str) -> list:
     :param temp_dir: The temporary directory for whole analysis
     :return: The QC results
     """
+    recode_and_sex_impute(human, input, temp_dir)
+    human.sample_qc(temp_dir)
     maf_ref = module_config['file']['maf_ref']
     ps_ref = module_config['file']['ps_ref']
     concord_ref = module_config['file']['concord_ref']
     # method = module_config['Population_stratisfication']['method']
+    chromo_info(human, temp_dir, img_dir)
     res = [None, None, None]
-    run_plink_cmd(f'--vcf {human.vcf} --make-just-bim --sort-vars --out {os.path.join(temp_dir, "sample_qc")}')
-    chr_and_vep(os.path.join(temp_dir, "sample_qc.bim"), img_dir)
     if maf_ref:
         res[0] = get_maf(human, temp_dir, maf_ref, img_dir)
     if ps_ref:
         metadata = module_config['file']['population_file']
         res[1] = ps_analyse(ps_ref, human.vcf, metadata, temp_dir, os.path.join(output, 'population_QC'), img_dir)
-        # pca_data(human, temp_dir, ps_ref)
-        # res[1] = pca_plot(temp_dir, img_dir)
-        # umap_data(human, temp_dir, ps_ref, img_dir)
-
     if concord_ref:
-        res[2] = check_concordence(human, temp_dir, concord_ref)
+        res[2] = check_concordance(human, temp_dir, concord_ref)
     return res
 
 
@@ -310,7 +282,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
 
     # other
     if module_config['file']['query_db']:
-        other_res = load_database(module_config['file']['query_db'], human)
+        other_res = load_other_database(module_config['file']['query_db'], human)
     else:
         other_res = None
 
@@ -320,7 +292,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
 @progress_value(5, average=True)
 @use_time('Produce QR code')
 def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
-    import src.qr_code as crypto
+    import qr_code as crypto
     import json
     need_snps_list = module_config['file']['qr_snps']
     save_user_img = module_config['file']['qr_user']
@@ -349,15 +321,22 @@ def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
 @progress_value(5, average=True)
 @use_time('Add population distribution')
 def add_distribution(human: Human, output: str, one: bool = True) -> None:
+    def suffix(type_: str):
+        if module_config['name']['quan_pop'] != 'ALL' and type_ == 'quan':
+            return '_quan'
+        elif module_config['name']['qual_pop'] != 'ALL' and type_ == 'qual':
+            return '_qual'
+        else:
+            return ''
     output = os.path.join(output, 'genetic_report', 'html_files', 'dist_plot')
     if one:
         assert not ref_code.empty, "Can not get reference data"
+        if module_config['name']['quan_pop'] != 'ALL':
+            assert not ref_code_quan.empty, "Can not get reference data for quantitative traits"
+        if module_config['name']['qual_pop'] != 'ALL':
+            assert not ref_code_qual.empty, "Can not get reference data for qualitative traits"
         for ind in tqdm(human.ind_data.values()):
-            if module_config['name']['quan_pop'] != 'ALL':
-                assert not ref_code_quan.empty, "Can not get reference data for quantitative traits"
-                ind.add_dist(output, eval(f'ref_code{"_quan" if ind.ftype == "quan" else ""}'))
-            else:
-                ind.add_dist(output, ref_code)
+            ind.add_dist(output, eval(f'ref_code{suffix(ind.ftype)}'))
     else:
         assert not ref_code_qual.empty, "Can not get reference data for qualitative traits"
         assert not ref_code_quan.empty, "Can not get reference data for quantitative traits"
@@ -382,7 +361,7 @@ def export_html(human: Human, type_list: dict, def_config: dict, log_txt: str, o
         fhtml.write(t)
 
 
-def check_concordence(human: Human, temp_dir: str, concord_ref: str) -> str:
+def check_concordance(human: Human, temp_dir: str, concord_ref: str) -> str:
     from matplotlib_venn import venn2, venn2_unweighted
     from copy import copy as obj_copy
     concord_human = Human('Ref_human')

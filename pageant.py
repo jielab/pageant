@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-11-10'
+version = '2021-11-16'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
@@ -37,6 +37,7 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
     res_str = ''
     basic_res_dict = {}
     extra_res = []
+    header = []
     success = True
     temp_dir, type_list, ref_file_list, model, main_config = initial(output, config_file, kwargs)
     output = os.path.abspath(output)
@@ -45,18 +46,16 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
 
     human = Human(name)
     try:
-        recode_and_sex_impute(human, input_file, temp_dir)
         if module['sample_qc']:
-            human.sample_qc(temp_dir)
-            extra_res.append(sample_qc(human, output, temp_dir))
+            extra_res.append(sample_qc(human, input_file, output, temp_dir))
         else:
+            recode_and_sex_impute(human, input_file, temp_dir)
             extra_res.append([None, None, None])
-
         if module['ref_qc']:
             ref_qc(temp_dir, ref_file_list)
         initial_ref_data(ref_file_list, type_list, output, model)
         load_vcf(human, get_snp_list(list(type_list)))
-        load_data(human, temp_dir, type_list, output)
+        load_database(human, temp_dir, type_list, output)
         if module['ref_dist']:
             add_distribution(human, output, len(ref_file_list) == 1)
         if module['query_database']:
@@ -67,6 +66,7 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
             load_vcf(human, snp_list)
             extra_res.append(produce_qr_code(human, output))
         basic_res_dict = human.export_res(output=output)
+        header = add_header(basic_res_dict)
     except Exception as e:
         success = False
         res_str += f'Error: {str(e)}, analysis falied. '
@@ -76,7 +76,6 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
         res_str += f'Analysis runs successfully! '
         logging.info(res_str)
     finally:
-        header = add_header(basic_res_dict)
         export_html(human, {os.path.basename(itype): type_list[itype] for itype in type_list}, locals(),
                     log_name, output, basic_res=basic_res_dict, module=module, extra_res=extra_res,
                     one=len(ref_file_list) == 1, success=success, header=header)
