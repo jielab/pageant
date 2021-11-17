@@ -6,15 +6,11 @@
 
 ## #1. Download & Run
 
-> ## Download:
-> > - ### Download executables for [Windows](https://drive.google.com/file/d/1_mvYskEgSITqRBTBKbffBkdud0DCaXo5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
-> > - ### Download [1000 genomes project (G1K) genotype](https://www.internationalgenome.org), to be used as population reference. The basic version of PAGEANT comes with a subset of the G1K data that includes all SNPs used in the genetic report.
-
-> ## Run:
-> > - ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> > - ### For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
-> > - ### For Linux: run "sudo apt-get install libzbar0 python3-pyqt5" to install packages, then run PAGEANT by typing "./PAGEANT".
-> > - ### For advanced users, please check out the wiki for command line approaches.
+> 1. ### Download executables for [Windows](https://drive.google.com/file/d/1_mvYskEgSITqRBTBKbffBkdud0DCaXo5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
+> 2. ### For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
+> 3. ### For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
+> 4. ### For Linux: run "sudo apt-get install libzbar0 python3-pyqt5" to install packages, then run PAGEANT by typing "./PAGEANT".
+> 5. ### For advanced users, please check out the wiki for command line approaches.
 <br/>
 
 
