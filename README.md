@@ -29,7 +29,7 @@
 
 ## 3. Example report 
 
-> A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
+> #### A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
 
 > Q1：Displayings user's PCA and UMAP among population reference
 
