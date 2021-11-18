@@ -4,7 +4,7 @@
 
 <br/>
 
-## #1. Download & Run
+## 1. Download & Run
 
 > 1. Download executables for [Windows](https://drive.google.com/file/d/1_mvYskEgSITqRBTBKbffBkdud0DCaXo5/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/18Pqs_NMOq5uXZunFSv2un72Tw3I5wyxX/view?usp=sharing)
 > 2. For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
@@ -14,24 +14,22 @@
 <br/>
 
 
-## #2. Example test-run 
+## 2. Example test-run 
 
-### Once the GUI window is displayed, a user simply needs to click the “Analyze” button to do a “test-drive” without doing anything else.
-### Once a user gets familiar with the test-drive, he/she could change all parameters in the GUI interface:
-> 1. sample name
-> 2. genotype data (in VCF format)
-> 3. configuration file
-> 4. output location for the genetic report and log file
+> Once the GUI window is displayed, a user simply needs to click the “Analyze” button to do a “test-drive” without doing anything else.
+> Once a user gets familiar with the test-drive, he/she could change all parameters in the GUI interface:
+> > - sample name
+> > - genotype data (in VCF format)
+> > - configuration file
+> > - output location for the genetic report and log file
 
 ![Q1](./images/Fig_GUI.png)
 
 <br/>
 
-## #3. Example report 
+## 3. Example report 
 
-## A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
-
-<br/>
+> ## A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
 
 > ## Q1：Displayings user's PCA and UMAP among population reference
 
@@ -56,7 +54,7 @@
 
 <br/>
 
-## Contact & Cite
+### Contact & Cite
 
-> - ### [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
-> - ### Manuscript under review
+> - [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
+> - Manuscript under review
