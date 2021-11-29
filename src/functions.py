@@ -12,7 +12,7 @@ from zipfile import ZipFile
 import matplotlib.cm as cm
 import numpy as np
 from tqdm import tqdm
-from objects import *
+from src.objects import *
 
 pattern = compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
 pat_header1 = compile(rb'^##')
@@ -694,7 +694,7 @@ def trans_clinvar_res(clinvar_res: dict) -> pd.DataFrame:
     return res.dropna().sort_values(['Color', 'Variant'], ascending=[False, True]).reset_index(drop=True)
 
 
-def get_clinvar_data(data_dir: str) -> None:
+def get_clinvar(data_dir: str) -> None:
     # download data
     if not os.path.isfile(os.path.join(data_dir, 'clinvar.vcf.gz')):
         urlretrieve('https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz',
@@ -706,7 +706,7 @@ def get_clinvar_data(data_dir: str) -> None:
 
 
 @progress_value(10, average=True)
-def get_pharmgkb_data(data_dir: str) -> None:
+def get_pharmgkb(data_dir: str) -> None:
     if not os.path.isfile(os.path.join(data_dir, 'pharmgkb.zip')):
         urlretrieve('https://api.pharmgkb.org/v1/download/file/data/annotations.zip',
                     os.path.join(data_dir, 'pharmgkb.zip'))
@@ -1349,7 +1349,7 @@ def load_prs_txt(f: BinaryIO, snp_list: List[str] or Set[str], def_config: dict,
 
 
 @auto_encoding
-def load_other_database(database: str, human: Human) -> pd.DataFrame:
+def load_other_db(database: str, human: Human) -> pd.DataFrame:
     with open(database) as f:
         sep = detect(f.readline(10), whitelist=['\t', ',', ' '], default='\t')
     data = pd.read_csv(database, sep=sep, dtype=object, error_bad_lines=False)

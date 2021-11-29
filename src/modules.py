@@ -2,7 +2,7 @@ from time import strftime
 
 from jinja2 import Environment, FileSystemLoader
 
-from functions import *
+from src.functions import *
 
 ref_code = pd.DataFrame()
 ref_rs = pd.DataFrame()
@@ -189,10 +189,10 @@ def load_database(human: Human, temp_dir: str, type_list: dict, output: str) -> 
                                   f'After clumping, there are {valid_num} valid variants for PRS.<br>&nbsp;',
                                   f'In this sample, there are {load_num} loaded to calculate PRS.<br>&nbsp;']
                         # todo: What detail should be told?
-                        human.get_prs_data(ind_dir, res, detail)
+                        human.get_prs(ind_dir, res, detail)
                     else:
                         # Get PRS result from algorithm database
-                        human.cal_ind_from_txt(file_name, type_list[type_dir], ind_dir, ref_rs, columns, header=True)
+                        human.cal_from_txt(file_name, type_list[type_dir], ind_dir, ref_rs, columns, header=True)
                 os.chdir('..')
             os.chdir(raw_dir)
     finally:
@@ -201,9 +201,8 @@ def load_database(human: Human, temp_dir: str, type_list: dict, output: str) -> 
 
 @progress_value(10, average=True)
 @use_time('Sample QC')
-def sample_qc(human: Human, input: str, output: str, temp_dir: str) -> list:
+def sample_qc(human: Human, output: str, temp_dir: str) -> list:
     """
-    Recode the sample into VCF and determine the sex of the sample firstly
     Sample QC functionalities:
         Recode & sex imputation
         Minor allele frequency analysis
@@ -214,7 +213,6 @@ def sample_qc(human: Human, input: str, output: str, temp_dir: str) -> list:
     :param temp_dir: The temporary directory for whole analysis
     :return: The QC results
     """
-    recode_and_sex_impute(human, input, temp_dir)
     human.sample_qc(temp_dir)
     maf_ref = module_config['file']['maf_ref']
     ps_ref = module_config['file']['ps_ref']
@@ -260,7 +258,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
     if eval(module_config['module']['clinvar']):
         clinvar_res = {}
         # get clinvar data
-        get_clinvar_data(query_database_path)
+        get_clinvar(query_database_path)
         # load
         load_clinvar(os.path.join(query_database_path, 'clinvar.vcf.gz'), clinvar_res, human)
         load_clinvar(os.path.join(query_database_path, 'clinvar_papu.vcf.gz'), clinvar_res, human)
@@ -271,7 +269,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
     # pharmgkb
     if eval(module_config['module']['pharmgkb']):
         # get pharmgkb data
-        get_pharmgkb_data(query_database_path)
+        get_pharmgkb(query_database_path)
 
         pharm_pheno = load_pharm(os.path.join(query_database_path, 'var_pheno_ann.tsv'), human)
         pharm_drug = load_pharm(os.path.join(query_database_path, 'var_drug_ann.tsv'), human)
@@ -282,7 +280,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
 
     # other
     if module_config['file']['query_db']:
-        other_res = load_other_database(module_config['file']['query_db'], human)
+        other_res = load_other_db(module_config['file']['query_db'], human)
     else:
         other_res = None
 
@@ -292,7 +290,7 @@ def query_database(human: Human, data_dir: str = os.path.join('.', 'algorithm'))
 @progress_value(5, average=True)
 @use_time('Produce QR code')
 def produce_qr_code(human: Human, output: str) -> Dict[str, str]:
-    import qr_code as crypto
+    import src.qr_code as crypto
     import json
     need_snps_list = module_config['file']['qr_snps']
     save_user_img = module_config['file']['qr_user']

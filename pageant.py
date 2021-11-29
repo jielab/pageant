@@ -46,10 +46,10 @@ def main(name: str, input_file: str, output: str, config_file: str = './bin/conf
 
     human = Human(name)
     try:
+        recode_and_sex_impute(human, input_file, temp_dir)
         if module['sample_qc']:
-            extra_res.append(sample_qc(human, input_file, output, temp_dir))
+            extra_res.append(sample_qc(human, output, temp_dir))
         else:
-            recode_and_sex_impute(human, input_file, temp_dir)
             extra_res.append([None, None, None])
         if module['ref_qc']:
             ref_qc(temp_dir, ref_file_list)
