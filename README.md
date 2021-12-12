@@ -23,7 +23,7 @@
 > > - configuration file
 > > - output location for the genetic report and log file
 
-![Q1](./images/Fig_GUI.png)
+![Fig_GUI](./images/Fig_GUI.png)
 
 <br/>
 
