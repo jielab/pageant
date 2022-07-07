@@ -57,4 +57,4 @@
 ### Contact & Cite
 
 > - [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
-> - Jie Huang, Zhi-Sheng Liang, Stefano Pallotti, Janice M. Ranson, David J. Llewellyn, Zhi-Jie Zheng, Dan A. King, Qiang Zhou, Houfeng Zheng, Valerio Napolioni. PAGEANT: personal access to genome and analysis of natural traits Nucleic Acids Research, 2021 1–11 https://doi.org/10.1093/nar/gkab1245
+> - Jie Huang, Zhi-Sheng Liang, Stefano Pallotti, Janice M. Ranson, David J. Llewellyn, Zhi-Jie Zheng, Dan A. King, Qiang Zhou, Houfeng Zheng, Valerio Napolioni. # PAGEANT: personal access to genome and analysis of natural traits. # [Nucleic Acids Res. 2022 Apr 22;50(7):e39. ](https://pubmed.ncbi.nlm.nih.gov/34928375/)
