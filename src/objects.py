@@ -1,15 +1,20 @@
-import matplotlib.pyplot as plt
-from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
-from typing import List, Dict, Set, Tuple, Generator, Iterable
-from typing.io import IO, TextIO, BinaryIO
-import pandas as pd
-from scipy.stats import gaussian_kde
 import subprocess
-import cpufeature
 from re import search
 from shutil import copy
+import matplotlib.pyplot as plt
+import pandas as pd
+from numpy import cos, sin, arcsin, deg2rad, rad2deg, sign, log10, linspace, exp
+from scipy.stats import gaussian_kde
 from src.decorator import *
-from src.config import *
+
+
+plink_dir = ''
+objects_config = configparser.ConfigParser()
+
+
+def load_config_obj(main_config: configparser.ConfigParser):
+    global objects_config
+    objects_config = main_config
 
 
 class PLINKERROR(Exception):
@@ -36,29 +41,45 @@ class Human(object):
         if trans_sex(sex) is None or trans_sex(sex) == trans_sex(self.sex):
             self.ind_data[code] = Ind(code, name, sex, itype, ind_dir, **other)
 
-    def cal_ind(self, ftype: str, code: str, snp: str, *cal_col, ref_rs: pd.DataFrame):
+    def cal_ind(self, ftype: str, code: str, snp: str, *cal_col, ref_rs: pd.DataFrame, mode: str or None):
         if code in self.ind_data:
             self.ind_data[code].set_ftype(ftype)
             if snp in self.gt_data:
-                self.ind_data[code].cal(snp, self.gt_data[snp], *cal_col)
+                self.ind_data[code].cal(snp, self.gt_data[snp], *cal_col, mode=mode)
             else:
                 self.ind_data[code].mis_snp(snp, cal_col[1], ref_rs)
 
     @auto_encoding
     @auto_sep
-    def cal_ind_from_txt(self, file: str, type_dir: str, ind_dir: str, ref_rs: pd.DataFrame,
-                         type_list: dict, columns: dict, *,
-                         encoding: str = 'UTF-8', sep: str = '\t') -> None:
+    def cal_from_txt(self, file: str, type_: str, ind_dir: str, ref_rs: pd.DataFrame, columns: dict, *,
+                     encoding: str = 'UTF-8', sep: str = '\t', header=False) -> None:
         with open(file, encoding=encoding) as f:
             for line in f:
                 line = line.strip('\n\r')
                 if line:
                     line = line.split(sep)
                     assert len(line) > 1, sep.join(line)
-                    self.cal_ind(type_list[type_dir], ind_dir,
-                                 *select_list(line, columns['columns_' + type_list[type_dir]].values()), ref_rs=ref_rs)
+                    if header:
+                        columns_idx = get_columns_index(line, list(columns['columns_' + type_].values()))
+                        if type_ == 'qual':
+                            assert None not in columns_idx, \
+                                f"Cannot find {list(columns['columns_qual'].keys())[columns_idx.index(None)]} " \
+                                f"in the header of algorithm file ({file})."
+                        elif type_ == 'quan':
+                            assert None not in columns_idx[:-2], \
+                                f"Cannot find {list(columns['columns_quan'].keys())[columns_idx[:-2].index(None)]} " \
+                                f"in the header of algorithm file ({file})."
+                            assert any(columns_idx[-2:]), \
+                                f"Cannot find statistic (OR or Beta) in the header of algorithm file ({file})."
+                            statistic = 'OR' if columns_idx[-2] else 'Beta'
+                            columns_idx.pop(-1 if statistic == 'OR' else -2)
+                        header = False
+                    else:
+                        self.cal_ind(type_, ind_dir,
+                                     *select_list(line, columns_idx), ref_rs=ref_rs,
+                                     mode=None if type_ == 'qual' else statistic)
 
-    def get_prs_data(self, code: str, res: float, detail: str):
+    def get_prs(self, code: str, res: float, detail: str):
         if code in self.ind_data:
             self.ind_data[code].add_prs_res(res, detail)
 
@@ -91,9 +112,9 @@ class Human(object):
 class Ind(object):
     def __init__(self, code: str, name: str, sex: str, itype: str, ind_dir, **other):
         self.code = code
-        self.name = name if load_config()['parameter']['show_code'] == 0 else f'{name} ({code})'
+        self.name = name if eval(objects_config['parameter']['show_code']) else f'{name} ({code})'
         self.sex = sex
-        self.itype = itype
+        self.itype = os.path.basename(itype)
         self.ftype = None
         self.outcome = None
         self.detail = []
@@ -101,13 +122,10 @@ class Ind(object):
         self.decide = False
         self.distribution = None
         self.and_status = True
-        # if 'ftype' in other:
-        #     self.set_ftype(other['ftype'])
-        #     other.pop('ftype')
         self.other = other
         try:
             self.picture = next(os.path.abspath(os.path.join(ind_dir, file)) for file in os.listdir(ind_dir)
-                                if search(rf'^{self.code}\.(jpeg|jpg|png|bmp)$', file))
+                                if search(rf'^.+\.(jpeg|jpg|png|bmp)$', file))
         except StopIteration:
             self.picture = None
 
@@ -115,7 +133,7 @@ class Ind(object):
         if not self.ftype:
             if ftype == 'quan':
                 self.outcome = 1
-                self.distribution = {'Average': None, 'Percentage': None, 'Plot': None, 'Status': False}
+                self.distribution = {'Average': None, 'Plot': None, 'Status': False}
             else:
                 self.distribution = {'Plot': None, 'Status': False}
             self.ftype = ftype
@@ -127,8 +145,8 @@ class Ind(object):
         self.detail = detail
         self.status = True
 
-    def cal(self, snp: str, gt: set, ref: str, inter: str or float or int, no_inter=None):
-        lan_lib = load_config()['lan_lib']
+    def cal(self, snp: str, gt: set, ref: str, inter: str or float or int, no_inter=None, mode: str or None = None):
+        lan_lib = convert_dict(objects_config['lan_lib'])
         if self.ftype == 'qual':
             if not self.decide:
                 if inter in lan_lib['if']:
@@ -152,29 +170,28 @@ class Ind(object):
                             else:
                                 self.outcome = no_inter
                                 self.and_status = True
-                            self.outcome = 'normal' if self.outcome in lan_lib[None] else self.outcome
+                            self.outcome = 'normal' if self.outcome in lan_lib['none'] else self.outcome
                             if self.outcome != 'normal':
                                 self.decide = True
                             self.status = True
                         if {snp: trans_gt(gt)} not in self.detail:
                             self.detail.append({snp: trans_gt(gt)})
         elif self.ftype == 'quan':
-            outcome = cal_beta(gt, ref, inter)
+            outcome = cal_effect(gt, ref, inter, mode)
             self.outcome *= outcome
             for item in self.detail:
                 if type(item) == dict:
                     if snp in item.keys():
                         logging.warning(f"There are duplicate snps ({snp}) when calculate the quantitative trait!")
-                        self.outcome /= item['outcome']
+                        self.outcome /= outcome
                         item['beta'] = inter
                         item['effect allele'] = ref
-                        item['outcome'] = outcome
-            if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome} not in self.detail:
-                self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter, 'outcome': outcome})
+            if {snp: trans_gt(gt), 'effect allele': ref, 'beta': inter} not in self.detail:
+                self.detail.append({snp: trans_gt(gt), 'effect allele': ref, 'beta': inter})
             self.status = True
 
     def mis_snp(self, snp: str, inter: str or float or int, ref_rs: pd.DataFrame):
-        lan_lib = load_config()['lan_lib']
+        lan_lib = convert_dict(objects_config['lan_lib'])
         warning = f'Snp ({snp}) cannot be found in your genotype file!'
         if self.ftype == 'quan':
             if f'{self.code}_{snp}' in ref_rs.columns:
@@ -210,8 +227,12 @@ class Ind(object):
 
     def report(self, output):
         if self.picture:
-            copy(self.picture, os.path.join(output, 'genetic_report', 'html_files', 'img', os.path.basename(self.picture)))
-            self.picture = os.path.join('html_files', 'img', os.path.basename(self.picture))
+            dest_ = os.path.join(output, 'genetic_report', 'html_files', 'img',
+                                 f'{self.name.replace(" ", "_")}.{os.path.basename(self.picture).split(".")[-1]}')
+            copy(self.picture, dest_)
+            self.picture = os.path.join('html_files', 'img',
+                                        f'{self.name.replace(" ", "_")}.'
+                                        f'{os.path.basename(self.picture).split(".")[-1]}')
         else:
             self.picture = os.path.join('html_files', 'img', 'no_pic.jpg')
         if self.status:
@@ -231,19 +252,20 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
     :param delete_log:
     :param plink: plink name
     :param cmd: cmd string
+    :param plink_dir: the directory of PLINK & PLINK2
     :return: A finished subprocess with no result
     """
     if '--out' in cmd:
         out_file = cmd.split('--out ')[-1].split(' ')[0]
     else:
         out_file = os.path.join('.', plink)
-    sys_suffix = 'win.exe' if platform == 'Windows' else 'mac' if platform == 'Darwin' else \
-        'linux' if platform == 'Linux' else ''
-    avx_suffix = '' if plink != 'plink2' else '_avx' if cpufeature.CPUFeature['AVX2'] else ''
-    assert sys_suffix, 'Unsupported operating system'
-    plink_file = os.path.join(raw_dir, "bin", plink + avx_suffix + "_" + sys_suffix)
-    assert os.path.isfile(plink_file), f"Cannot find {plink + avx_suffix}_{sys_suffix} in bin directory"
-    cmd = plink_file + ' ' + cmd
+    if detect_plink(plink):
+        plink_file = plink
+    else:
+        sys_suffix = '.exe' if platform == 'Windows' else ''
+        plink_file = os.path.join(plink_dir, plink + sys_suffix)
+        assert os.path.isfile(plink_file), f"Cannot find {plink}{sys_suffix} in plink directory"
+    cmd = f'"{plink_file}" {cmd}'
     a = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
     stdout, sterr = a.communicate()
     a.wait()
@@ -256,8 +278,22 @@ def run_plink_cmd(cmd: str, plink='plink2', delete_log=True) -> None:
             raise RUNPLINKERROR("RunPlinkError:\n" + sterr.decode().strip())
 
 
-def select_list(ob_list: list, index) -> list:
-    # assert len(ob_list) < max(index), 'list index out of range'
+def get_plink_dir(dir_: Optional[str] = None) -> None:
+    global plink_dir
+    plink_dir = dir_ if dir_ else os.path.abspath(objects_config['file']['plink_dir'])
+
+
+def detect_plink(plink: str = 'plink' or 'plink2'):
+    a = subprocess.Popen(f'which {plink}', shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         stdin=subprocess.PIPE)
+    stdout, sterr = a.communicate()
+    a.wait()
+    return True if stdout else False
+
+
+def select_list(ob_list: list, index: List[int]) -> list:
     return [ob_list[i] if i < len(ob_list) else None for i in index]
 
 
@@ -299,16 +335,17 @@ def gene_filp(raw: str) -> str:
         return ''.join([base_dict[char] if char in base_dict.keys() else char for char in raw])
 
 
-def cal_beta(gt: set, ref: str, beta: int or float) -> float:
-    if type(beta) == str:
-        beta = float(beta)
-    return 1 if ref not in gt else beta ** 2 if len(gt) == 1 else beta
+def cal_effect(gt: set, ref: str, statistic: int or float, mode: str = 'OR' or 'Beta') -> float:
+    if type(statistic) == str:
+        statistic = float(statistic)
+    or_ = statistic if mode == 'OR' else exp(statistic)
+    return 1 if ref not in gt else or_ ** 2 if len(gt) == 1 else or_
 
 
 def trans_sex(sex: str or bool) -> bool or str:
-    lan_lib = load_config()['lan_lib']
+    lan_lib = convert_dict(objects_config['lan_lib'])
     if type(sex) == str:
-        return True if sex in lan_lib['sex']['male'] else False if sex in lan_lib['sex']['female'] else None
+        return True if sex in lan_lib['male'] else False if sex in lan_lib['female'] else None
     elif type(sex) == bool:
         return 'male' if sex else 'female'
 
@@ -331,7 +368,7 @@ def risk_level(per: float):
 def pie_plot(count: list or pd.Series, labels: list or pd.Index, save_path: str, title: str or None = None,
              arrow: bool = True, legend_ratio: int = 3, **other_kwargs):
     plt.figure(figsize=(8, 6), dpi=400)
-    ax1, ax2 = plt.subplot(1, legend_ratio, 1 if legend_ratio == 2 else tuple(range(1, legend_ratio))),\
+    ax1, ax2 = plt.subplot(1, legend_ratio, 1 if legend_ratio == 2 else tuple(range(1, legend_ratio))), \
                plt.subplot(1, legend_ratio, legend_ratio)
     patches, texts = ax1.pie(count, radius=1.2, pctdistance=1.13, **other_kwargs)
     ax1.axis('equal')
@@ -408,7 +445,7 @@ def quan_dist_plot(code: str, value: float, ref_data: pd.Series, per: float, rep
              f'Percentage: {per:.2f}% '
              # f'\nLevel: {risk_level(per)}'
              , bbox={'facecolor': 'white', 'alpha': 0.8})
-    plt.xlabel("Standardized genetic rise score")
+    plt.xlabel("Standardized genetic risk score")
     plt.yticks([])
     plt.xlim(symmertry_range(plt.xlim()))
     plt.ylim(bottom=0, top=plt.ylim()[1] * 1.15)
@@ -424,3 +461,25 @@ def symmertry_range(limit: Tuple[float, float], center: float = 0) -> Tuple[floa
         return limit[0], 2 * center - limit[0]
     else:
         return 2 * center - limit[1], limit[1]
+
+
+def get_ind(pos: List[int], pos_length: List[int]) -> List[int or None]:
+    idx_rev = []
+    for p in pos:
+        if p is None:
+            idx_rev.append(None)
+        else:
+            i = 0
+            while p >= pos_length[i]:
+                p -= pos_length[i]
+                i += 1
+            idx_rev.append(i)
+    return [idx_rev.index(i) if i in idx_rev else None for i in range(len(pos_length))]
+
+
+def get_columns_index(col_names: List[str], need_cols: List[List[str]]) -> List[int or None]:
+    col_names = [name.upper().replace(' ', '_') for name in col_names]
+    needs = [need for need_col in need_cols for need in need_col]
+    need_pos = [len(need_col) for need_col in need_cols]
+    need_idx = [needs.index(name) if name in needs else None for name in col_names]
+    return get_ind(need_idx, need_pos)

@@ -1,29 +1,37 @@
-from math import exp
-from pickle import dump, load
-from multiprocessing import Pool
+import os.path
+
+import umap
 from functools import partial
 from gzip import open as gzip_open
+from multiprocessing import Pool, cpu_count
+from pickle import dump, load, dumps
 from re import compile, sub
 from tempfile import mkdtemp
 from urllib.request import urlretrieve
 from zipfile import ZipFile
-from tqdm import tqdm
-from chardet import universaldetector
 import matplotlib.cm as cm
-from typing import Tuple, Set, Dict
+import numpy as np
+from tqdm import tqdm
 from src.objects import *
-
 
 pattern = compile(rb'(?<=[\t])rs[0-9]*(?=[\t;])')
 pat_header1 = compile(rb'^##')
 pat_header2 = compile(rb'^#')
 pattern_clinvar = compile(r'(?<=CLNSIG=)\w+(?=[,;])')
 pattern_clinvar_rs = compile(r'(?<=RS=)\d+')
-# pattern_load_num = compile(r'\d+(?= valid predictors loaded)')  # use for plink1.9
+split_str = compile(r'\w{1,28}')
 pattern_load_num = compile(r'\d+(?= variants processed\.)')
+sample_file_pat = compile(r'\.samples$')
+functions_config = configparser.ConfigParser()
 
 
 # Sub_functions
+def load_config_fun(main_config: configparser.ConfigParser):
+    global functions_config
+    functions_config = main_config
+    load_config_obj(main_config)
+
+
 def open_gz(file: str):
     if file.split('.')[-1] == 'gz':
         return gzip_open
@@ -73,7 +81,6 @@ def cal_multi_sha(file_list: str or list, vcf_only=True, re=r'', include=True):
     return value.hexdigest()
 
 
-# @use_time('Extract_snp from reference data')
 def extract_snp(vcf_file: str, temp_dir: str) -> None:
     """
     Extract snp using plink2
@@ -140,7 +147,7 @@ def get_gt_iid(vcf_list: list) -> pd.DataFrame:
 
 
 @use_time('Get reference GT data')
-def get_ref_gt(vcf_list: list, data_dir: str, output: str, filter_vcf: str = 'filter.vcf') -> pd.DataFrame:
+def get_ref_gt(vcf_list: list, data_dir: List[str], output: str, filter_vcf: str = 'filter.vcf') -> pd.DataFrame:
     if os.path.isfile(filter_vcf):
         if not verify_data(filter_vcf, vcf_list, 'multi'):
             get_ref_vcf(vcf_list, get_snp_list(data_dir))
@@ -171,7 +178,7 @@ def snp_list_rw(tempdir: str, method: str = 'w', need_snp_list: None or set or l
 
 
 def rm_dir(rmdir: str) -> None:
-    # danger function, only can delete one level directory
+    # Danger function, only can delete one level directory
     if os.listdir(rmdir):
         for file in os.listdir(rmdir):
             os.remove(os.path.join(rmdir, file))
@@ -201,7 +208,7 @@ def get_ref_vcf(vcf_files: list, need_snp_list: set or list, output: str, out_na
     rm_dir(temp_dir)
 
 
-def get_ref_freq(data_dir: str, vcf_files: list, output: str) -> None:
+def get_ref_freq(data_dir: List[str], vcf_files: list, output: str) -> None:
     if not os.path.isfile(os.path.join(output, 'population_QC', 'prs.ref.afreq')):
         get_ref_vcf(vcf_files, get_snp_list(data_dir, cal_ind=False, prs_ind=True), output, out_name='prs.vcf',
                     write_valid=False, write_header=True)
@@ -212,11 +219,11 @@ def get_ref_freq(data_dir: str, vcf_files: list, output: str) -> None:
 
 
 def verify_data(data_file: str, source_files: str or list, mode: str) -> bool:
-    config = load_config()['parameter']
+    def_config = convert_dict(load_config()['file'], False)
     sha_cal = cal_sha if mode == 'single' else \
         partial(cal_multi_sha, vcf_only=False,
-                re=config['need_suf'].replace('.', '\\.') + "|" +
-                   config['gwas_suf'].replace('.', '\\.') + '|setting|\\.vcf',
+                re=def_config['need_suf'].replace('.', '\\.') + "|" +
+                   def_config['gwas_suf'].replace('.', '\\.') + '|setting|\\.vcf',
                 include=True)
     with open(data_file) as f:
         f.read(2)
@@ -263,7 +270,7 @@ def same_status(files: list) -> bool:
 
 
 def trans_gz(gz_file: str, out_dir: str) -> str:
-    if gz_file.split('.')[-1] == 'gz':
+    if gz_file.endswith('.gz'):
         with gzip_open(gz_file) as fr:
             with open(os.path.join(out_dir, 'prs_data'), 'w') as fw:
                 for line in fr:
@@ -298,16 +305,24 @@ def xlim_adjust(mean: float, x_range: tuple) -> Tuple[float, float]:
     return (x_range[0], mean + left) if left > right else (mean - right, x_range[1])
 
 
-def get_type_list(data_dir: str) -> Dict[str, str]:
-    try:
-        return dict(load_txt(os.path.join(data_dir, 'Type.txt')))
-    except FileNotFoundError:
-        raise Exception("Cannot find type list file.")
+def get_type_list() -> Dict[str, str]:
+    qual_dir = functions_config['file']['qual_data']
+    quan_dir = functions_config['file']['quan_data']
+    type_dict = dict()
+    if qual_dir:
+        type_dict.update({os.path.join(qual_dir, directory): 'qual' for directory in os.listdir(qual_dir)
+                          if directory != '.DS_Store'})
+    if quan_dir:
+        type_dict.update({os.path.join(quan_dir, directory): 'quan' for directory in os.listdir(quan_dir)
+                          if directory != '.DS_Store'})
+    return type_dict
+
+
+def get_subtype_list(type_list: Dict[str, str], need_type: str = 'quan' or 'qual') -> Dict[str, str]:
+    return {directory: need_type for directory in type_list if type_list[directory] == need_type}
 
 
 def get_gt(vcf_gt: str, ref: str, alt: str, snp: None or str = None, warning: bool = True) -> Set[str]:
-    # if sum(not i.isnumeric() for i in vcf_gt) != 1:
-    #     logging.warning('Not biallelic alleles appear')
     if '/' in vcf_gt:
         gt_n = vcf_gt.split('/')
     elif '|' in vcf_gt:
@@ -339,53 +354,68 @@ def load_txt(description_text: str, encoding: str = 'UTF-8') -> Iterable[Tuple[s
                     yield key, value
 
 
-def get_cal_file(code: str) -> Tuple[bool, bool or None, str or None]:
-    config = load_config()['parameter']
-    if os.path.isfile(code + config['need_suf']):
-        return True, False, code + config['need_suf']
-    elif os.path.isfile(code + config['gwas_suf']):
-        return True, True, code + config['gwas_suf']
-    elif os.path.isfile(code + config['gwas_suf'] + '.gz'):
-        return True, True, code + config['gwas_suf'] + '.gz'
+def get_cal_file() -> Tuple[bool, bool or None, str or None]:
+    """
+    Get the calculation file from work directory
+    :return: Tuple[Whether exist, whether from GWAS, the name of the calculation file]
+    """
+    def_config = convert_dict(functions_config['file'], False)
+    files = os.listdir()
+    simple_files = list(filter(lambda a: a.endswith(def_config['need_suf']), files))
+    gwas_files = list(filter(lambda a: a.endswith(def_config['gwas_suf']), files))
+    gwas_gz_files = list(filter(lambda a: a.endswith(def_config['gwas_suf'] + '.gz'), files))
+    if simple_files:
+        return True, False, simple_files[0]
+    elif gwas_files:
+        return True, True, gwas_files[0]
+    elif gwas_gz_files:
+        return True, True, gwas_gz_files[0]
     else:
         return False, None, None
 
 
-def get_snp_list(data_dir: str, cal_ind: bool = True, prs_ind: bool = False) -> Set[str]:
-    config = load_config()['parameter']
+def get_snp_list(type_list: List[str], cal_ind: bool = True, prs_ind: bool = False) -> Set[str]:
+    def_config = convert_dict(functions_config['name'], False)
     snp_list = set([])
     try:
-        os.chdir(data_dir)
-        for type_dir in [item for item in os.listdir('.') if os.path.isdir(item)]:
-            os.chdir(type_dir)
+        for data_dir in type_list:
+            os.chdir(data_dir)
             for ind_dir in [item for item in sorted(os.listdir('.')) if os.path.isdir(item)]:
                 os.chdir(ind_dir)
-                exist, file_type, file = get_cal_file(ind_dir)
+                exist, file_type, file = get_cal_file()
                 if exist:
                     if cal_ind and not file_type:
-                        snp_list = add_snp_list(file, snp_list)
+                        snp_list = add_snp_list(file, snp_list, header=True)
                     elif prs_ind and file_type:
                         if file:
                             nopen = open_gz(file)
                             with nopen(file, 'rb') as f:
-                                snp_list = load_prs_txt(f, snp_list, config)
+                                snp_list = load_prs_txt(f, snp_list, def_config)
                 else:
                     logging.warning(f'Code({ind_dir}) has no corresponding algorithm!')
                 os.chdir('..')
-            os.chdir('..')
+            os.chdir(raw_dir)
     finally:
         os.chdir(raw_dir)
     return snp_list
 
 
 @auto_sep
-def get_columns_num(file: str, need_columns: list, sep: str = '\t') -> List[int]:
-    nopen = open_gz(file)
-    with nopen(file, 'rb') as f:
+def get_columns_num(file: str, need_columns: list, sep: str = '\t', start=1) -> List[int]:
+    """
+    Get corresponding columns' index from header
+    :param file: Input file
+    :param need_columns: The names of needed columns
+    :param sep: The separator of file
+    :param start: index start number
+    :return: A list for corresponding columns' index
+    """
+    open_ = open_gz(file)
+    with open_(file, 'rb') as f:
         header = f.readline()
     header = header.strip().split(sep.encode())
     assert len(header) > 1, sep.encode().join(header).decode()
-    return [header.index(i.encode()) + 1 for i in need_columns]
+    return [header.index(i.encode()) + start for i in need_columns]
 
 
 def get_prs_res(result_file: str) -> float:
@@ -396,7 +426,7 @@ def get_prs_res(result_file: str) -> float:
 
 
 def cal_trait(trait: str or None, gt: set, ref: str, inter: str, no_inter: str or None) -> str or None:
-    lan_lib = load_config()['lan_lib']
+    lan_lib = convert_dict(functions_config['lan_lib'])
     if trait is None:
         if inter in lan_lib['if']:
             return 'Normal' if equal_gt(gt, trans_gt(ref)) else 'Normal' \
@@ -415,22 +445,22 @@ def cal_trait(trait: str or None, gt: set, ref: str, inter: str, no_inter: str o
             else:
                 outcome = inter if equal_gt(gt, trans_gt(ref)) else inter \
                     if equal_gt(gt, trans_gt(gene_filp(ref))) else no_inter
-                return 'Normal' if outcome in lan_lib[None] else outcome
+                return 'Normal' if outcome in lan_lib['none'] else outcome
         elif trait == 'And_yes':
             outcome = inter if equal_gt(gt, trans_gt(ref)) else inter \
                 if equal_gt(gt, trans_gt(gene_filp(ref))) else no_inter
-            return 'Normal' if outcome in lan_lib[None] else outcome
+            return 'Normal' if outcome in lan_lib['none'] else outcome
         elif trait == 'And_no':
             outcome = no_inter
-            return 'Normal' if outcome in lan_lib[None] else outcome
+            return 'Normal' if outcome in lan_lib['none'] else outcome
         else:
             return trait
 
 
 # QC
 # MAF
-def qc_maf(failed_snps: set, file_path: str, report_dir: str) -> None:
-    maf_threshold = load_config()['parameter']['qc_maf']
+def qc_maf(failed_snps: set, file_path: str, report_dir: str, suffix: str = '') -> None:
+    maf_threshold = eval(functions_config['parameter']['qc_maf'])
     data = pd.read_csv(os.path.join(file_path, 'qc.frq'), ' ', skipinitialspace=True)
     failed_snps.update(data.loc[data.MAF < maf_threshold, 'SNP'])
     plt.figure(figsize=[9, 3.6], dpi=300)
@@ -440,13 +470,13 @@ def qc_maf(failed_snps: set, file_path: str, report_dir: str) -> None:
     plt.axvline(maf_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("Minor allele frequency")
     plt.ylabel("Number of variants")
-    plt.savefig(os.path.join(report_dir, f'QC_MAF.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_MAF{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # SNPs_MISS
-def qc_vmiss(failed_snps: set, file_path: str, report_dir) -> None:
-    snp_miss_threshold = load_config()['parameter']['qc_vmiss']
+def qc_vmiss(failed_snps: set, file_path: str, report_dir, suffix: str = '') -> None:
+    snp_miss_threshold = eval(functions_config['parameter']['qc_vmiss'])
     data = pd.read_csv(os.path.join(file_path, 'qc.lmiss'), ' ', skipinitialspace=True)
     failed_snps.update(data.loc[data.F_MISS > snp_miss_threshold, 'SNP'])
     plt.figure(dpi=300)
@@ -460,13 +490,13 @@ def qc_vmiss(failed_snps: set, file_path: str, report_dir) -> None:
     plt.axvline(snp_miss_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("Missing genotype rate per sample")
     plt.ylabel("Number of samples")
-    plt.savefig(os.path.join(report_dir, f'QC_var_miss.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_var_miss{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # FMISS
-def qc_smiss(failed_samples: set, file_path: str, report_dir) -> None:
-    individual_miss_threshold = load_config()['parameter']['qc_smiss']
+def qc_smiss(failed_samples: set, file_path: str, report_dir, suffix: str = '') -> None:
+    individual_miss_threshold = eval(functions_config['parameter']['qc_smiss'])
     data = pd.read_csv(os.path.join(file_path, 'qc.imiss'), ' ', skipinitialspace=True)
     failed_samples.update(data.loc[data.F_MISS > individual_miss_threshold, 'IID'])
     plt.figure(dpi=300)
@@ -481,13 +511,13 @@ def qc_smiss(failed_samples: set, file_path: str, report_dir) -> None:
     plt.axvline(individual_miss_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("Missing genotype rate per variant")
     plt.ylabel("Number of variants")
-    plt.savefig(os.path.join(report_dir, f'QC_ind_miss.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_ind_miss{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # HARDY
-def qc_hardy(failed_snps: set, file_path: str, report_dir) -> None:
-    hardy_threshold = load_config()['parameter']['qc_hardy']
+def qc_hardy(failed_snps: set, file_path: str, report_dir, suffix: str = '') -> None:
+    hardy_threshold = eval(functions_config['parameter']['qc_hardy'])
     data = pd.read_csv(os.path.join(file_path, 'qc.hwe'), ' ', skipinitialspace=True)
     failed_snps.update(data.loc[data.P < 10 ** -hardy_threshold, 'SNP'])
     data.loc[data.P == 0, 'P'] = 1e-295
@@ -498,13 +528,13 @@ def qc_hardy(failed_snps: set, file_path: str, report_dir) -> None:
     plt.axvline(hardy_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("-log$_{10}$(HWE exact test p-value)")
     plt.ylabel("Number of variants")
-    plt.savefig(os.path.join(report_dir, f'QC_hardy.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_hardy{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # HET
-def qc_het(failed_samples: set, file_path: str, report_dir) -> None:
-    het_threshold = load_config()['parameter']['qc_het']
+def qc_het(failed_samples: set, file_path: str, report_dir, suffix: str = '') -> None:
+    het_threshold = eval(functions_config['parameter']['qc_het'])
     data = pd.read_csv(os.path.join(file_path, 'qc.het'), ' ', skipinitialspace=True)
     het_mean, het_sd = data.F.mean(), data.F.std()
     failed_samples.update(data.loc[(data.F - het_mean > het_sd * het_threshold) |
@@ -513,21 +543,21 @@ def qc_het(failed_samples: set, file_path: str, report_dir) -> None:
     plt.hist(data.F, bins=50)
     plt.text(assign_pos(het_mean - het_sd * het_threshold, plt.axis(), right_offset=0.02, left_offset=0.285),
              plt.axis()[3] * 0.816,
-             f'Heterozygosity rate\nthreshold: mean ±{het_threshold} sd',
+             f'F threshold:\n mean ±{het_threshold} sd',
              bbox={'facecolor': 'white', 'alpha': 0.8})
     plt.axvline(het_mean + het_sd * het_threshold, c='r', lw=1.5, ls='--')
     plt.axvline(het_mean - het_sd * het_threshold, c='r', lw=1.5, ls='--')
-    plt.xlabel("Heterozygosity rate")
+    plt.xlabel("F value")
     plt.ylabel("Number of individuals")
     plt.xlim(*xlim_adjust(het_mean, plt.xlim()))
-    plt.savefig(os.path.join(report_dir, f'QC_het.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_het{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # SEX
-def qc_sex(failed_samples: set, file_path: str, report_dir) -> None:
-    male_threshold = load_config()['parameter']['qc_male_F']
-    female_threshold = load_config()['parameter']['qc_female_F']
+def qc_sex(failed_samples: set, file_path: str, report_dir, suffix: str = '') -> None:
+    male_threshold = eval(functions_config['parameter']['qc_male_F'])
+    female_threshold = eval(functions_config['parameter']['qc_female_F'])
     data = pd.read_csv(os.path.join(file_path, 'qc.sexcheck'), ' ', skipinitialspace=True)
     failed_samples.update(data.loc[(data.F > male_threshold) & (data.F < female_threshold), 'IID'])
     plt.figure(figsize=[9, 3.6], dpi=300)
@@ -540,13 +570,13 @@ def qc_sex(failed_samples: set, file_path: str, report_dir) -> None:
     plt.axvline(female_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("F value")
     plt.ylabel("Number of individuals")
-    plt.savefig(os.path.join(report_dir, f'QC_sex.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_sex{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
 # RELATEDNESS
-def qc_relatedness(failed_samples: set, file_path: str, report_dir) -> None:
-    pihat_threshold = load_config()['parameter']['qc_pihat']
+def qc_relatedness(failed_samples: set, file_path: str, report_dir, suffix: str = '') -> None:
+    pihat_threshold = eval(functions_config['parameter']['qc_pihat'])
     data = pd.read_csv(os.path.join(file_path, 'qc.genome'), ' ', skipinitialspace=True)
     failed_samples.update(data.loc[data.PI_HAT > pihat_threshold, 'IID1'])
     failed_samples.update(data.loc[data.PI_HAT > pihat_threshold, 'IID2'])
@@ -557,7 +587,7 @@ def qc_relatedness(failed_samples: set, file_path: str, report_dir) -> None:
     plt.axvline(pihat_threshold, c='r', lw=1.5, ls='--')
     plt.xlabel("Pihat")
     plt.ylabel("Number of individual-individual pairs")
-    plt.savefig(os.path.join(report_dir, f'QC_relatedness.png'), bbox_inches='tight')
+    plt.savefig(os.path.join(report_dir, f'QC_relatedness{"_" + suffix if suffix else ""}.png'), bbox_inches='tight')
     plt.close()
 
 
@@ -587,7 +617,7 @@ def vep_query(search_ids: list) -> Dict[str, dict]:
     return result
 
 
-@progress_value(10 * average_progress())
+@progress_value(10, average=True)
 def vep_multiprocess(search_ids: list) -> List[dict]:
     queue = [search_ids[i: i + 100] for i in range(0, len(search_ids), 100)]
     process_num = os.cpu_count() if len(queue) > os.cpu_count() else len(queue)
@@ -654,7 +684,7 @@ def load_pharm(pharm_data: str, human: Human) -> pd.DataFrame:
     return res.dropna().sort_values(['Color', 'Variant'], ascending=[False, True]).reset_index(drop=True)
 
 
-@progress_value(10 * average_progress())
+@progress_value(10, average=True)
 def trans_clinvar_res(clinvar_res: dict) -> pd.DataFrame:
     res = pd.DataFrame(clinvar_res).T
     res.reset_index(inplace=True)
@@ -664,7 +694,7 @@ def trans_clinvar_res(clinvar_res: dict) -> pd.DataFrame:
     return res.dropna().sort_values(['Color', 'Variant'], ascending=[False, True]).reset_index(drop=True)
 
 
-def get_clinvar_data(data_dir: str) -> None:
+def get_clinvar(data_dir: str) -> None:
     # download data
     if not os.path.isfile(os.path.join(data_dir, 'clinvar.vcf.gz')):
         urlretrieve('https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh37/clinvar.vcf.gz',
@@ -675,8 +705,8 @@ def get_clinvar_data(data_dir: str) -> None:
                     os.path.join(data_dir, 'clinvar_papu.vcf.gz'))
 
 
-@progress_value(10 * average_progress())
-def get_pharmgkb_data(data_dir: str) -> None:
+@progress_value(10, average=True)
+def get_pharmgkb(data_dir: str) -> None:
     if not os.path.isfile(os.path.join(data_dir, 'pharmgkb.zip')):
         urlretrieve('https://api.pharmgkb.org/v1/download/file/data/annotations.zip',
                     os.path.join(data_dir, 'pharmgkb.zip'))
@@ -699,59 +729,61 @@ def write_failed_qc_list(failed_snps: set, failed_samples: set, output: str) -> 
 
 
 @use_time('Get reference result data')
-def get_ref_cal(data_dir: str, vcf_files: list, type_list: dict, failed_snps: set, failed_samples: set,
-                output: str) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    ref_code_file = os.path.join(output, 'population_QC', 'population_code_res.csv')
-    ref_rs_file = os.path.join(output, 'population_QC', 'population_rs_res.csv')
+def get_ref_cal(ref_file_list: List[str], type_list: dict, failed_snps: set, failed_samples: set,
+                output: str, suffix: str = '') -> Tuple[pd.DataFrame, pd.DataFrame]:
+    ref_code_file = os.path.join(output, 'population_QC', f'population_code_res{"_" + suffix if suffix else ""}.csv')
+    ref_rs_file = os.path.join(output, 'population_QC', f'population_rs_res{"_" + suffix if suffix else ""}.csv')
     ref_config = os.path.join(output, 'population_QC', 'setting')
-    config = load_config()['parameter']
-    config = {key: config[key] for key in config if key in ['ref_structure', 'SNP', 'EA', 'P',
-                                                            'BETA', 'p_threshold', 'clump-p1', 'clump-r2',
-                                                            'clump-kb', 'clump-p2', 'description_suf', 'need_suf',
-                                                            'gwas_suf', 'use_qc_ref']}
-    use_ref_qc = config['use_qc_ref']
+    def_config = convert_dict(functions_config['parameter'])
+    def_config.update(convert_dict(functions_config['file'], False))
+    def_config = {key: def_config[key] for key in def_config if key in ['ref_structure', 'snp', 'ea', 'p',
+                                                                        'beta', 'p_threshold', 'clump-p1', 'clump-r2',
+                                                                        'clump-kb', 'clump-p2', 'description_suf',
+                                                                        'need_suf',
+                                                                        'gwas_suf', 'use_qc_ref']}
+    use_ref_qc = def_config['use_qc_ref']
     with open(ref_config, 'wb') as f:
-        dump(config, f)
+        dump(def_config, f)
     if os.path.isfile(ref_code_file) and os.path.isfile(ref_rs_file):
-        if verify_data(ref_code_file, vcf_files + [data_dir] + [ref_config], 'multi'):
+        if verify_data(ref_code_file, ref_file_list + list(type_list) + [ref_config], 'multi'):
             if same_status([ref_code_file, ref_rs_file]):
                 return pd.read_csv(ref_rs_file, skiprows=1, index_col=0), \
                        pd.read_csv(ref_code_file, skiprows=1, index_col=0)
     outcomes_rs = pd.DataFrame()
     outcomes_code = pd.DataFrame()
-    gt_data = get_ref_gt(vcf_files, data_dir, output)
+    gt_data = get_ref_gt(ref_file_list, list(type_list), output)
     if use_ref_qc:
         gt_data = gt_data.loc[~gt_data.index.isin(failed_snps), ~gt_data.columns.isin(failed_samples)]
         write_failed_qc_list(failed_snps, failed_samples, output)
     with open(ref_code_file, 'w', newline='', encoding='UTF-8') as fc:
         with open(ref_rs_file, 'w', newline='', encoding='UTF-8') as fr:
-            sha = cal_multi_sha(vcf_files + [data_dir] + [ref_config], vcf_only=False,
-                                re=config['need_suf'].replace('.', '\\.') + "|" +
-                                   config['gwas_suf'].replace('.', '\\.') + '|setting|\\.vcf',
+            sha = cal_multi_sha(ref_file_list + list(type_list) + [ref_config], vcf_only=False,
+                                re=def_config['need_suf'].replace('.', '\\.') + "|" +
+                                   def_config['gwas_suf'].replace('.', '\\.') + '|setting|\\.vcf',
                                 include=True)
             fc.write(f'###{sha}\n')
             fr.write(f'###{sha}\n')
             try:
-                os.chdir(data_dir)
-                for type_dir in tqdm([item for item in os.listdir('.') if os.path.isdir(item)]):
+                for type_dir in tqdm(list(type_list)):
                     os.chdir(type_dir)
                     for ind_dir in tqdm([item for item in os.listdir('.') if os.path.isdir(item)]):
                         os.chdir(ind_dir)
-                        exist, file_type, file = get_cal_file(ind_dir)
+                        exist, file_type, file = get_cal_file()
                         if exist:
                             if file_type:
-                                res = get_ref_prs(file, vcf_files, use_ref_qc, output)
+                                res = get_ref_prs(file, ref_file_list, use_ref_qc, output)
                                 if outcomes_code.empty:
-                                    outcomes_code[ind_dir] = res
+                                    outcomes_code[ind_dir] = res.apply(lambda x: exp(x))
                                 else:
                                     res = res.rename(ind_dir)
                                     outcomes_code = outcomes_code.merge(res.apply(lambda x: exp(x)), left_index=True,
                                                                         right_index=True)
                             else:
-                                outcomes_rs, outcomes_code = cal_ref_from_txt(file, type_dir, ind_dir, type_list,
-                                                                              gt_data, outcomes_rs, outcomes_code)
+                                outcomes_rs, outcomes_code = cal_ref_from_txt(file, type_list[type_dir], ind_dir,
+                                                                              gt_data, outcomes_rs, outcomes_code,
+                                                                              header=True)
                         os.chdir('..')
-                    os.chdir('..')
+                    os.chdir(raw_dir)
             finally:
                 os.chdir(raw_dir)
                 outcomes_rs.to_csv(fr)
@@ -763,44 +795,88 @@ def get_ref_cal(data_dir: str, vcf_files: list, type_list: dict, failed_snps: se
     return outcomes_rs, outcomes_code
 
 
+@progress_value(5)
+@use_time()
+def recode_and_sex_impute(human: Human, file: str, temp_dir: str):
+    """
+    recode the sample, determine the sex of the sample
+    :param human: Objects Human
+    :param file: the sample path
+    :param temp_dir: the temp temporary directory path
+    :return: a converted sample file in the temporary directory and a sex result
+    """
+    file_type, file_name = file_recognize(file)
+    try:
+        run_plink_cmd(f"--{file_type} {file_name} "
+                      "--impute-sex y-only "  # Should be reconsider
+                      "--recode vcf "
+                      f"--out {os.path.join(temp_dir, 'temp')}",
+                      plink='plink')
+        data = pd.read_csv(os.path.join(temp_dir, 'temp.sexcheck'), ' ', skipinitialspace=True)
+    except Exception as e:
+        logging.warning('Sex impute failed:\n' + f'{e.args}')
+        run_plink_cmd(f"--{file_type} {file_name} "
+                      "--recode vcf "
+                      f"--out {os.path.join(temp_dir, 'temp')}",
+                      plink='plink')
+        human.vcf = os.path.join(temp_dir, 'temp.vcf')
+    else:
+        run_plink_cmd(f"--vcf {os.path.join(temp_dir, 'temp.vcf')} "
+                      "--recode vcf "
+                      "--rm-dup force-first "
+                      f"--out {os.path.join(temp_dir, 'temp')}")
+        if file_type == 'vcf':
+            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.SNPSEX[0] == 1 else 'Female'
+        else:
+            human.vcf, human.sex = os.path.join(temp_dir, 'temp.vcf'), 'Male' if data.PEDSEX[0] == 1 else 'Female'
+
+
 @use_time('Get population prs result')
 def get_ref_prs(prs_data: str, vcf_files: list, qc_ref: bool, output: str) -> pd.DataFrame:
-    config = load_config()['parameter']
-    ref_structure = config['ref_structure']
+    """
+    Get prs result from population for single indicator
+    :param prs_data: Information for PRS SNPs
+    :param vcf_files: Population genotype data
+    :param qc_ref: Whether include QC-failed samples in population data
+    :param output: The output directory for whole analysis
+    :return: A dataframe which stores prs score result from population for single indicator
+    """
+    def_config = convert_dict(functions_config['parameter'])
+    def_config.update(convert_dict(functions_config['file'], False))
+    def_config.update(convert_dict(functions_config['name'], False))
+    ref_structure = os.path.realpath(os.path.join(raw_dir, def_config['ref_structure']))
     temp_dir = mkdtemp(suffix='prs')
-    code = os.path.basename(prs_data).split('.')[0]
+    save_code = os.path.basename(prs_data).split('.')[0]
     # Clump
-    clump_p2 = config["clump-p2"] if config["clump-p1"] < config["clump-p2"] \
-        else config["clump-p1"]
-    run_plink_cmd(f'--vcf {ref_structure} --clump-p1 {str(config["clump-p1"])} '
+    clump_p2 = def_config["clump-p2"] if def_config["clump-p1"] < def_config["clump-p2"] \
+        else def_config["clump-p1"]
+    run_plink_cmd(f'--vcf {ref_structure} --clump-p1 {str(def_config["clump-p1"])} '
                   f'--clump-p2 {str(clump_p2)} '
-                  f'--clump-r2 {str(config["clump-r2"])} --clump-kb {str(config["clump-kb"])} '
-                  f'--clump {prs_data} --clump-snp-field {config["SNP"]} '
-                  f'--clump-field {config["P"]} --out {os.path.join(temp_dir, code)}', plink='plink')
+                  f'--clump-r2 {str(def_config["clump-r2"])} --clump-kb {str(def_config["clump-kb"])} '
+                  f'--clump {prs_data} --clump-snp-field {def_config["snp"]} '
+                  f'--clump-field {def_config["p"]} --out {os.path.join(temp_dir, save_code)}', plink='plink')
     # Produce plink need data
-    select_columns(os.path.join(temp_dir, code + '.clumped'), [2],
+    select_columns(os.path.join(temp_dir, save_code + '.clumped'), [2],
                    os.path.join(temp_dir, 'valid.snp'), header=False, skipspace=True, sep=' ')
-    select_columns(prs_data, [0, 4], os.path.join(output, 'population_QC', f'{code}.SNP.pvalue'))
+    select_columns(prs_data, [0, 4], os.path.join(output, 'population_QC', f'{save_code}.SNP.pvalue'))
     with open(os.path.join(output, 'population_QC', 'need_range_list'), 'w') as f:
-        f.write(f'{config["p_threshold"]} 0 {config["p_threshold"]}\n')
+        f.write(f'{def_config["p_threshold"]} 0 {def_config["p_threshold"]}\n')
     # PRS calculate
-    columns_num = get_columns_num(prs_data, [config[i] for i in ['SNP', 'EA', 'BETA']])
-    prs_data = trans_gz(prs_data, temp_dir)
+    prs_data = get_score_data(prs_data, def_config, temp_dir)
     qc_str = f"--remove {os.path.join(output, 'population_QC', 'failed_qc_samples')} " \
              f"--exclude {os.path.join(output, 'population_QC', 'failed_qc_snps')} " if qc_ref else ""
     for fid, file in enumerate(vcf_files):
-        run_plink_cmd(f'--vcf {file} {qc_str}--score {prs_data} '
-                      f'{" ".join([str(i) for i in columns_num])} header '
+        run_plink_cmd(f'--vcf {file} {qc_str}--score {prs_data} 1 2 3 header '
                       f'--q-score-range {os.path.join(output, "population_QC", "need_range_list")} '
-                      f'{os.path.join(output, "population_QC", code + ".SNP.pvalue")} '
+                      f'{os.path.join(output, "population_QC", save_code + ".SNP.pvalue")} '
                       f'--extract {os.path.join(temp_dir, "valid.snp")} --out {os.path.join(temp_dir, "result_prs")}',
                       plink='plink')
         if fid == 0:
-            res_data = pd.read_csv(os.path.join(temp_dir, f"result_prs.{config['p_threshold']}.profile"), ' ',
+            res_data = pd.read_csv(os.path.join(temp_dir, f"result_prs.{def_config['p_threshold']}.profile"), ' ',
                                    skipinitialspace=True, index_col=1)['SCORE']
         else:
             res_data = res_data + pd.read_csv(os.path.join(temp_dir,
-                                                           f"result_prs.{config['p_threshold']}.profile"),
+                                                           f"result_prs.{def_config['p_threshold']}.profile"),
                                               ' ', skipinitialspace=True, index_col=1)['SCORE']
     rm_dir(temp_dir)
     return res_data
@@ -824,13 +900,15 @@ def read_line_num(gwas_file: str, header: bool = False) -> int:
     nopen = open_gz(gwas_file)
     line_num = -1 if header else 0
     with nopen(gwas_file, 'rb') as f:
-        for line in f:
+        for _ in f:
             line_num += 1
     return line_num
 
 
-def chr_and_vep(bim_file: str, img_dir: str) -> None:
-    data = pd.read_csv(bim_file, '\t', skipinitialspace=True, header=None, dtype={0: str})
+def chromo_info(human: Human, temp_dir: str, img_dir: str) -> None:
+    run_plink_cmd(f'--vcf {human.vcf} --make-just-bim --sort-vars --out {os.path.join(temp_dir, "sample_qc")}')
+    data = pd.read_csv(os.path.join(temp_dir, "sample_qc.bim"),
+                       '\t', skipinitialspace=True, header=None, dtype={0: str})
     data.columns = ['Chromosome', 'ID', 'Unknown', 'Position', 'Ref', 'ALT']
 
     pos_count = data.Chromosome.value_counts(sort=False)
@@ -844,19 +922,19 @@ def chr_and_vep(bim_file: str, img_dir: str) -> None:
     plt.savefig(os.path.join(img_dir, f'chromosome_count.png'))
     plt.close()
 
-    if load_config()['module']['vep']:
-        vep_res = vep_multiprocess(list(data.ID))
-        vep_res = {res: queue[res] for queue in vep_res for res in queue}
-        vep_res = pd.DataFrame(vep_res).T
-        vep_result = pd.merge(data.loc[:, 'ID'], vep_res, right_index=True, left_on='ID', how='left')
-        vep_class_result = vep_result['Variant class'].fillna('Unknown').value_counts()
-        vep_type_result = vep_result['Variant type'].fillna('Unknown').value_counts()
-        arrow_class = False if vep_result['Variant class'].value_counts(normalize=True)[0] > 0.80 else True
-        arrow_type = False if vep_result['Variant type'].value_counts(normalize=True)[0] > 0.80 else True
-        pie_plot(vep_class_result, vep_class_result.index, os.path.join(img_dir, './vep_class_res.png'),
-                 arrow=arrow_class)
-        pie_plot(vep_type_result, vep_type_result.index, os.path.join(img_dir, './vep_type_res.png'), arrow=arrow_type,
-                 legend_ratio=2)
+    # if convert_dict(functions_config['module'])['vep']:
+    #     vep_res = vep_multiprocess(list(data.ID))
+    #     vep_res = {res: queue[res] for queue in vep_res for res in queue}
+    #     vep_res = pd.DataFrame(vep_res).T
+    #     vep_result = pd.merge(data.loc[:, 'ID'], vep_res, right_index=True, left_on='ID', how='left')
+    #     vep_class_result = vep_result['Variant class'].fillna('Unknown').value_counts()
+    #     vep_type_result = vep_result['Variant type'].fillna('Unknown').value_counts()
+    #     arrow_class = False if vep_result['Variant class'].value_counts(normalize=True)[0] > 0.80 else True
+    #     arrow_type = False if vep_result['Variant type'].value_counts(normalize=True)[0] > 0.80 else True
+    #     pie_plot(vep_class_result, vep_class_result.index, os.path.join(img_dir, './vep_class_res.png'),
+    #              arrow=arrow_class)
+    #     pie_plot(vep_type_result, vep_type_result.index, os.path.join(img_dir, './vep_type_res.png'), arrow=arrow_type,
+    #              legend_ratio=2)
 
 
 def file_recognize(file: str) -> Tuple[str, str]:
@@ -899,7 +977,7 @@ def qc_sample_maf(freq_data: pd.DataFrame, report_dir: str) -> None:
     plt.close()
 
 
-def geno_diff(raw_human: Human, ref_human: Human, intersection: set or None = None) -> int:
+def geno_diff(raw_human: Human, ref_human: Human, intersection: Optional[set] = None) -> int:
     same_num = 0
     if not intersection:
         intersection = set(raw_human.gt_data.keys()) & set(ref_human.gt_data.keys())
@@ -924,68 +1002,236 @@ def get_maf(human: Human, temp_dir: str, maf_ref: str, img_dir: str) -> str:
     return f'{res[1]} of {res[0]} variants were found in MAF reference data.'
 
 
-def pca_data(human: Human, temp_dir: str, pca_ref: str) -> None:
-    file_prefix, file_name = file_recognize(pca_ref)
+def process_line(line: bytes) -> Tuple[np.ndarray, str]:
+    line = line.strip().split(b'\t')
+    geno_dat = line[6:]
+    return np.array([int(geno.decode()) if geno != b'NA' else None for geno in geno_dat], dtype='f'), line[1].decode()
 
-    # prune data
-    run_plink_cmd(f'--{file_prefix} {file_name} --indep-pairwise 50  0.2 '
+
+def add_res(geno_res: np.ndarray, iid: str, data: list, iid_list: list, pbar: tqdm) -> None:
+    data.append(geno_res)
+    iid_list.append(iid)
+    pbar.update(1)
+
+
+def get_ps_need(ps_file: str, work_dir: str, temp_dir: str, prune: bool) -> None:
+    with open(os.path.join(work_dir, 'ps_data'), 'w', encoding='UTF-8') as f:
+        f.write(f'###{cal_sha(ps_file)}\n')
+        file_prefix, file_name = file_recognize(ps_file)
+        if prune:
+            # prune data
+            run_plink_cmd(f'--{file_prefix} {file_name} --maf 0.01 --geno 0.01 --hwe 1e-50 --indep-pairwise 50 10 0.2 '
+                          f'--out {os.path.join(temp_dir, "prune_pop")}', plink='plink2')
+        # produce PCA outcome and frequency data
+        get_pca_need(file_prefix, file_name, temp_dir, prune, work_dir)
+        get_umap_need(file_prefix, file_name, temp_dir, prune, work_dir)
+        f.seek(2)
+        f.write('DONE')
+
+
+def get_pca_need(file_prefix: str, file_name: str, temp_dir: str, prune: bool, save_dir: str) -> None:
+    convert_data(file_prefix, file_name, temp_dir, prune, 'pca')
+    run_plink_cmd(f'--pfile {os.path.join(temp_dir, "pop")} vzs --freq counts --pca 2 allele-wts '
+                  f'--out {os.path.join(temp_dir, "ref_pca")}', plink='plink2')
+    if os.path.normcase(temp_dir) != os.path.normcase(save_dir):
+        if prune:
+            copy(os.path.join(temp_dir, 'prune_pop.prune.in'), save_dir)
+        copy(os.path.join(temp_dir, 'ref_pca.eigenvec.allele'), save_dir)
+        copy(os.path.join(temp_dir, 'ref_pca.eigenvec'), save_dir)
+        copy(os.path.join(temp_dir, 'ref_pca.eigenval'), save_dir)
+        copy(os.path.join(temp_dir, 'ref_pca.acount'), save_dir)
+
+
+def convert_data(file_prefix: str, file_name: str, temp_dir: str, prune: bool, mode: str) -> None:
+    run_plink_cmd(f'--{file_prefix} {file_name} --maf 0.01 --geno 0.01 --hwe 1e-50 --indep-pairwise 50 10 0.2 '
                   f'--out {os.path.join(temp_dir, "prune_pop")}', plink='plink2')
+    plink_cmd_prune = f'--extract {os.path.join(temp_dir, "prune_pop.prune.in")} ' if prune else ''
+    plink_cmd_recode = '--make-pgen vzs ' if mode != 'umap' else '--recode A '
     run_plink_cmd(
         f'--{file_prefix} {file_name} '
+        f'--maf 0.01 '
+        f'--geno 0.01 '
+        f'--hwe 1e-50 '
         f'--autosome '
-        f'--extract {os.path.join(temp_dir, "prune_pop.prune.in")} '
+        f'{plink_cmd_prune}'
         f'--mac 1 '
-        f'--make-pgen vzs '
-        f'--out {os.path.join(temp_dir, "prune_pop")}', plink='plink2')
-    run_plink_cmd(f'--pfile {os.path.join(temp_dir, "prune_pop")} vzs --freq counts --pca 2 allele-wts '
-                  f'--out {os.path.join(temp_dir, "ref_pcs")}', plink='plink2')
-    run_plink_cmd(f'--vcf {human.vcf} '
+        f'{plink_cmd_recode}'
+        f'--out {os.path.join(temp_dir, "pop")}', plink='plink2')
+
+
+def get_umap_need(file_prefix: str, file_name: str, temp_dir: str, prune: bool, save_dir: str) -> None:
+    convert_data(file_prefix, file_name, temp_dir, prune, 'umap')
+    # UMAP
+    with open(f'{os.path.join(temp_dir, "pop.raw")}', 'rb') as f:
+        total = 1
+        dat = []
+        freq_mean = []
+        iid_list = []
+        with tqdm(desc='Getting genotype data...', unit=' samples', unit_scale=True) as pbar:
+            with Pool(processes=cpu_count()) as pool:
+                rs_id = pd.DataFrame([rs.split('_') for rs in f.readline().decode().strip().split('\t')[6:]])
+                pool.apply_async(process_line, args=(f.readline(),),
+                                 callback=lambda a: add_res(*a, dat, iid_list, pbar))
+                for line in f:
+                    total += 1
+                    pbar.format_meter(0, total, 0)
+                    pool.apply_async(process_line, args=(line,), callback=lambda a: add_res(*a, dat, iid_list, pbar))
+                pool.close()
+                pool.join()
+    dat = np.vstack(tuple(dat))
+    for col in range(dat.shape[1]):
+        freq_mean.append(np.nanmean(dat[:, col]))
+        dat[:, col] = np.nan_to_num(dat[:, col], nan=freq_mean[col], copy=False)
+    rs_id.to_csv(os.path.join(save_dir, "snp_info"), sep='\t', index=False, header=False)
+    rs_id.insert(2, 'freq_mean', freq_mean)
+    rs_id.to_csv(os.path.join(save_dir, "umap_snp"), sep='\t', index=False, header=False)
+    ref_data = pd.DataFrame([iid.split('_') for iid in iid_list])
+    ref_data.columns = ['FID', 'IID'] if ref_data.shape[1] > 1 else ['IID']
+    ref_data.to_csv(os.path.join(save_dir, "sample_info"), index=False)
+    umap_fit = umap.UMAP(random_state=42)
+    umap_fit.fit(dat)
+    with gzip_open(os.path.join(save_dir, 'umap_fit'), 'wb', compresslevel=6) as f:
+        f.write(dumps(umap_fit))
+
+
+def get_metadata(metadata: Optional[str], ref_data: pd.DataFrame,
+                 pop_id: Optional[str] = None, pop_col: Optional[str] = None) -> pd.DataFrame:
+    if not pop_id:
+        pop_id = functions_config['name']['population_id']
+    if not pop_col:
+        pop_col = functions_config['name']['population_col']
+    if metadata:
+        with open(metadata) as f:
+            population_sep = detect(f.readline(10))
+        population_data = pd.read_csv(metadata, sep=population_sep)
+        return pd.merge(ref_data, population_data, left_on='IID', right_on=pop_id)
+    else:
+        ref_data.insert(0, pop_col, 'Reference')
+        return ref_data
+
+
+def pca_sample(sample_vcf: str, work_dir: str, temp_dir: str, prune: bool) -> Tuple[float, float]:
+    # extract data
+    plink_prune_cmd = f'--extract {os.path.join(work_dir, "prune_pop.prune.in")} ' if prune else ''
+    run_plink_cmd(f'--vcf {sample_vcf} '
                   f'--autosome '
-                  f'--extract {os.path.join(temp_dir, "prune_pop.prune.in")} '
+                  f'{plink_prune_cmd}'
                   f'--recode vcf '
                   f'--out {os.path.join(temp_dir, "sample_prune_in")}',
                   plink='plink2')
-    fill_vcf = fill_missing_alt(os.path.join(temp_dir, "sample_prune_in.vcf"), os.path.join(temp_dir, "ref_pcs.acount"),
+    # Fill missing Alt
+    fill_vcf = fill_missing_alt(os.path.join(temp_dir, "sample_prune_in.vcf"), os.path.join(work_dir, "ref_pca.acount"),
                                 os.path.join(temp_dir, "fill.vcf"))
-    run_plink_cmd(f'--vcf {fill_vcf} --read-freq {os.path.join(temp_dir, "ref_pcs.acount")} '
-                  f'--min-alleles 2 '
-                  # f'--score {os.path.join(temp_dir, "ref_pcs.eigenvec.allele")} 2 5 header-read no-mean-imputation '
-                  # f'variance-standardize --score-col-nums 6-7 '
-                  f'--score {os.path.join(temp_dir, "ref_pcs.eigenvec.allele")} 2 5 header-read no-mean-imputation '
+    # Calculate sample's PC values
+    run_plink_cmd(f'--vcf {fill_vcf} --read-freq {os.path.join(work_dir, "ref_pca.acount")} '
+                  f'--max-alleles 2 '
+                  f'--score {os.path.join(work_dir, "ref_pca.eigenvec.allele")} 2 5 header-read no-mean-imputation '
                   f'variance-standardize '
                   f'--score-col-nums 6-7 '
                   f'--out {os.path.join(temp_dir, "sample_pca")}', plink='plink2')
-
-
-def pca_plot(temp_dir: str, img_dir: str) -> str:
-    assert load_config()['parameter']['population_file'], 'Need population data'
-    pop_column = load_config()['parameter']['population_col']
-    population_data = pd.read_csv(load_config()['parameter']['population_file'],
-                                  sep=load_config()['parameter']['population_sep'])
-    pca_data = pd.read_csv(os.path.join(temp_dir, 'ref_pcs.eigenvec'), sep='\t')
-    pca_vec = pd.read_csv(os.path.join(temp_dir, 'ref_pcs.eigenval'), sep='\t', header=None)[0]
     sample_pca = pd.read_csv(os.path.join(temp_dir, 'sample_pca.sscore'), sep='\t')
+    pca_vec = pd.read_csv(os.path.join(work_dir, 'ref_pca.eigenval'), sep='\t', header=None)[0]
+    return sample_pca['PC1_AVG'] / (-(pca_vec[0] ** 0.5) / 2), sample_pca['PC2_AVG'] / (-(pca_vec[1] ** 0.5) / 2)
+
+
+def pca_plot(sample_vcf: Optional[str], metadata: Optional[str], work_dir: str, temp_dir: str, img_dir: str,
+             prune: bool, pop_id: Optional[str] = None, pop_col: Optional[str] = None) -> None:
+    if not pop_col:
+        pop_col = functions_config['name']['population_col']
+    pca_data = pd.read_csv(os.path.join(work_dir, 'ref_pca.eigenvec'), sep='\t')
     if '#IID' in pca_data.columns:
         pca_data['IID'] = pca_data['#IID'].apply(lambda a: a.split('_')[-1])
-    ref_pca_data = pd.merge(pca_data, population_data, left_on='IID',
-                            right_on=load_config()['parameter']['population_id'])
+    ref_pca_data = get_metadata(metadata, pca_data, pop_id, pop_col)
+    sample_pc = pca_sample(sample_vcf, work_dir, temp_dir, prune) if sample_vcf else None
+    draw_plot(ref_pca_data, sample_pc, pop_col, img_dir, 'PC')
 
-    grouped = ref_pca_data.groupby(pop_column)
-    colors = iter(cm.rainbow(linspace(0, 1, len(grouped))))
+
+def draw_plot(ref_data: pd.DataFrame, sample: Optional[Tuple[float, float]],
+              pop_column: str, img_dir: str, mode: str = 'PC' or 'UMAP') -> None:
+    grouped = ref_data.groupby(pop_column)
+    colors = iter(cm.rainbow(linspace(1, 0, len(grouped))))
     plt.figure(dpi=400)
-    # if len(grouped) > 15:
-    #     logging.warning('The legend cannot be plotted correctly due to too many kinds of population.')
     for key, group in grouped:
-        plt.scatter(x=group['PC1'], y=group['PC2'], label=key, s=66, alpha=0.35, marker='.', color=next(colors))
-    plt.scatter(x=sample_pca['PC1_AVG'] / (-(pca_vec[0] ** 0.5) / 2),
-                y=sample_pca['PC2_AVG'] / (-(pca_vec[1] ** 0.5) / 2),
-                label='Own data', s=66, marker='x', c='black')
-    plt.legend(bbox_to_anchor=(1.05, 0.95), loc='upper left', borderaxespad=0, ncol=len(grouped)//18 + 1)
-    plt.xlabel('Principal component 1')
-    plt.ylabel('Principal component 2')
-    plt.savefig(os.path.join(img_dir, 'QC_PCA.png'), bbox_inches='tight')
+        plt.scatter(x=group[f'{mode}1'], y=group[f'{mode}2'], label=key, s=66, alpha=0.35, marker='.',
+                    color=next(colors))
+    if sample:
+        plt.scatter(x=sample[0], y=sample[1],
+                    label='Me', s=66, marker='x', c='black')
+    plt.legend(bbox_to_anchor=(1.05, 0.95), loc='upper left', borderaxespad=0, ncol=len(grouped) // 18 + 1)
+    plt.xlabel(f'{mode}1', fontdict={'weight': 'bold'})
+    plt.ylabel(f'{mode}2', fontdict={'weight': 'bold'})
+    plt.savefig(os.path.join(img_dir, f'QC_{"PCA" if mode == "PC" else mode}.png'), bbox_inches='tight')
     plt.close()
+
+
+def sample_umap(sample_vcf: str, umap_fit: umap.UMAP, work_dir: str, temp_dir: str,
+                prune: bool) -> Tuple[float, float]:
+    plink_prune_cmd = f'--extract {os.path.join(work_dir, "prune_pop.prune.in")} ' if prune else ''
+    run_plink_cmd(
+        f'--vcf {sample_vcf} '
+        f'--autosome '
+        f'{plink_prune_cmd}'
+        f'--export A '
+        f'--export-allele {os.path.join(work_dir, "snp_info")} '
+        f'--out {os.path.join(temp_dir, "sample_umap")}', plink='plink2')
+    with open(os.path.join(temp_dir, 'sample_umap.raw'), 'rb') as f:
+        snps = f.readline().strip().split(b'\t')[6:]
+        geno = f.readline().strip().split(b'\t')[6:]
+    sample_dat = [snp.decode().split('_') + [geno[idx].decode()] for idx, snp in enumerate(snps)]
+    sample_dat = [sample for sample in sample_dat if sample[2].isnumeric()]
+    rs_id = pd.read_csv(os.path.join(work_dir, "umap_snp"), header=None, sep='\t')
+    sample = pd.merge(rs_id, pd.DataFrame(sample_dat), how='left', left_on=[0], right_on=[0])
+    sample.insert(5, 'value',
+                  sample.apply(lambda a: a['2_x'] if pd.isna(a['1_y']) else
+                  a['2_y'] if a['1_x'] == a['1_y'] else 2 - a['2_y'], axis=1))
+    own_umap = umap_fit.transform(np.array([sample['value']]))
+    return own_umap[0, 0], own_umap[0, 1]
+
+
+def umap_plot(sample_vcf: Optional[str], metadata: Optional[str], work_dir: str, temp_dir: str, img_dir: str,
+              prune: bool, pop_id: Optional[str] = None, pop_col: Optional[str] = None) -> None:
+    if not pop_col:
+        pop_col = functions_config['name']['population_col']
+    with gzip_open(os.path.join(work_dir, 'umap_fit')) as f:
+        umap_fit = load(f)
+    umap_data = pd.read_csv(os.path.join(work_dir, "sample_info"))
+    umap_data = pd.concat([umap_data, pd.DataFrame(umap_fit.embedding_, columns=['UMAP1', 'UMAP2'])], axis=1)
+    sample_value = sample_umap(sample_vcf, umap_fit, work_dir, temp_dir, prune) if sample_vcf else None
+    ref_umap_data = get_metadata(metadata, umap_data, pop_id, pop_col)
+    draw_plot(ref_umap_data, sample_value, pop_col, img_dir, 'UMAP')
+
+
+def ps_plot(sample_vcf: Optional[str], metadata: Optional[str], work_dir: str, temp_dir: str, img_dir: str,
+            prune: bool, pop_id: Optional[str] = None, pop_col: Optional[str] = None) -> None:
+    pca_plot(sample_vcf, metadata, work_dir, temp_dir, img_dir, prune, pop_id, pop_col)
+    umap_plot(sample_vcf, metadata, work_dir, temp_dir, img_dir, prune, pop_id, pop_col)
+
+
+def ps_verify(ps_file: str, work_dir: str) -> bool:
+    ps_save = os.path.join(work_dir, 'ps_data')
+    if os.path.isfile(ps_save):
+        if verify_data(ps_save, ps_file, 'single'):
+            return True
+    return False
+
+
+def ps_analyse(ps_ref: str, sample_vcf: Optional[str], metadata: Optional[str],
+               temp_dir: str, save_dir: str,
+               img_dir: Optional[str] = None, prune: Optional[bool] = None, **kwargs) -> str:
+    if not prune:
+        prune = convert_dict(functions_config['parameter'])['ps_prune']
+    if not img_dir:
+        img_dir = save_dir
+    if not ps_verify(ps_ref, save_dir):
+        get_ps_need(ps_ref, save_dir, temp_dir, prune)
+    if 'pop_id' not in kwargs:
+        kwargs['pop_id'] = None
+    if 'pop_col' not in kwargs:
+        kwargs['pop_col'] = None
+    ps_plot(sample_vcf, metadata, save_dir, temp_dir, img_dir,
+            prune, pop_id=kwargs['pop_id'], pop_col=kwargs['pop_col'])
     return 'Yes'
+
 
 
 def chrom_key(chromosome: str) -> int:
@@ -1004,16 +1250,19 @@ def fill_missing_alt(vcf: str, reference_alt: str, output: str) -> str:
     raw_data = pd.read_csv(vcf, sep='\t', dtype={0: str}, comment='#', header=None, names=header.strip().split('\t'))
     raw_data = raw_data.loc[raw_data['REF'] != 'N', :]
     fill_data = pd.merge(raw_data, ref_data, how='left', on='ID', suffixes=("", "_ref"))
-    fill_data['ALT'] = fill_data.apply(lambda a: a['ALT'] if a['ALT'] != '.' else a['ALT_ref'] if a['REF'] == a['REF_ref'] else a['REF_ref'], axis=1)
+    fill_data['ALT'] = fill_data.apply(
+        lambda a: a['ALT'] if a['ALT'] != '.' else a['ALT_ref'] if a['REF'] == a['REF_ref'] else a['REF_ref'], axis=1)
     fill_data.iloc[:, 0:10].to_csv(output, sep='\t', index=False)
     return output
 
 
 @auto_sep
 @auto_encoding
-def cal_ref_from_txt(file: str, type_dir: str, ind_dir: str, type_list: dict,
+def cal_ref_from_txt(file: str, type_: str, ind_dir: str,
                      gt_data: pd.DataFrame, outcomes_rs: pd.DataFrame, outcomes_code: pd.DataFrame,
-                     *, encoding: str = 'UTF-8', sep: str = '\t') -> Tuple[pd.DataFrame, pd.DataFrame]:
+                     *, encoding: str = 'UTF-8', sep: str = '\t',
+                     header: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    columns = convert_dict(functions_config['columns'])
     with open(file, 'r', encoding=encoding) as f:
         first = True
         for line in f:
@@ -1022,44 +1271,68 @@ def cal_ref_from_txt(file: str, type_dir: str, ind_dir: str, type_list: dict,
                 if first:
                     assert len(line) > 1, sep.join(line)
                     first = False
-                rs = line[0]
-                if rs in gt_data.index:
-                    if type_list[type_dir] == 'quan':
-                        outcome = gt_data.loc[rs].apply(
-                            lambda gt: cal_beta(gt, *line[1:3]))
-                        code_rs = f'{ind_dir}_{rs}'
-                        if code_rs not in outcomes_rs.columns:
-                            outcomes_rs[code_rs] = outcome
-                            if ind_dir in outcomes_code.columns:
-                                outcomes_code[ind_dir] = outcomes_code[ind_dir] * outcome
-                            else:
-                                outcomes_code[ind_dir] = outcome
-                    else:
-                        if ind_dir not in outcomes_code.columns:
-                            outcomes_code[ind_dir] = pd.Series('Normal',
-                                                               index=gt_data.columns)
-                        temp = list(map(lambda trait, gt: cal_trait(trait, gt, *line[1:4]),
-                                        outcomes_code[ind_dir], gt_data.loc[rs]))
-                        outcomes_code[ind_dir] = temp
+                if header:
+                    columns_idx = get_columns_index(line, list(columns['columns_' + type_].values()))
+                    if type_ == 'qual':
+                        assert None not in columns_idx,\
+                            f"Cannot find {list(columns['columns_qual'].keys())[columns_idx.index(None)]} " \
+                            f"in the header of algorithm file ({file})."
+                    elif type_ == 'quan':
+                        assert None not in columns_idx[:-2], \
+                            f"Cannot find {list(columns['columns_quan'].keys())[columns_idx[:-2].index(None)]} " \
+                            f"in the header of algorithm file ({file})."
+                        assert any(columns_idx[-2:]),\
+                            f"Cannot find statistic (OR or Beta) in the header of algorithm file ({file})."
+                        statistic = 'OR' if columns_idx[-2] else 'Beta'
+                        columns_idx.pop(-1 if statistic == 'OR' else -2)
+                    header = False
+                else:
+                    rs = line[columns_idx[0]]
+                    if rs in gt_data.index:
+                        if type_ == 'quan':
+                            outcome = gt_data.loc[rs].apply(
+                                lambda gt: cal_effect(gt, *select_list(line, columns_idx[1:3]), statistic))
+                            code_rs = f'{ind_dir}_{rs}'
+                            if code_rs not in outcomes_rs.columns:
+                                outcomes_rs[code_rs] = outcome
+                                if ind_dir in outcomes_code.columns:
+                                    outcomes_code[ind_dir] = outcomes_code[ind_dir] * outcome
+                                else:
+                                    outcomes_code[ind_dir] = outcome
+                        else:
+                            if ind_dir not in outcomes_code.columns:
+                                outcomes_code[ind_dir] = pd.Series('Normal',
+                                                                   index=gt_data.columns)
+                            temp = list(map(lambda trait, gt: cal_trait(trait, gt, *select_list(line, columns_idx[1:4])),
+                                            outcomes_code[ind_dir], gt_data.loc[rs]))
+                            outcomes_code[ind_dir] = temp
     return outcomes_rs, outcomes_code
 
 
 @auto_encoding
 @auto_sep
 def add_snp_list(file: str, snp_list: Set[str] or List[str], *,
-                 encoding: str = 'UTF-8', sep: str = '\t') -> Set[str] or List[str]:
+                 encoding: str = 'UTF-8', sep: str = '\t', header=False) -> Set[str] or List[str]:
     first = True
     with open(file, 'r', encoding=encoding) as f:
         for line in f:
             if first:
                 assert len(line.strip('\n\r').split(sep)) > 1, line
                 first = False
-            snp_list.add(line.strip('\n\r').split(sep)[0])
+            if header:
+                columns = convert_dict(functions_config['columns'])
+                line = line.strip('\n\r').split(sep)
+                columns_idx = filter(lambda a: a in columns['columns_quan']['SNP'] + columns['columns_qual']['SNP'],
+                                     line)
+                columns_idx = line.index(next(columns_idx))
+                header = False
+            else:
+                snp_list.add(line.strip('\n\r').split(sep)[columns_idx])
     return snp_list
 
 
 @auto_sep
-def load_prs_txt(f: BinaryIO, snp_list: List[str] or Set[str], config: dict, *,
+def load_prs_txt(f: BinaryIO, snp_list: List[str] or Set[str], def_config: dict, *,
                  sep: str = '\t') -> List[str] or Set[str]:
     header = True
     snp_column = None
@@ -1067,9 +1340,113 @@ def load_prs_txt(f: BinaryIO, snp_list: List[str] or Set[str], config: dict, *,
         if header:
             if not snp_column:
                 assert len(line.split(sep.encode())) > 1, line
-                snp_column = line.split(sep.encode()).index(config['SNP'].encode())
+                snp_column = line.split(sep.encode()).index(def_config['snp'].encode())
             header = False
             continue
         else:
             snp_list.add(line.split(sep.encode())[snp_column].decode())
     return snp_list
+
+
+@auto_encoding
+def load_other_db(database: str, human: Human) -> pd.DataFrame:
+    with open(database) as f:
+        sep = detect(f.readline(10), whitelist=['\t', ',', ' '], default='\t')
+    data = pd.read_csv(database, sep=sep, dtype=object, error_bad_lines=False)
+    res = data.loc[data[functions_config['name']['database_snp']].isin(human.gt_data), :]
+    res.loc['Genotype'] = res.apply(lambda a: trans_gt(human.gt_data[a[functions_config['name']['database_snp']]],
+                                                       connector=''), axis=1)
+    return res.dropna().sort_values([functions_config['name']['database_snp']], ascending=[True]).reset_index(drop=True)
+
+
+def ref_data_qc(temp_dir: str, vcf_list: list, img_dir: str, failed_snps: set, failed_samples: set,
+                suffix: str = '') -> None:
+    assert len(vcf_list) == 1, 'Reference QC can only execute with single vcf'
+    run_plink_cmd(f'--vcf {vcf_list[0]} --hardy --het --check-sex --missing --freq --test-missing --genome '
+                  f'--out {os.path.join(temp_dir, "qc")}', plink='plink')
+    qc_maf(failed_snps, temp_dir, img_dir, suffix=suffix)
+    qc_vmiss(failed_snps, temp_dir, img_dir, suffix=suffix)
+    qc_smiss(failed_samples, temp_dir, img_dir, suffix=suffix)
+    qc_het(failed_samples, temp_dir, img_dir, suffix=suffix)
+    qc_hardy(failed_snps, temp_dir, img_dir, suffix=suffix)
+    qc_sex(failed_samples, temp_dir, img_dir, suffix=suffix)
+    qc_relatedness(failed_samples, temp_dir, img_dir, suffix=suffix)
+
+
+# TODO: Add merge function
+def merge_ref():
+    pass
+
+
+def get_vcf_files(directory: str) -> List[str]:
+    return [os.path.abspath(f"{os.path.join(directory, file)}") for file in os.listdir(directory) if
+            'vcf' in file and 'idi' not in file and 'tbi' not in file]
+
+
+def get_ref_data_type() -> List[List[str]]:
+    quan_dir = functions_config['file']['quan_ref']
+    qual_dir = functions_config['file']['qual_ref']
+    if quan_dir and qual_dir:
+        if os.path.realpath(quan_dir) == os.path.realpath(qual_dir):
+            return [get_vcf_files(quan_dir)]
+        else:
+            return list(map(get_vcf_files, [qual_dir, quan_dir]))
+    elif qual_dir:
+        return [get_vcf_files(qual_dir)]
+    elif quan_dir:
+        return [get_vcf_files(quan_dir)]
+    else:
+        raise FileNotFoundError('No reference data was found!')
+
+
+def mkdir(directories: List[str], pre_dir: str = '') -> None:
+    for directory in directories:
+        if not os.path.isdir(os.path.join(pre_dir, directory)):
+            os.mkdir(os.path.join(pre_dir, directory))
+
+
+@auto_sep
+def get_score_data(file: str, def_config, temp_dir: str, sep: str = '\t') -> str:
+    score_file = os.path.join(temp_dir, os.path.basename(file).split('.')[0])
+    if not os.path.isfile(score_file):
+        open_ = open_gz(file)
+        with open_(file, 'rb') as fr:
+            header = fr.readline()
+            header = header.strip().split(sep.encode())
+            header = [col.decode() for col in header]
+            assert len(header) > 1, sep.join(header)
+            if def_config['beta'] in header:
+                need_idx = [header.index(def_config[i]) for i in ['snp', 'ea', 'beta']]
+                mode = 'beta'
+            elif def_config['or'] in header:
+                need_idx = [header.index(def_config[i]) for i in ['snp', 'ea', 'or']]
+                mode = 'or'
+                from math import log
+            else:
+                raise Exception(f"Cannot find statistic (Beta or OR) in the file ({file}).")
+            with open(score_file, 'wb') as fw:
+                for line in fr:
+                    line = line.strip().split(sep.encode())
+                    fw.write(b'\t'.join(select_list(line, need_idx[:-1])))
+                    beta = line[need_idx[-1]]
+                    beta = beta if mode == 'beta' else str(log(float(beta.decode()))).encode()
+                    fw.write(b'\t' + beta + b'\n')
+    return score_file
+
+
+def add_header(result: dict) -> str or None:
+    high_risk_items = []
+    for item in result['Quantitative_traits']:
+        if item['Distribution']['Low_p'] > 75:
+            high_risk_items.append(item['Name'])
+    if high_risk_items:
+        res = '<b>High risk disease:</b><br>&nbsp;&nbsp;&nbsp;&nbsp;' + '<br>&nbsp;&nbsp;&nbsp;&nbsp;'.join(high_risk_items)
+        return res
+    return None
+
+
+def find_samples_file(dir_: str) -> str:
+    for file in os.listdir(dir_):
+        if sample_file_pat.search(file):
+            return os.path.join(dir_, file)
+    return ''
