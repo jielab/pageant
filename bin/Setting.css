@@ -1,6 +1,5 @@
 body {
     background-color: darkgray;
-    font-family: Cambria, "Hoefler Text", "Liberation Serif", Times, "Times New Roman", "serif", 华文中宋;
     font-size: 18px;
 }
 
@@ -376,4 +375,11 @@ header div {
     text-indent: 2em;
     line-height: 1.5;
     margin-left: 18px;
+}
+
+.note_text {
+    font-size: 16px;
+    text-indent: 0em;
+    line-height: 1.05;
+    margin-left: 25px;
 }
