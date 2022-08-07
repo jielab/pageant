@@ -1,0 +1,6 @@
+Name: Migraine
+Chinese name: 偏头痛
+Description: "Migraine affects up to one-fifth of the world population. It persistently ranks among the top 10 causes of disability, and accounts for more than half of the years lived with disability from neurological causes. As such, migraine has a tremendous socioeconomic impact, not to mention lost productivity and human suffering. Despite decades of research, the complex pathophysiology of migraine is still poorly understood. Without understanding the molecular mechanisms, existing therapies are empirical, serendipitous, and of limited efficacy. It has long been recognised that migraine is a disease with a strong genetic component. Migraine runs in families, and epidemiological studies in twins and families have indicated that risk for migraine is conferred by a combination of genetic and environmental factors, both contributing equally. These studies also indicated that the genetic contribution seems stronger in migraine with aura than the more common migraine without aura subtype."
+Average lifetime risk:
+Reference: Meta-analysis of 375,000 individuals identifies 38 susceptibility loci for migraine
+PMID: 27322543
