@@ -1,60 +1,85 @@
-<br/>
 
-## PAGEANT: Personal Access to Genome & Analysis of Natural Traits
+# PAGEANT: Personal Access to Genome and Analysis of Natural Traits
 
-<br/>
+Contact: jiehuang001@pku.edu.cn (Jie Huang MD MPH PhD, Department of Global Health, Peking University School of Public Health)
 
-## 1. Download & Run
-
-> 1. Download executables for [Windows](https://drive.google.com/file/d/1eFhEjKXXj4DAZtTLXY8_XslggOBL41Rb/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1pj5CzZJwobT7IX_HS7KGPNp0_hFkqaNS/view?usp=sharing)
-> 2. For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
-> 3. For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
-> - For Linux: run "sudo apt-get install libzbar0 python3-pyqt5" to install packages, then run PAGEANT by typing "./PAGEANT".
-> - For advanced users, please check out the wiki for command line approaches.
-<br/>
+<br />
 
 
-## 2. Example test-run 
+# 1. Core functionalities (5Qs)
 
-> Once the GUI window is displayed, a user simply needs to click the “Analyze” button to do a “test-drive” without doing anything else.
-> Once a user gets familiar with the test-drive, he/she could change all parameters in the GUI interface:
-> > - sample name
-> > - genotype data (in VCF format)
-> > - configuration file
-> > - output location for the genetic report and log file
+The hard core of PAGEANT is a suite of common bioinformatics software including VEP and PLINK to manage and annotate user provided genetic data. 
+The main python script is used to generate user interface, manage the process and data flow, and eventually generate an easy-to-read report. 
 
-![Fig_GUI](./images/Fig_GUI.png)
+<img src="./pictures/figure1.png" width = "1050" height = "" alt="figure1" align=center />
 
-<br/>
+<br />
+<br />
 
-## 3. Example report 
+# 2. Install and click to run
 
-> - #### A full example genetic report can be viewed [here](https://pageant.me/Report.html). 
+* Three zipped folders are downloadable from [Google Drive](https://drive.google.com/drive/folders/1utGpJNofmjqoV6TG8F9FqMv9iD-CKhwi?usp=sharing) for Linux, Mac, Windows, respectively. 
 
-> - #### Q1：Displayings user's PCA and UMAP among population reference
+* The PAGEANT.exe could be run directly by double clicking. It is compiled from GUI.py and main.py and a suite of extra libraries
 
-> ![Q1](./images/Fig_Q1.png)
+![Figure 2](./pictures/figure2NEW.png)
 
-> - #### Q2: Qualitative traits report
+<br />
+<br />
 
-> ![Q3](./images/Fig_Q2.png)
+# 3. Example report Q1: QA/QC of genotype data
 
-> - #### Q3: Quantitative traits reportaa
+![Figure 4](./pictures/figure4.png)
 
-> ![Q3](./images/Fig_Q3.png)
+<br />
 
-> - #### Q4: Query ClinVAR database
+# 4. Example report Q2 - Q4
 
-> ![Q4](./images/Fig_Q4.png)
+![Figure 6](./pictures/figure6.png)
 
-> - #### Q5: QR code to extract genetic data
+<br />
 
-> ![Q5](./images/Fig_Q5.png)
+# 5. Customize PAGEANT
 
+### 5.1 Download HapMap3 genotype, used as population reference by default
 
-<br/>
+```
+Open https://www.broadinstitute.org/medical-and-population-genetics/hapmap-3， 
+click the 3 links under "A. SNP Genotype Data" in the section of "How To Download This Release".
 
-### Contact & Cite
+Advanced users could use liftOver to convert the GRCh36 based .map file into GRCh37 based.
+But this is not needed for PAGEANT, since only SNP rsID is used for querying and calculation.
 
-> - [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Department of Global Health, Peking University School of Public Health
-> - Jie Huang, Zhi-Sheng Liang, Stefano Pallotti, Janice M. Ranson, David J. Llewellyn, Zhi-Jie Zheng, Dan A. King, Qiang Zhou, Houfeng Zheng, Valerio Napolioni. PAGEANT: personal access to genome and analysis of natural traits. [Nucleic Acids Res. 2022 Apr 22;50(7):e39. ](https://pubmed.ncbi.nlm.nih.gov/34928375/)
+```
+
+## 5.2 download 1000 genomes project (1000G) genotype data, if needed
+
+```
+
+open https://www.internationalgenome.org, click "Data" menu on the top.
+under "Available data" section, click "Phase 3" VCF files.
+
+use wget to download files at ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/
+
+# rename the long file names to something short such as below:
+mv ALL.chr1.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz chr1.vcf.gz
+
+# rename chromosome to add "chr" prefix, if needed
+seq 1 22 | xargs -n1 -I % echo % chr% > chr_name_conv.txt
+bcftools annotate chr1.vcf.gz --rename-chrs chr_name_conv.txt -Oz -o chr1.vcf.gz
+
+# convert from build 37 positions to build 38 positions, if needed
+gatk --java-options "-Xmx6g" LiftoverVcf -R Homo_sapiens_assembly38.fasta.gz -I chr1.vcf.gz -O chr1.b38.vcf.gz \
+	-C hg19ToHg38.over.chain --REJECT rejected.vcf --DISABLE_SORT true
+
+# create a small VCF subset, keeping only those samples of interest.
+echo "NA20525" > sample.keep
+plink2 --vcf chr1.vcf.gz --extract subset.snps --keep sample.keep --export vcf bgz id-paste=iid --out chr1.subset
+
+```
+
+## 5.3 Add or remove traits from the genetic report
+
+Please follow the following design.
+
+![Figure 3](./pictures/figure3b.png)
