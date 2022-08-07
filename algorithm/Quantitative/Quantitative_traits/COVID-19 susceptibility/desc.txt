@@ -1,0 +1,4 @@
+Name: COVID-19 susceptibility
+Chinese name: 新冠易感性
+Description: While environmental, clinical and social factors play a role in exposure to SARS-CoV-2 and COVID-19 disease severity, host genetics may also be important. Identifying host-specific genetic factors may reveal biological mechanisms of therapeutic relevance and clarify causal relationships of modifiable environmental risk factors for SARS-CoV-2 infection and outcomes.  We derive personal susceptibility based on GWAS released by the COVID-19 host genetics initiative. This initiative brings together the human genetics community to generate, share, and analyze data to learn the genetic determinants of COVID-19 susceptibility, severity, and outcomes. Such discoveries could help to generate hypotheses for drug repurposing, identify individuals at unusually high or low risk, and contribute to global knowledge of the biology of SARS-CoV-2 infection and disease.
+Reference: PMID：34237774
