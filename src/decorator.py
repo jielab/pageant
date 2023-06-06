@@ -1,11 +1,9 @@
-import logging
-from functools import wraps
 from time import time
-
 from chardet.universaldetector import UniversalDetector
 from detect_delimiter import detect
+from functools import wraps
+import logging
 
-from src.config import *
 
 progress_bar = 0
 
@@ -34,16 +32,13 @@ def use_time(process_name=None):
     return decorator
 
 
-def progress_value(base_value: float, average: bool = False):
+def progress_value(process_value: float):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             fun_res = func(*args, **kwargs)
             global progress_bar
-            if average:
-                progress_bar += base_value * average_progress()
-            else:
-                progress_bar += base_value
+            progress_bar += process_value
             logging.info(f"Progress of the analysis: {progress_bar:.1f}%")
             return fun_res
 
