@@ -316,7 +316,7 @@ def addrsid_run(raw_file: str, db_file: str, output_file: str, processes: Option
     columns_name['BP'].append(pos)
     columns_name['REF'].append(ref)
     columns_name['ALT'].append(alt)
-    sep_str = sep
+    sep_str = eval(repr(sep).replace('\\\\', '\\'))
     NA_str = na
     rs_id_str = rs_id
     get_rsid(raw_file, db_file, output_file, processes)
