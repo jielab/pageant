@@ -5,8 +5,13 @@ from gzip import open as gzip_open
 from time import time
 from tempfile import mkdtemp
 import os
+import argparse
 from collections import OrderedDict
 
+
+version = '2023-06-12'
+description = 'Usage: python3 ./src/add_rsid.py -i ./add_rsid/test.tsv -d "./rsids-v154-hg38.tsv.gz" --sep "\t" ' \
+              '--chr "chrom" --ref "ref" --alt "alt" --pos "pos" -o ./add_rsid/test_o.tsv'
 
 sep_str = '\t'
 NA_str = 'NA'
@@ -320,3 +325,22 @@ def addrsid_run(raw_file: str, db_file: str, output_file: str, processes: Option
     NA_str = na
     rs_id_str = rs_id
     get_rsid(raw_file, db_file, output_file, processes)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='Add_rsid', description=f'Add_rsid ({version})')
+    parser.add_argument('-i', '--input', help="Input GWAS file", required=True)
+    parser.add_argument('-d', '--database', help="The dbSNP file", required=True)
+    parser.add_argument('-s', '--sep', default='\t', help="The delimiter of input file")
+    parser.add_argument('-c', '--core', default=None, help="The number of processors used in analysis")
+    parser.add_argument('--na', default='NA', help="The string of NA value")
+    parser.add_argument('--rsid', default='RS_ID', help="The name of annotated column")
+    parser.add_argument('--alt', default='ALT', help="The column's name of reference allele")
+    parser.add_argument('--ref', default='REF', help="The column's name of alternative allele")
+    parser.add_argument('--pos', default='POS', help="The column's name of allele position")
+    parser.add_argument('--chr', default='CHR', help="The column's name of chromosome")
+    parser.add_argument('-o', '--output', default='./annotated.tsv.gz', help="The output name of file", required=True)
+
+    args = parser.parse_args()
+    addrsid_run(args.input, args.database, args.output, args.core, args.sep, args.chr,
+                                 args.pos, args.ref, args.alt, args.rsid, args.na)

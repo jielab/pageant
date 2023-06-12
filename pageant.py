@@ -4,7 +4,7 @@ from src.log import *
 from src.modules import *
 
 
-version = '2021-11-16'
+version = '2023-06-12'
 description = "Usage: python pageant.py -n --name NAME -i --input INPUT_FILE -o --output OUTPUT_DIR\n" \
               "\t Options [-c --config CONFIG_FILE] [-s --set-config KEY=VALUE ...]"
 warnings.filterwarnings('ignore')
