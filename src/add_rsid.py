@@ -205,9 +205,11 @@ class Variant:
     def __eq__(self, other):
         if self.pos == other.pos:
             if equal_seq(self.ref, other.ref):
-                return True
+                if equal_seq(self.ref, other.ref):
+                    return True
             elif equal_seq(self.alt, other.ref):
-                return True
+                if equal_seq(self.ref, other.alt):
+                    return True
         return False
 
     def __lt__(self, other):
