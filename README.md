@@ -6,7 +6,7 @@
 
 ## 1. Download & Run
 
-> 1. Download executables for [Windows](https://drive.google.com/file/d/1eFhEjKXXj4DAZtTLXY8_XslggOBL41Rb/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1pj5CzZJwobT7IX_HS7KGPNp0_hFkqaNS/view?usp=sharing)
+> 1. Download executables for [Windows](https://drive.google.com/file/d/1Y6qy63MnaHCwDsshUThCfyUp6a0ZZVXZ/view?usp=sharing), [Linux](https://drive.google.com/file/d/1zvgbGQJfpPJK3mL748cYrv83HgryEo-x/view?usp=sharing), [Mac OS](https://drive.google.com/file/d/1pj5CzZJwobT7IX_HS7KGPNp0_hFkqaNS/view?usp=sharing)
 > 2. For Windows OS: the program could be run directly by double clicking "PAGEANT.exe".
 > 3. For Mac-OS: follow the instruction to install [Homebrew](https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) and then run "[brew](https://brew.sh/) install zbar llvm", to install necessary libraries, and then double click "PAGEANT".
 > - For Linux: run "sudo apt-get install libzbar0 python3-pyqt5" to install packages, then run PAGEANT by typing "./PAGEANT".
