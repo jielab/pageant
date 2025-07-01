@@ -51,7 +51,7 @@
 
 > ![Q5](./images/Fig_Q5.png)
 
-<br/>
+<br/> what
 
 <b>cite</b>: Jie Huang , Andrew D. Johnson , Christopher J. O'Donnell. [PRIMe: a method for characterization and evaluation of pleiotropic regions from multiple genome-wide association studies](https://academic.oup.com/bioinformatics/article/27/9/1201/242517). Bioinformatics. 2011 May 1;27(9):1201-6. doi: 10.1093/bioinformatics/btr116. Epub 2011 Mar 12.
 
