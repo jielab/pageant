@@ -51,10 +51,7 @@
 
 > ![Q5](./images/Fig_Q5.png)
 
-
 <br/>
 
-### Contact & Cite
+<b>cite</b>: Jie Huang , Andrew D. Johnson , Christopher J. O'Donnell. [PRIMe: a method for characterization and evaluation of pleiotropic regions from multiple genome-wide association studies](https://academic.oup.com/bioinformatics/article/27/9/1201/242517). Bioinformatics. 2011 May 1;27(9):1201-6. doi: 10.1093/bioinformatics/btr116. Epub 2011 Mar 12.
 
-> - [Jie Huang](jiehuang001@pku.edu.cn) MD MPH PhD, Southern University of Science and Technology
-> - Jie Huang, Zhi-Sheng Liang, Stefano Pallotti, Janice M. Ranson, David J. Llewellyn, Zhi-Jie Zheng, Dan A. King, Qiang Zhou, Houfeng Zheng, Valerio Napolioni. PAGEANT: personal access to genome and analysis of natural traits. [Nucleic Acids Res. 2022 Apr 22;50(7):e39. ](https://pubmed.ncbi.nlm.nih.gov/34928375/)
